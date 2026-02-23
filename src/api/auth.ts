@@ -15,6 +15,10 @@ import type {
   ResetPasswordRequest,
   VerifyEmailRequest,
   CreateWorkspaceRequest,
+  VerifyTokenRequest,
+  VerifyTokenResponse,
+  ResendVerificationTokenRequest,
+  ResendVerificationTokenResponse,
 } from '@/types/auth'
 
 const USE_MOCK = !import.meta.env.VITE_API_URL
@@ -104,6 +108,37 @@ async function mockResendVerification(_data: { email: string }): Promise<{ succe
   return { success: true }
 }
 
+async function mockVerifyToken(
+  data: VerifyTokenRequest
+): Promise<VerifyTokenResponse> {
+  await new Promise((r) => setTimeout(r, 800))
+  if (!data.token || data.token.length < 10) {
+    return {
+      success: false,
+      verified: false,
+      message: 'Verification link is invalid or expired.',
+    }
+  }
+  return {
+    success: true,
+    verified: true,
+    userId: `user_${Date.now()}`,
+    message: 'Your email has been verified.',
+    expiresAt: new Date(Date.now() + 86400000).toISOString(),
+  }
+}
+
+async function mockResendVerificationToken(
+  _data: ResendVerificationTokenRequest
+): Promise<ResendVerificationTokenResponse> {
+  await new Promise((r) => setTimeout(r, 400))
+  return {
+    success: true,
+    cooldownSeconds: 60,
+    message: 'A new verification email has been sent.',
+  }
+}
+
 /** Real API calls - used when VITE_API_URL is set */
 async function realRegister(data: RegisterRequest): Promise<RegisterResponse> {
   const res = await api.post<RegisterResponse>('/auth/register', data)
@@ -144,6 +179,16 @@ export const authApi = {
 
   resendVerification: (data: { email: string }): Promise<{ success: boolean }> =>
     USE_MOCK ? mockResendVerification(data) : api.post<{ success: boolean }>('/auth/resend-verification', data),
+
+  verifyToken: (data: VerifyTokenRequest): Promise<VerifyTokenResponse> =>
+    USE_MOCK ? mockVerifyToken(data) : api.post<VerifyTokenResponse>('/auth/verify-token', data),
+
+  resendVerificationToken: (
+    data: ResendVerificationTokenRequest
+  ): Promise<ResendVerificationTokenResponse> =>
+    USE_MOCK
+      ? mockResendVerificationToken(data)
+      : api.post<ResendVerificationTokenResponse>('/auth/resend-verification', data),
 
   createWorkspace: (data: CreateWorkspaceRequest) =>
     api.post<{ id: string; name: string }>('/workspaces/create', data),

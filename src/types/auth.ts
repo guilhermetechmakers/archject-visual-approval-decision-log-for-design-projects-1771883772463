@@ -79,3 +79,27 @@ export interface CreateWorkspaceRequest {
   accountId: string
   workspaceName: string
 }
+
+/** Email verification via token (from verification link) */
+export interface VerifyTokenRequest {
+  token: string
+}
+
+export interface VerifyTokenResponse {
+  success: boolean
+  verified: boolean
+  message?: string
+  userId?: string
+  expiresAt?: string
+}
+
+export interface ResendVerificationTokenRequest {
+  email?: string
+  token?: string
+}
+
+export interface ResendVerificationTokenResponse {
+  success: boolean
+  cooldownSeconds?: number
+  message?: string
+}

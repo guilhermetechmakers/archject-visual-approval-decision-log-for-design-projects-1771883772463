@@ -6,6 +6,7 @@ import { AuthLoginPage } from '@/pages/auth/auth-login-page'
 import { PasswordResetPage } from '@/pages/auth/password-reset-page'
 import { ResetPasswordRoute } from '@/pages/auth/reset-password-route'
 import { PasswordResetConfirmPage } from '@/pages/auth/password-reset-confirm-page'
+import { EmailVerificationPage } from '@/pages/auth/email-verification-page'
 import { PasswordResetGuard } from '@/components/auth'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DashboardOverview } from '@/pages/dashboard/overview'
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
           </PasswordResetGuard>
         ),
       },
+      { path: '/verify', element: <EmailVerificationPage /> },
       { path: '/demo-request', element: <DemoRequestPage /> },
       { path: '/privacy', element: <PrivacyPage /> },
       { path: '/terms', element: <TermsPage /> },

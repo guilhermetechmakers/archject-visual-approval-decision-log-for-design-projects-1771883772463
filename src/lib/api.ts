@@ -4,6 +4,7 @@ export interface ApiError {
   message: string
   code?: string
   status?: number
+  cooldownSeconds?: number
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -16,6 +17,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
       const data = await response.json()
       if (data.message) error.message = data.message
       if (data.code) error.code = data.code
+      if (typeof data.cooldownSeconds === 'number') error.cooldownSeconds = data.cooldownSeconds
     } catch {
       // Use default error message
     }

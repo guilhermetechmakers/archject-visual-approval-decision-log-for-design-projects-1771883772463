@@ -22,3 +22,11 @@ export type { PasswordResetRequestFormData } from './password-reset-request-card
 export { PasswordResetFormCard } from './password-reset-form-card'
 export type { PasswordResetFormData } from './password-reset-form-card'
 export { PasswordResetGuard } from './password-reset-guard'
+export {
+  StatusIcon,
+  TokenExpiryHint,
+  ResendVerificationControl,
+  DashboardCTA,
+  SupportLink,
+} from './email-verification'
+export type { VerificationStatus } from './email-verification'
