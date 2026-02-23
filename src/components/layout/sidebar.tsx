@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   FolderKanban,
   FileCheck,
+  BarChart3,
   Users,
   Settings,
   CreditCard,
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils'
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
   { to: '/dashboard/decisions', icon: FileCheck, label: 'Decisions' },
   { to: '/dashboard/team', icon: Users, label: 'Team' },

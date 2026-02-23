@@ -36,6 +36,8 @@ import { SettingsBilling } from '@/pages/dashboard/settings/settings-billing'
 import { BillingPage } from '@/pages/dashboard/billing'
 import { BillingHistoryPage } from '@/pages/dashboard/billing-history'
 import { CheckoutPage } from '@/pages/dashboard/checkout'
+import { AnalyticsDashboardPage } from '@/pages/dashboard/analytics-dashboard-page'
+import { AnalyticsDrilldownPage } from '@/pages/dashboard/analytics-drilldown-page'
 import { ClientPortalPage } from '@/pages/client-portal'
 import { PrivacyPage } from '@/pages/legal/privacy'
 import { TermsPage } from '@/pages/legal/terms'
@@ -109,6 +111,8 @@ export const router = createBrowserRouter([
         ),
         children: [
           { index: true, element: <DashboardOverview /> },
+          { path: 'analytics', element: <AnalyticsDashboardPage /> },
+          { path: 'analytics/drilldown', element: <AnalyticsDrilldownPage /> },
           { path: 'projects', element: <ProjectsPage /> },
           { path: 'projects/:projectId', element: <ProjectWorkspacePage /> },
           { path: 'projects/:projectId/decisions', element: <DecisionsListPage /> },
