@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ export function PlanChangeModal({
   currentPlanId,
   subscription,
 }: PlanChangeModalProps) {
+  const navigate = useNavigate()
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const { data: plans, isLoading } = useBillingPlans()
   const confirmMutation = useConfirmPlanChange()
@@ -129,6 +131,18 @@ export function PlanChangeModal({
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (selectedPlanId && !isCurrentPlan) {
+                onOpenChange(false)
+                navigate(`/dashboard/checkout?plan=${selectedPlanId}`)
+              }
+            }}
+            disabled={!selectedPlanId || isCurrentPlan}
+          >
+            Proceed to checkout
           </Button>
           <Button
             onClick={handleConfirm}

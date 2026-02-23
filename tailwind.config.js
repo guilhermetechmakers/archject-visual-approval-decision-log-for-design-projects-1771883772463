@@ -91,6 +91,11 @@ export default {
           '0%': { opacity: '1' },
           '100%': { opacity: '0' },
         },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
+          '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
+        },
         marquee: {
           '0%': { transform: 'translateX(0)' },
           '100%': { transform: 'translateX(-50%)' },
@@ -107,6 +112,7 @@ export default {
         'slide-out-top': 'slide-out-top 0.3s ease-out forwards',
         'slide-out-bottom': 'slide-out-bottom 0.3s ease-out forwards',
         'fade-out': 'fade-out 0.2s ease-out forwards',
+        shake: 'shake 0.4s ease-in-out',
       },
     },
   },

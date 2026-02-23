@@ -15,6 +15,8 @@ export type SuccessType =
   | 'export_generated'
   | 'approval_recorded'
   | 'changes_requested'
+  | 'payment_completed'
+  | 'invoice_created'
   | 'generic'
 
 export interface OperationSuccessModalProps {
@@ -34,6 +36,8 @@ const DEFAULT_TITLES: Record<SuccessType, string> = {
   export_generated: 'Export generated',
   approval_recorded: 'Approval recorded',
   changes_requested: 'Changes requested',
+  payment_completed: 'Payment successful',
+  invoice_created: 'Invoice created',
   generic: 'Success',
 }
 
@@ -46,6 +50,10 @@ const DEFAULT_DESCRIPTIONS: Record<SuccessType, string> = {
     'Thank you for your decision. The studio has been notified and will proceed accordingly.',
   changes_requested:
     'Your feedback has been recorded. The studio will review and get back to you.',
+  payment_completed:
+    'Your payment has been processed. Your subscription is now active.',
+  invoice_created:
+    'Your invoice has been created and will be sent to your email. Your subscription will activate once payment is received.',
   generic: 'Operation completed successfully.',
 }
 

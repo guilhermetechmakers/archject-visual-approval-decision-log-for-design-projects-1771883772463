@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Package, Check, ShoppingCart } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,8 +10,13 @@ import { cn } from '@/lib/utils'
 import type { BillingAddOn } from '@/types/billing'
 
 export function AddOnsSection() {
+  const navigate = useNavigate()
   const [checkoutAddOn, setCheckoutAddOn] = useState<BillingAddOn | null>(null)
   const { data: addons, isLoading } = useBillingAddOns()
+
+  const handleFullCheckout = (addon: BillingAddOn) => {
+    navigate(`/dashboard/checkout?addons=${addon.id}`)
+  }
 
   return (
     <>
@@ -42,6 +48,7 @@ export function AddOnsSection() {
                   key={addon.id}
                   addon={addon}
                   onPurchase={() => setCheckoutAddOn(addon)}
+                  onFullCheckout={() => handleFullCheckout(addon)}
                 />
               ))}
             </div>
@@ -71,9 +78,11 @@ export function AddOnsSection() {
 function AddOnCard({
   addon,
   onPurchase,
+  onFullCheckout,
 }: {
   addon: BillingAddOn
   onPurchase: () => void
+  onFullCheckout: () => void
 }) {
   const intervalLabel =
     addon.interval === 'monthly'
@@ -99,17 +108,24 @@ function AddOnCard({
           </li>
         ))}
       </ul>
-      <div className="mt-4 flex items-center justify-between">
-        <span className="text-lg font-bold text-foreground">
-          ${addon.price}
-          <span className="text-sm font-normal text-muted-foreground">
-            {intervalLabel}
+      <div className="mt-4 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-bold text-foreground">
+            ${addon.price}
+            <span className="text-sm font-normal text-muted-foreground">
+              {intervalLabel}
+            </span>
           </span>
-        </span>
-        <Button size="sm" onClick={onPurchase}>
-          <ShoppingCart className="h-4 w-4" />
-          Buy
-        </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={onFullCheckout}>
+              Checkout
+            </Button>
+            <Button size="sm" onClick={onPurchase}>
+              <ShoppingCart className="h-4 w-4" />
+              Buy
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )
