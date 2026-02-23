@@ -1,204 +1,288 @@
+import { useState, useCallback, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { DecisionEditorProvider, useDecisionEditor } from '@/contexts/decision-editor-context'
-import {
-  DecisionEditorStepper,
-  DecisionEditorMetadataForm,
-  DecisionEditorOptionsUploader,
-  DecisionEditorSideBySide,
-  DecisionEditorApprovalRules,
-  DecisionEditorAssigneeReminders,
-  DecisionEditorTriggers,
-  DecisionEditorReview,
-} from '@/components/decision-editor'
-import { useProjectWorkspace } from '@/hooks/use-workspace'
-import { useDecision, useUpdateDecisionMutation } from '@/hooks/use-decision'
 import { toast } from 'sonner'
-import type { DecisionOptionForm, ApprovalRuleForm, ReminderForm, TriggerForm } from '@/types/decision-editor'
+import {
+  EditDecisionHeader,
+  MetadataEditor,
+  DecisionObjectsEditor,
+  VersionComparePanel,
+  HistoryPanel,
+  ReissueSharePanel,
+  QuickPreviewPanel,
+} from '@/components/edit-decision'
+import { useProjectWorkspace } from '@/hooks/use-workspace'
+import {
+  useVersionedDecision,
+  useDecisionVersions,
+  useAuditLog,
+  useDecisionDiffs,
+  useCreateVersionMutation,
+  useReissueShareMutation,
+  useUpdateDecisionStatusMutation,
+} from '@/hooks/use-edit-decision'
+import type {
+  VersionedDecision,
+  DecisionObject,
+  DecisionMetadata,
+  DecisionVersion,
+  AuditAction,
+} from '@/types/edit-decision'
 
 function EditDecisionContent() {
   const { projectId, decisionId } = useParams<{ projectId: string; decisionId: string }>()
   const navigate = useNavigate()
-  const editor = useDecisionEditor()
-  const { step, setStep, canGoToStep } = editor
-  const { project, team, templates } = useProjectWorkspace(projectId ?? '')
-  const { isLoading } = useDecision(decisionId)
-  const getState = () => ({
-    title: editor.title,
-    description: editor.description,
-    templateId: editor.templateId,
-    typeName: editor.typeName,
-    dueDate: editor.dueDate,
-    priority: editor.priority,
-    status: editor.status,
-    options: editor.options,
-    approvalRules: editor.approvalRules,
-    assigneeId: editor.assigneeId,
-    reminders: editor.reminders,
-    triggers: editor.triggers,
-    version: editor.version,
-  })
-  const updateMutation = useUpdateDecisionMutation(
+  const { project } = useProjectWorkspace(projectId ?? '')
+
+  const { data: decision, isLoading } = useVersionedDecision(decisionId ?? '')
+  const { data: versions = [] } = useDecisionVersions(decisionId ?? '')
+  const { data: auditEntries = [], isLoading: auditLoading } = useAuditLog(
     decisionId ?? '',
-    projectId ?? '',
-    getState
+    { limit: 50 }
   )
 
-  const handleSaveDraft = async () => {
+  const [fromVersionId, setFromVersionId] = useState<string | null>(null)
+  const [toVersionId, setToVersionId] = useState<string | null>(null)
+  const { data: diff, isLoading: diffLoading } = useDecisionDiffs(
+    decisionId ?? '',
+    fromVersionId ?? undefined,
+    toVersionId ?? undefined
+  )
+
+  const saveMutation = useCreateVersionMutation(decisionId ?? '')
+  const reissueMutation = useReissueShareMutation(decisionId ?? '')
+  const updateStatusMutation = useUpdateDecisionStatusMutation(
+    decisionId ?? '',
+    projectId ?? ''
+  )
+
+  const [draft, setDraft] = useState<{
+    metadata?: Partial<DecisionMetadata>
+    decision_objects: DecisionObject[]
+  } | null>(null)
+  const [shareLink, setShareLink] = useState<{ url: string; expires_at?: string } | null>(null)
+  const [filterAction, setFilterAction] = useState<AuditAction | 'all'>('all')
+
+  const displayDecision = draft
+    ? {
+        ...decision!,
+        ...(draft.metadata && {
+          title: draft.metadata.title ?? decision!.title,
+          description: draft.metadata.description ?? decision!.description,
+          metadata: { ...decision!.metadata, ...draft.metadata },
+        }),
+        decision_objects: draft.decision_objects,
+      }
+    : decision
+
+  const hasUnsavedChanges = !!draft
+
+  const initializeDraft = useCallback((d: VersionedDecision) => {
+    setDraft({
+      metadata: d.metadata ? { ...d.metadata } : undefined,
+      decision_objects: d.decision_objects ? [...d.decision_objects] : [],
+    })
+  }, [])
+
+  useEffect(() => {
+    if (decision && !draft) {
+      initializeDraft(decision)
+    }
+  }, [decision, draft, initializeDraft])
+
+  const handleMetadataChange = useCallback((data: Partial<DecisionMetadata>) => {
+    setDraft((prev) =>
+      prev
+        ? { ...prev, metadata: { ...prev.metadata, ...data } }
+        : { metadata: data, decision_objects: [] }
+    )
+  }, [])
+
+  const handleObjectsChange = useCallback((objects: DecisionObject[]) => {
+    setDraft((prev) =>
+      prev ? { ...prev, decision_objects: objects } : { decision_objects: objects }
+    )
+  }, [])
+
+  const handleSave = useCallback(async () => {
+    if (!draft || !decision) return
     try {
-      await updateMutation.mutateAsync({ status: 'draft' })
-      toast.success('Decision saved as draft')
+      await saveMutation.mutateAsync({
+        snapshot: {
+          title: draft.metadata?.title ?? decision.title,
+          description: draft.metadata?.description ?? decision.description ?? null,
+          category: draft.metadata?.category ?? decision.category ?? null,
+          owner_id: draft.metadata?.owner_id ?? decision.owner_id ?? null,
+          due_date: draft.metadata?.due_date ?? decision.due_date ?? null,
+          tags: draft.metadata?.tags ?? decision.tags ?? [],
+          decision_objects: draft.decision_objects,
+        },
+        note: 'Edited via Edit / Manage Decision',
+      })
+      setDraft(null)
       navigate(`/dashboard/projects/${projectId}/decisions/${decisionId}/internal`)
     } catch {
-      toast.error('Failed to save draft')
+      // toast handled by mutation
     }
-  }
+  }, [draft, decision, saveMutation, projectId, decisionId, navigate])
 
-  const handlePublish = async () => {
+  const handleCancel = useCallback(() => {
+    setDraft(null)
+    navigate(`/dashboard/projects/${projectId}/decisions/${decisionId}/internal`)
+  }, [projectId, decisionId, navigate])
+
+  const handleRevert = useCallback(() => {
+    if (decision) {
+      initializeDraft(decision)
+      toast.success('Reverted to last saved state')
+    }
+  }, [decision, initializeDraft])
+
+  const handlePublish = useCallback(async () => {
     try {
-      await updateMutation.mutateAsync({ status: 'pending' })
+      await handleSave()
+      await updateStatusMutation.mutateAsync('pending')
       toast.success('Decision published')
-      navigate(`/dashboard/projects/${projectId}/decisions/${decisionId}/internal`)
     } catch {
-      toast.error('Failed to publish')
+      // handled
     }
-  }
+  }, [handleSave, updateStatusMutation])
 
-  const handleValidatePreview = () => {
-    toast.info('Preview mode — validate your decision layout')
-  }
+  const handleVersionCompare = useCallback(
+    (from: string, to: string) => {
+      setFromVersionId(from)
+      setToVersionId(to)
+    },
+    []
+  )
 
-  const handleTestTrigger = (triggerId: string) => {
-    toast.info(`Test trigger ${triggerId} — would send sample payload`)
-  }
+  const handleReissueShare = useCallback(
+    async (options: {
+      expires_at?: string
+      access_scope?: 'read' | 'read_write'
+      read_only?: boolean
+    }) => {
+      const result = await reissueMutation.mutateAsync({
+        expires_at: options.expires_at,
+        access_scope: options.access_scope ?? (options.read_only ? 'read' : 'read_write'),
+      })
+      setShareLink({ url: result.url, expires_at: result.expires_at ?? undefined })
+    },
+    [reissueMutation]
+  )
+
+  const filteredAudit = filterAction === 'all'
+    ? auditEntries
+    : auditEntries.filter((e) => e.action === filterAction)
 
   if (!projectId || !decisionId) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <p className="text-muted-foreground">Project or decision not found</p>
-        <Button asChild className="mt-4" variant="outline">
-          <Link to="/dashboard/projects">
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to projects
-          </Link>
-        </Button>
+        <Link
+          to="/dashboard/projects"
+          className="mt-4 text-primary hover:underline"
+        >
+          Back to projects
+        </Link>
       </div>
     )
   }
 
-  if (isLoading || !project) {
+  if (isLoading || !decision) {
     return (
       <div className="animate-pulse space-y-6">
         <div className="h-8 w-48 rounded bg-secondary" />
-        <div className="flex gap-6">
-          <div className="h-64 w-56 rounded-xl bg-secondary" />
-          <div className="flex-1 space-y-4">
-            <div className="h-64 rounded-xl bg-secondary" />
-          </div>
-        </div>
+        <div className="h-32 rounded-xl bg-secondary" />
+        <div className="h-64 rounded-xl bg-secondary" />
       </div>
     )
   }
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="sm">
-          <Link to={`/dashboard/projects/${projectId}/decisions/${decisionId}/internal`}>
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            {project.name}
-          </Link>
-        </Button>
-      </div>
+      <EditDecisionHeader
+        decision={displayDecision ?? decision}
+        projectId={projectId}
+        projectName={project?.name}
+        hasUnsavedChanges={hasUnsavedChanges}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        onRevert={handleRevert}
+        onPublish={handlePublish}
+        isSaving={saveMutation.isPending}
+      />
 
-      <div className="flex flex-col gap-8 lg:flex-row">
-        <DecisionEditorStepper
-          currentStep={step}
-          onStepClick={(s) => canGoToStep(s) && setStep(s)}
-          canGoToStep={canGoToStep}
-        />
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <MetadataEditor
+            metadata={displayDecision?.metadata ?? decision.metadata}
+            onChange={handleMetadataChange}
+          />
 
-        <main className="min-w-0 flex-1">
-          {step === 'metadata' && (
-            <DecisionEditorMetadataForm
-              templates={templates}
-              onNext={() => setStep('options')}
+          <div className="rounded-xl border border-border bg-card p-6 shadow-card">
+            <DecisionObjectsEditor
+              decisionId={decisionId}
+              objects={draft?.decision_objects ?? decision.decision_objects ?? []}
+              onChange={handleObjectsChange}
             />
-          )}
-          {step === 'options' && (
-            <DecisionEditorOptionsUploader onNext={() => setStep('comparison')} />
-          )}
-          {step === 'comparison' && (
-            <DecisionEditorSideBySide onNext={() => setStep('approval')} />
-          )}
-          {step === 'approval' && (
-            <DecisionEditorApprovalRules
-              teamMembers={team}
-              onNext={() => setStep('assignee')}
-            />
-          )}
-          {step === 'assignee' && (
-            <div className="space-y-6">
-              <DecisionEditorAssigneeReminders
-                teamMembers={team}
-                onNext={() => setStep('review')}
-              />
-              <DecisionEditorTriggers onTestTrigger={handleTestTrigger} />
-            </div>
-          )}
-          {step === 'review' && (
-            <DecisionEditorReview
-              onSaveDraft={handleSaveDraft}
-              onPublish={handlePublish}
-              onValidatePreview={handleValidatePreview}
-              isSaving={updateMutation.isPending}
-              isPublishing={updateMutation.isPending}
-            />
-          )}
-        </main>
+          </div>
+
+          <VersionComparePanel
+            versions={versions as DecisionVersion[]}
+            currentVersionId={decision.current_version_id}
+            diff={diff ?? null}
+            isLoading={diffLoading}
+            onCompare={handleVersionCompare}
+            fromVersionId={fromVersionId}
+            toVersionId={toVersionId}
+            onFromChange={setFromVersionId}
+            onToChange={setToVersionId}
+          />
+
+          <HistoryPanel
+            entries={filteredAudit}
+            isLoading={auditLoading}
+            filterAction={filterAction}
+            onFilterActionChange={setFilterAction}
+          />
+        </div>
+
+        <div className="space-y-6">
+          <QuickPreviewPanel
+            decision={displayDecision ?? decision}
+            projectId={projectId}
+          />
+
+          <ReissueSharePanel
+            shareLink={
+              shareLink
+                ? {
+                    id: 'generated',
+                    decision_id: decisionId,
+                    url: shareLink.url,
+                    expires_at: shareLink.expires_at ?? null,
+                    access_scope: 'read',
+                    created_by: null,
+                    is_active: true,
+                    created_at: new Date().toISOString(),
+                  }
+                : null
+            }
+            generatedUrl={shareLink?.url}
+            isGenerating={reissueMutation.isPending}
+            onGenerate={handleReissueShare}
+            onCopy={() => toast.success('Link copied')}
+          />
+        </div>
       </div>
     </div>
   )
 }
 
 export function EditDecisionPage() {
-  const { decisionId } = useParams<{ projectId: string; decisionId: string }>()
-  const { data: decision, isLoading } = useDecision(decisionId)
-
-  const initial = decision
-    ? {
-        title: decision.title,
-        description: decision.description ?? '',
-        templateId: decision.template_id ?? null,
-        dueDate: decision.due_date ?? null,
-        priority: 'medium' as const,
-        status: decision.status,
-        assigneeId: decision.assignee_id ?? null,
-        options: [] as DecisionOptionForm[],
-        approvalRules: [] as ApprovalRuleForm[],
-        reminders: [] as ReminderForm[],
-        triggers: [] as TriggerForm[],
-      }
-    : undefined
-
-  if (isLoading) {
-    return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-8 w-48 rounded bg-secondary" />
-        <div className="flex gap-6">
-          <div className="h-64 w-56 rounded-xl bg-secondary" />
-          <div className="flex-1 space-y-4">
-            <div className="h-64 rounded-xl bg-secondary" />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <DecisionEditorProvider key={decisionId} initial={initial}>
+    <div className="space-y-6">
       <EditDecisionContent />
-    </DecisionEditorProvider>
+    </div>
   )
 }
