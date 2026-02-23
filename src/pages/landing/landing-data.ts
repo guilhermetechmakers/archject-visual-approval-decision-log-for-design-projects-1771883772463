@@ -17,7 +17,7 @@ export const heroConfig = {
   titleHighlight: 'design projects',
   subtitle:
     'Replace scattered emails and PDFs with a structured, time-stamped workflow. Create decisions, share branded no-login links, and export defensible audit records.',
-  ctaPrimary: { label: 'Start free', href: '/signup' },
+  ctaPrimary: { label: 'Start free', href: '/auth/signup' },
   ctaSecondary: { label: 'Request demo', href: '/demo-request' },
 }
 
@@ -111,7 +111,7 @@ export const pricingTiers: PricingTier[] = [
       'Client portal links',
       'PDF export',
     ],
-    cta: { label: 'Start free', href: '/signup' },
+    cta: { label: 'Start free', href: '/auth/signup' },
   },
   {
     id: 'pro',
@@ -125,7 +125,7 @@ export const pricingTiers: PricingTier[] = [
       'CSV & JSON export',
       'Priority support',
     ],
-    cta: { label: 'View plans', href: '/signup' },
+    cta: { label: 'View plans', href: '/auth/signup' },
     recommended: true,
   },
   {

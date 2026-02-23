@@ -59,12 +59,12 @@ export function NavigationHeader() {
             >
               Request demo
             </Button>
-            <Link to="/login">
+            <Link to="/auth/login">
               <Button variant="ghost" aria-label="Log in">
                 Log in
               </Button>
             </Link>
-            <Link to="/signup">
+            <Link to="/auth/signup">
               <Button aria-label="Start free">Start free</Button>
             </Link>
           </div>
@@ -118,12 +118,12 @@ export function NavigationHeader() {
                 >
                   Request demo
                 </Button>
-                <Link to="/login" onClick={() => setMobileOpen(false)}>
+                <Link to="/auth/login" onClick={() => setMobileOpen(false)}>
                   <Button variant="ghost" className="w-full justify-center">
                     Log in
                   </Button>
                 </Link>
-                <Link to="/signup" onClick={() => setMobileOpen(false)}>
+                <Link to="/auth/signup" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full justify-center">Start free</Button>
                 </Link>
               </div>
