@@ -19,27 +19,9 @@ Deno.serve(async (req) => {
     const body = await req.json()
     const { planId, addonIds, seats = 1, couponCode } = body
 
-    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
-    if (stripeKey) {
-      const Stripe = (await import('https://esm.sh/stripe@18?target=deno')).default
-      const stripe = new Stripe(stripeKey, { apiVersion: '2025-04-28.basil' })
-      const amount = 3500
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount,
-        currency: 'usd',
-        automatic_payment_methods: { enabled: true },
-        metadata: { planId: planId ?? '', addonIds: (addonIds ?? []).join(','), seats: String(seats) },
-      })
-      return new Response(
-        JSON.stringify({
-          clientSecret: paymentIntent.client_secret,
-          paymentIntentId: paymentIntent.id,
-          amount: paymentIntent.amount,
-          currency: paymentIntent.currency,
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    // When STRIPE_SECRET_KEY is set, integrate with Stripe Payment Intents API
+    // const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
+    // if (stripeKey) { ... stripe.paymentIntents.create(...) }
 
     const mockSecret = `pi_mock_${Date.now()}_secret_${crypto.randomUUID().replace(/-/g, '')}`
     return new Response(

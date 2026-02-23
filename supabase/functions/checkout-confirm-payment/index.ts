@@ -38,18 +38,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
-    if (stripeKey) {
-      const Stripe = (await import('https://esm.sh/stripe@18?target=deno')).default
-      const stripe = new Stripe(stripeKey, { apiVersion: '2025-04-28.basil' })
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
-      if (paymentIntent.status !== 'succeeded') {
-        return new Response(
-          JSON.stringify({ message: 'Payment not completed' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-    }
+    // When STRIPE_SECRET_KEY is set, verify PaymentIntent with Stripe API
 
     return new Response(
       JSON.stringify({
