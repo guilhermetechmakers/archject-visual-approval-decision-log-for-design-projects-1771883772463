@@ -78,7 +78,7 @@ export const billingApi = {
     const search = new URLSearchParams()
     if (params?.start_date) search.set('start_date', params.start_date)
     if (params?.end_date) search.set('end_date', params.end_date)
-    if (params?.types?.length) search.set('types', params.types.join(','))
+    if (params?.types?.length) params.types.forEach((t) => search.append('types', t))
     if (params?.query) search.set('query', params.query)
     if (params?.page != null) search.set('page', String(params.page))
     if (params?.page_size != null) search.set('page_size', String(params.page_size))
@@ -96,16 +96,8 @@ export const billingApi = {
       `/billing/history/${itemId}`
     ),
 
-  getInvoiceDownloadUrl: (invoiceId: string) =>
-    api.get<{ url: string }>(`/billing/invoice/${invoiceId}/download`),
-
   getSubscriptionTimeline: (subscriptionId: string) =>
     api.get<import('@/types/billing-history').SubscriptionTimelineResponse>(
       `/billing/subscription/${subscriptionId}/timeline`
-    ),
-
-  getSubscription: (subscriptionId: string) =>
-    api.get<{ id: string; plan_id: string; status: string }>(
-      `/billing/subscription/${subscriptionId}`
     ),
 }

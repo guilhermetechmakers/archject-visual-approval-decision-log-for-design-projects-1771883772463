@@ -33,6 +33,7 @@ import { SettingsSecurity } from '@/pages/dashboard/settings/settings-security'
 import { SettingsTeam } from '@/pages/dashboard/settings/settings-team'
 import { SettingsBilling } from '@/pages/dashboard/settings/settings-billing'
 import { BillingPage } from '@/pages/dashboard/billing'
+import { BillingHistoryPage } from '@/pages/dashboard/billing-history'
 import { CheckoutPage } from '@/pages/dashboard/checkout'
 import { ClientPortalPage } from '@/pages/client-portal'
 import { PrivacyPage } from '@/pages/legal/privacy'
@@ -114,6 +115,7 @@ export const router = createBrowserRouter([
               { path: 'billing', element: <SettingsBilling /> },
             ],
           },
+          { path: 'billing/history', element: <BillingHistoryPage /> },
           { path: 'billing', element: <BillingPage /> },
           { path: 'checkout', element: <CheckoutPage /> },
         ],

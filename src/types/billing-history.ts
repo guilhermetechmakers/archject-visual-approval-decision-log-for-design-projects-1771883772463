@@ -12,6 +12,8 @@ export type TransactionType =
   | 'renewal'
   | 'suspension'
   | 'cancellation'
+  | 'add_on'
+  | 'plan_change'
 
 export type TransactionStatus =
   | 'paid'
@@ -63,6 +65,9 @@ export interface BillingHistorySummary {
   total_refunds: number
   currency: string
 }
+
+/** Alias for BillingHistorySummary - used by billing history API */
+export type BillingSummary = BillingHistorySummary
 
 export type SubscriptionEventType =
   | 'plan_change'

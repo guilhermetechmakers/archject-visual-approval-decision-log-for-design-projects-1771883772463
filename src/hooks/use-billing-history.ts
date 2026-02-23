@@ -7,8 +7,8 @@ import { billingHistoryApi } from '@/api/billing-history'
 import type { BillingHistoryParams } from '@/types/billing-history'
 import {
   getMockHistoryResponse,
-  getMockTimelineResponse,
-  MOCK_SUMMARY,
+  getMockSubscriptionTimelineResponse,
+  MOCK_HISTORY_SUMMARY,
 } from '@/lib/billing-history-mock'
 
 const BILLING_HISTORY_KEYS = ['billing-history'] as const
@@ -46,7 +46,7 @@ export function useSubscriptionTimeline(subscriptionId: string | null) {
     queryFn: () =>
       withFallback(
         () => billingHistoryApi.getSubscriptionTimeline(subscriptionId!),
-        subscriptionId ? getMockTimelineResponse(subscriptionId) : { events: [], subscription: { id: '', plan_id: '', status: '' } }
+        subscriptionId ? getMockSubscriptionTimelineResponse(subscriptionId) : { events: [] }
       ),
     enabled: !!subscriptionId,
   })
@@ -56,7 +56,7 @@ export function useBillingSummary(params?: { start_date?: string; end_date?: str
   return useQuery({
     queryKey: [...BILLING_HISTORY_KEYS, 'summary', params],
     queryFn: () =>
-      withFallback(() => billingHistoryApi.getSummary(params), MOCK_SUMMARY),
+      withFallback(() => billingHistoryApi.getSummary(params), MOCK_HISTORY_SUMMARY),
   })
 }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Download, Settings, ArrowRight, CreditCard, FileText, Package } from 'lucide-react'
+import { Download, Settings, ArrowRight, CreditCard, FileText, Package, History } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   CurrentPlanCard,
@@ -47,6 +47,12 @@ export function BillingPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/dashboard/billing/history">
+              <History className="h-4 w-4" />
+              Transaction history
+            </Link>
+          </Button>
           <Button
             variant="outline"
             size="sm"
