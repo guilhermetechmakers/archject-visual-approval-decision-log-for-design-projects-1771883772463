@@ -8,7 +8,6 @@ import {
   WorkspaceNav,
   OverviewCard,
   DecisionsList,
-  FilesLibrary,
   TeamPanel,
   TemplatesLibrary,
   ActivitySidebar,
@@ -22,6 +21,7 @@ import {
   type WorkspaceTab,
   type CreateDecisionFormData,
 } from '@/components/workspace'
+import { FilesLibraryView } from '@/components/files-library'
 import { useProjectWorkspace, useCreateClientLink, useCreateExport } from '@/hooks/use-workspace'
 import { toast } from 'sonner'
 
@@ -193,10 +193,9 @@ export function ProjectWorkspacePage() {
           )}
 
           {activeTab === 'files' && (
-            <FilesLibrary
-              files={files}
-              projectId={projectId}
+            <FilesLibraryView
               storageUsedPercent={storagePercent}
+              showFullLibraryLink
             />
           )}
 

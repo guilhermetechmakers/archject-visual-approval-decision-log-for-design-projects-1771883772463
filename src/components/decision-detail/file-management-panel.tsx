@@ -1,4 +1,5 @@
-import { FileText, Image, File, Download, Eye, Link2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { FileText, Image, File, Download, Eye, Link2, FolderOpen } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -34,7 +35,7 @@ export interface FileManagementPanelProps {
 
 export function FileManagementPanel({
   files,
-  projectId: _projectId,
+  projectId,
   onPreview,
   onLinkToDecision,
   className,
@@ -63,6 +64,14 @@ export function FileManagementPanel({
               <p className="mt-1 text-xs text-muted-foreground">
                 Upload from Create/Edit Decision or link from Files Library
               </p>
+              {projectId && (
+                <Button variant="outline" size="sm" className="mt-4" asChild>
+                  <Link to={`/dashboard/projects/${projectId}/files`}>
+                    <FolderOpen className="mr-2 h-4 w-4" />
+                    Open Files Library
+                  </Link>
+                </Button>
+              )}
             </div>
           ) : (
             <div className="space-y-2">
