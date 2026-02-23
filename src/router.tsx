@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { LandingPage } from '@/pages/landing'
+import { DemoRequestPage } from '@/pages/demo-request'
 import { LoginPage } from '@/pages/auth/login'
 import { SignupPage } from '@/pages/auth/signup'
 import { ForgotPasswordPage } from '@/pages/auth/forgot-password'
@@ -8,6 +9,7 @@ import { DashboardOverview } from '@/pages/dashboard/overview'
 import { ProjectsPage } from '@/pages/dashboard/projects'
 import { DecisionsPage } from '@/pages/dashboard/decisions'
 import { DecisionDetailPage } from '@/pages/dashboard/decision-detail'
+import { CreateDecisionPlaceholder } from '@/pages/dashboard/create-decision-placeholder'
 import { TeamPage } from '@/pages/dashboard/team'
 import { SettingsPage } from '@/pages/dashboard/settings'
 import { BillingPage } from '@/pages/dashboard/billing'
@@ -23,6 +25,7 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <SignupPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  { path: '/demo-request', element: <DemoRequestPage /> },
   { path: '/privacy', element: <PrivacyPage /> },
   { path: '/terms', element: <TermsPage /> },
   { path: '/cookies', element: <CookiesPage /> },
@@ -41,22 +44,9 @@ export const router = createBrowserRouter([
       { path: 'billing', element: <BillingPage /> },
     ],
   },
-  { path: '/features', element: <Navigate to="/" replace /> },
-  { path: '/pricing', element: <Navigate to="/" replace /> },
-  { path: '/about', element: <Navigate to="/" replace /> },
+  { path: '/features', element: <Navigate to="/#features" replace /> },
+  { path: '/pricing', element: <Navigate to="/#pricing" replace /> },
+  { path: '/about', element: <Navigate to="/#features" replace /> },
   { path: '/500', element: <ServerErrorPage /> },
   { path: '*', element: <NotFoundPage /> },
 ])
-
-function CreateDecisionPlaceholder() {
-  return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Create decision</h1>
-      <div className="rounded-xl border border-border bg-card p-12 text-center">
-        <p className="text-muted-foreground">
-          Decision creation form — metadata, options uploader, side-by-side preview builder.
-        </p>
-      </div>
-    </div>
-  )
-}

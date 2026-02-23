@@ -1,0 +1,20 @@
+export { HeroBlock } from './hero-block'
+export type { HeroBlockProps, CTAConfig } from './hero-block'
+export { FeatureCardGrid } from './feature-card-grid'
+export type { FeatureCardGridProps, FeatureItem } from './feature-card-grid'
+export { HowItWorksSection } from './how-it-works-section'
+export type { HowItWorksSectionProps, StepItem } from './how-it-works-section'
+export { TemplatesGallery } from './templates-gallery'
+export type { TemplatesGalleryProps, TemplateItem } from './templates-gallery'
+export { PricingPreview } from './pricing-preview'
+export type { PricingPreviewProps, PricingTier } from './pricing-preview'
+export { LogosTestimonials } from './logos-testimonials'
+export type {
+  LogosTestimonialsProps,
+  TestimonialItem,
+} from './logos-testimonials'
+export { CTABar } from './cta-bar'
+export type { CTABarProps } from './cta-bar'
+export { Footer } from './footer'
+export type { FooterProps } from './footer'
+export { DemoRequestModal } from './demo-request-modal'

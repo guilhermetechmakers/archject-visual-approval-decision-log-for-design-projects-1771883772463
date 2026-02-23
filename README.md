@@ -42,16 +42,33 @@ npm run build
 ```
 src/
 ├── components/     # Reusable UI components
+│   ├── landing/    # Landing page sections (HeroBlock, FeatureCardGrid, etc.)
 │   ├── layout/     # Sidebar, header, dashboard layout
 │   └── ui/         # Button, Card, Input, etc.
 ├── lib/            # Utilities (api, utils)
 ├── pages/          # Route pages
 │   ├── auth/       # Login, signup, forgot password
 │   ├── dashboard/  # Overview, projects, decisions, team, settings
+│   ├── landing/    # Landing page + landing-data
 │   ├── errors/     # 404, 500
 │   └── legal/      # Privacy, terms, cookies
 └── router.tsx     # Route configuration
 ```
+
+## Landing Page Components
+
+Modular, reusable components for the marketing landing page:
+
+- **HeroBlock** — Hero with title, subtitle, primary/secondary CTAs, optional media
+- **FeatureCardGrid** — Responsive grid of feature cards with icons
+- **HowItWorksSection** — Step-by-step flow with connectors
+- **TemplatesGallery** — Clickable template tiles with lightbox preview
+- **PricingPreview** — Tier comparison with recommended plan highlight
+- **LogosTestimonials** — Logo strip + testimonial cards
+- **CTABar** — Inline CTA section (Start free, Request demo)
+- **Footer** — Corporate links, social icons
+- **NavigationHeader** — Responsive nav with pill tabs, mobile drawer
+- **DemoRequestModal** — Demo request form (email, name, company)
 
 ## Design System
 
