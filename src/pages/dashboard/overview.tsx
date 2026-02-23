@@ -1,197 +1,169 @@
 import { Link } from 'react-router-dom'
-import {
-  FolderKanban,
-  FileCheck,
-  Clock,
-  TrendingUp,
-  Plus,
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Plus, FileCheck, FolderKanban, FileText, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
-
-const mockApprovals = [
-  { id: '1', title: 'Kitchen finish options', project: 'Riverside Villa', due: '2 days' },
-  { id: '2', title: 'Bathroom tile selection', project: 'Riverside Villa', due: '5 days' },
-  { id: '3', title: 'Exterior color palette', project: 'Urban Loft', due: '1 week' },
-]
-
-const mockActivity = [
-  { id: '1', text: 'Client approved Kitchen finish options', time: '2 hours ago' },
-  { id: '2', text: 'New decision created: Bathroom tile selection', time: '5 hours ago' },
-  { id: '3', text: 'Share link sent for Exterior color palette', time: '1 day ago' },
-]
-
-const mockChartData = [
-  { name: 'Mon', approvals: 4 },
-  { name: 'Tue', approvals: 3 },
-  { name: 'Wed', approvals: 6 },
-  { name: 'Thu', approvals: 5 },
-  { name: 'Fri', approvals: 8 },
-  { name: 'Sat', approvals: 2 },
-  { name: 'Sun', approvals: 1 },
-]
+  ActionQuickBar,
+  ProjectCard,
+  ApprovalItem,
+  ActivityItem,
+  UsageSnapshotCard,
+  AnalyticsWidget,
+  DashboardSkeleton,
+} from '@/components/dashboard'
+import { useDashboardData } from '@/hooks/use-dashboard'
 
 export function DashboardOverview() {
+  const { data, isLoading, error } = useDashboardData()
+
+  if (isLoading) {
+    return <DashboardSkeleton />
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <p className="text-muted-foreground">Failed to load dashboard</p>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </Button>
+      </div>
+    )
+  }
+
+  const {
+    projects,
+    awaiting_approvals,
+    recent_activity,
+    usage,
+  } = data
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <Link to="/dashboard/decisions/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New decision
-          </Button>
-        </Link>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <ActionQuickBar />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Projects
-            </CardTitle>
-            <FolderKanban className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">Active projects</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Awaiting approval
-            </CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">7</div>
-            <p className="text-xs text-muted-foreground">Decisions pending</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Approved this week
-            </CardTitle>
-            <FileCheck className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">15</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-success">+3</span> vs last week
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Avg. approval time
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2.4 days</div>
-            <p className="text-xs text-muted-foreground">Down from 4.1 days</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Awaiting approvals</CardTitle>
-            <CardContent className="pt-0 text-sm text-muted-foreground">
-              Decisions waiting for client response
-            </CardContent>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockApprovals.map((item) => (
-                <Link
-                  key={item.id}
-                  to={`/dashboard/decisions/${item.id}`}
-                  className="flex items-center justify-between rounded-lg border border-border p-4 transition-colors hover:bg-secondary/50"
-                >
-                  <div>
-                    <p className="font-medium">{item.title}</p>
-                    <p className="text-sm text-muted-foreground">{item.project}</p>
-                  </div>
-                  <Badge variant="warning">{item.due}</Badge>
-                </Link>
-              ))}
-            </div>
-            <Link to="/dashboard/decisions" className="mt-4 block">
-              <Button variant="ghost" className="w-full">
-                View all decisions
+      <section>
+        <h2 className="mb-4 text-lg font-semibold">Projects overview</h2>
+        {projects.length === 0 ? (
+          <div className="rounded-xl border border-border bg-card p-12 text-center">
+            <p className="text-muted-foreground">No active projects yet</p>
+            <Link to="/dashboard/projects" className="mt-4 inline-block">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create project
               </Button>
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {projects.map((project, i) => (
+              <div
+                key={project.id}
+                className="animate-fade-in-up"
+                style={{
+                  animationDelay: `${i * 50}ms`,
+                  animationFillMode: 'both',
+                }}
+              >
+                <ProjectCard project={project} />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent activity</CardTitle>
-            <CardContent className="pt-0 text-sm text-muted-foreground">
-              Latest updates across your workspace
-            </CardContent>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockActivity.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-3 rounded-lg p-3"
-                >
-                  <div className="h-2 w-2 shrink-0 rounded-full bg-primary mt-1.5" />
-                  <div>
-                    <p className="text-sm">{item.text}</p>
-                    <p className="text-xs text-muted-foreground">{item.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Awaiting approvals</h2>
+            <Link to="/dashboard/decisions">
+              <Button variant="ghost" size="sm">
+                View all
+              </Button>
+            </Link>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-6">
+            {awaiting_approvals.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <FileCheck className="h-12 w-12 text-muted-foreground" />
+                <p className="mt-4 font-medium">All caught up</p>
+                <p className="text-sm text-muted-foreground">
+                  No decisions awaiting client response
+                </p>
+                <Link to="/dashboard/decisions/new" className="mt-4">
+                  <Button size="sm">Create decision</Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {awaiting_approvals.map((approval) => (
+                  <ApprovalItem key={approval.decision_id} approval={approval} />
+                ))}
+                <Link to="/dashboard/decisions" className="mt-4 block">
+                  <Button variant="ghost" className="w-full">
+                    View all decisions
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-lg font-semibold">Recent activity</h2>
+          <div className="rounded-xl border border-border bg-card p-6">
+            {recent_activity.length === 0 ? (
+              <div className="py-12 text-center">
+                <p className="text-muted-foreground">No recent activity</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {recent_activity.map((activity) => (
+                  <ActivityItem key={activity.id} activity={activity} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Approvals over time</CardTitle>
-          <CardContent className="pt-0 text-sm text-muted-foreground">
-            Weekly approval trend
-          </CardContent>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={mockChartData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="name" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="approvals"
-                  stroke="rgb(25, 92, 74)"
-                  fill="rgb(25, 92, 74)"
-                  fillOpacity={0.2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      <section>
+        <h2 className="mb-4 text-lg font-semibold">Quick links</h2>
+        <div className="flex flex-wrap gap-2">
+          <Link to="/dashboard/projects">
+            <Button variant="secondary" size="sm">
+              <FolderKanban className="mr-2 h-4 w-4" />
+              All projects
+            </Button>
+          </Link>
+          <Link to="/dashboard/decisions">
+            <Button variant="secondary" size="sm">
+              <FileText className="mr-2 h-4 w-4" />
+              All decisions
+            </Button>
+          </Link>
+          <Link to="/dashboard/team">
+            <Button variant="secondary" size="sm">
+              <Users className="mr-2 h-4 w-4" />
+              Team
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      <section>
+        <UsageSnapshotCard usage={usage} />
+      </section>
+
+      <section>
+        <AnalyticsWidget />
+      </section>
     </div>
   )
 }

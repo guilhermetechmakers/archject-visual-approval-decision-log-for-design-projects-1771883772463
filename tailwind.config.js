@@ -30,6 +30,7 @@ export default {
         ring: 'rgb(var(--ring) / <alpha-value>)',
         success: 'rgb(var(--success) / <alpha-value>)',
         warning: 'rgb(var(--warning) / <alpha-value>)',
+        'warning-muted': 'rgb(var(--warning-muted) / <alpha-value>)',
         destructive: 'rgb(var(--destructive) / <alpha-value>)',
         muted: {
           DEFAULT: 'rgb(var(--muted) / <alpha-value>)',
