@@ -1,0 +1,1362 @@
+⚠️ CRITICAL EXECUTION RULES - READ FIRST ⚠️
+❌ NEVER run: npm run dev, npm start, yarn dev, pnpm dev, or ANY development server
+❌ NEVER run: long-running processes, servers, or commands that don't exit
+❌ NEVER test the application by starting it
+✅ ALLOWED: npm install, npm run build, npm run test (if needed)
+✅ YOUR TASK: Create/modify files only, then STOP and EXIT immediately
+⚠️ The MCP server handles all testing and validation separately
+
+You are an expert full-stack developer proficient in TypeScript, React, Next.js, and modern UI/UX frameworks (Tailwind CSS, Shadcn UI, Radix UI).
+
+=== DESIGN REFERENCE (MANDATORY) ===
+# Modern Design Best Practices
+
+## Philosophy
+
+Create unique, memorable experiences while maintaining consistency through modern design principles. Every project should feel distinct yet professional, innovative yet intuitive.
+
+---
+
+## Landing Pages & Marketing Sites
+
+### Hero Sections
+**Go beyond static backgrounds:**
+- Animated gradients with subtle movement
+- Particle systems or geometric shapes floating
+- Interactive canvas backgrounds (Three.js, WebGL)
+- Video backgrounds with proper fallbacks
+- Parallax scrolling effects
+- Gradient mesh animations
+- Morphing blob animations
+
+
+### Layout Patterns
+**Use modern grid systems:**
+- Bento grids (asymmetric card layouts)
+- Masonry layouts for varied content
+- Feature sections with diagonal cuts or curves
+- Overlapping elements with proper z-index
+- Split-screen designs with scroll-triggered reveals
+
+**Avoid:** Traditional 3-column equal grids
+
+### Scroll Animations
+**Engage users as they scroll:**
+- Fade-in and slide-up animations for sections
+- Scroll-triggered parallax effects
+- Progress indicators for long pages
+- Sticky elements that transform on scroll
+- Horizontal scroll sections for portfolios
+- Text reveal animations (word by word, letter by letter)
+- Number counters animating into view
+
+**Avoid:** Static pages with no scroll interaction
+
+### Call-to-Action Areas
+**Make CTAs impossible to miss:**
+- Gradient buttons with hover effects
+- Floating action buttons with micro-interactions
+- Animated borders or glowing effects
+- Scale/lift on hover
+- Interactive elements that respond to mouse position
+- Pulsing indicators for primary actions
+
+---
+
+## Dashboard Applications
+
+### Layout Structure
+**Always use collapsible side navigation:**
+- Sidebar that can collapse to icons only
+- Smooth transition animations between states
+- Persistent navigation state (remember user preference)
+- Mobile: drawer that slides in/out
+- Desktop: sidebar with expand/collapse toggle
+- Icons visible even when collapsed
+
+**Structure:**
+```
+/dashboard (layout wrapper with sidebar)
+  /dashboard/overview
+  /dashboard/analytics
+  /dashboard/settings
+  /dashboard/users
+  /dashboard/projects
+```
+
+All dashboard pages should be nested inside the dashboard layout, not separate routes.
+
+### Data Tables
+**Modern table design:**
+- Sticky headers on scroll
+- Row hover states with subtle elevation
+- Sortable columns with clear indicators
+- Pagination with items-per-page control
+- Search/filter with instant feedback
+- Selection checkboxes with bulk actions
+- Responsive: cards on mobile, table on desktop
+- Loading skeletons, not spinners
+- Empty states with illustrations or helpful text
+
+**Use modern table libraries:**
+- TanStack Table (React Table v8)
+- AG Grid for complex data
+- Data Grid from MUI (if using MUI)
+
+### Charts & Visualizations
+**Use the latest charting libraries:**
+- Recharts (for React, simple charts)
+- Chart.js v4 (versatile, well-maintained)
+- Apache ECharts (advanced, interactive)
+- D3.js (custom, complex visualizations)
+- Tremor (for dashboards, built on Recharts)
+
+**Chart best practices:**
+- Animated transitions when data changes
+- Interactive tooltips with detailed info
+- Responsive sizing
+- Color scheme matching design system
+- Legend placement that doesn't obstruct data
+- Loading states while fetching data
+
+### Dashboard Cards
+**Metric cards should stand out:**
+- Gradient backgrounds or colored accents
+- Trend indicators (↑ ↓ with color coding)
+- Sparkline charts for historical data
+- Hover effects revealing more detail
+- Icon representing the metric
+- Comparison to previous period
+
+---
+
+## Color & Visual Design
+
+### Color Palettes
+**Create depth with gradients:**
+- Primary gradient (not just solid primary color)
+- Subtle background gradients
+- Gradient text for headings
+- Gradient borders on cards
+- Elevated surfaces for depth
+
+**Color usage:**
+- 60-30-10 rule (dominant, secondary, accent)
+- Consistent semantic colors (success, warning, error)
+- Accessible contrast ratios (WCAG AA minimum)
+
+### Typography
+**Create hierarchy through contrast:**
+- Large, bold headings (48-72px for heroes)
+- Clear size differences between levels
+- Variable font weights (300, 400, 600, 700)
+- Letter spacing for small caps
+- Line height 1.5-1.7 for body text
+- Inter, Poppins, or DM Sans for modern feel
+
+### Shadows & Depth
+**Layer UI elements:**
+- Multi-layer shadows for realistic depth
+- Colored shadows matching element color
+- Elevated states on hover
+- Neumorphism for special elements (sparingly)
+
+---
+
+## Interactions & Micro-animations
+
+### Button Interactions
+**Every button should react:**
+- Scale slightly on hover (1.02-1.05)
+- Lift with shadow on hover
+- Ripple effect on click
+- Loading state with spinner or progress
+- Disabled state clearly visible
+- Success state with checkmark animation
+
+### Card Interactions
+**Make cards feel alive:**
+- Lift on hover with increased shadow
+- Subtle border glow on hover
+- Tilt effect following mouse (3D transform)
+- Smooth transitions (200-300ms)
+- Click feedback for interactive cards
+
+### Form Interactions
+**Guide users through forms:**
+- Input focus states with border color change
+- Floating labels that animate up
+- Real-time validation with inline messages
+- Success checkmarks for valid inputs
+- Error states with shake animation
+- Password strength indicators
+- Character count for text areas
+
+### Page Transitions
+**Smooth between views:**
+- Fade + slide for page changes
+- Skeleton loaders during data fetch
+- Optimistic UI updates
+- Stagger animations for lists
+- Route transition animations
+
+---
+
+## Mobile Responsiveness
+
+### Mobile-First Approach
+**Design for mobile, enhance for desktop:**
+- Touch targets minimum 44x44px
+- Generous padding and spacing
+- Sticky bottom navigation on mobile
+- Collapsible sections for long content
+- Swipeable cards and galleries
+- Pull-to-refresh where appropriate
+
+### Responsive Patterns
+**Adapt layouts intelligently:**
+- Hamburger menu → full nav bar
+- Card grid → stack on mobile
+- Sidebar → drawer
+- Multi-column → single column
+- Data tables → card list
+- Hide/show elements based on viewport
+
+---
+
+## Loading & Empty States
+
+### Loading States
+**Never leave users wondering:**
+- Skeleton screens matching content layout
+- Progress bars for known durations
+- Animated placeholders
+- Spinners only for short waits (<3s)
+- Stagger loading for multiple elements
+- Shimmer effects on skeletons
+
+### Empty States
+**Make empty states helpful:**
+- Illustrations or icons
+- Helpful copy explaining why it's empty
+- Clear CTA to add first item
+- Examples or suggestions
+- No "no data" text alone
+
+---
+
+## Unique Elements to Stand Out
+
+### Distinctive Features
+**Add personality:**
+- Custom cursor effects on landing pages
+- Animated page numbers or section indicators
+- Unusual hover effects (magnification, distortion)
+- Custom scrollbars
+- Glassmorphism for overlays
+- Animated SVG icons
+- Typewriter effects for hero text
+- Confetti or celebration animations for actions
+
+### Interactive Elements
+**Engage users:**
+- Drag-and-drop interfaces
+- Sliders and range controls
+- Toggle switches with animations
+- Progress steps with animations
+- Expandable/collapsible sections
+- Tabs with slide indicators
+- Image comparison sliders
+- Interactive demos or playgrounds
+
+---
+
+## Consistency Rules
+
+### Maintain Consistency
+**What should stay consistent:**
+- Spacing scale (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- Border radius values
+- Animation timing (200ms, 300ms, 500ms)
+- Color system (primary, secondary, accent, neutrals)
+- Typography scale
+- Icon style (outline vs filled)
+- Button styles across the app
+- Form element styles
+
+### What Can Vary
+**Project-specific customization:**
+- Color palette (different colors, same system)
+- Layout creativity (grids, asymmetry)
+- Illustration style
+- Animation personality
+- Feature-specific interactions
+- Hero section design
+- Card styling variations
+- Background patterns or textures
+
+---
+
+## Technical Excellence
+
+### Performance
+- Optimize images (WebP, lazy loading)
+- Code splitting for faster loads
+- Debounce search inputs
+- Virtualize long lists
+- Minimize re-renders
+- Use proper memoization
+
+### Accessibility
+- Keyboard navigation throughout
+- ARIA labels where needed
+- Focus indicators visible
+- Screen reader friendly
+- Sufficient color contrast
+- Respect reduced motion preferences
+
+---
+
+## Key Principles
+
+1. **Be Bold** - Don't be afraid to try unique layouts and interactions
+2. **Be Consistent** - Use the same patterns for similar functions
+3. **Be Responsive** - Design works beautifully on all devices
+4. **Be Fast** - Animations are smooth, loading is quick
+5. **Be Accessible** - Everyone can use what you build
+6. **Be Modern** - Use current design trends and technologies
+7. **Be Unique** - Each project should have its own personality
+8. **Be Intuitive** - Users shouldn't need instructions
+
+
+*IMPORTANT*: For every page or component refer to # Modern Design Best Practices
+
+## Philosophy
+
+Create unique, memorable experiences while maintaining consistency through modern design principles. Every project should feel distinct yet professional, innovative yet intuitive.
+
+---
+
+## Landing Pages & Marketing Sites
+
+### Hero Sections
+**Go beyond static backgrounds:**
+- Animated gradients with subtle movement
+- Particle systems or geometric shapes floating
+- Interactive canvas backgrounds (Three.js, WebGL)
+- Video backgrounds with proper fallbacks
+- Parallax scrolling effects
+- Gradient mesh animations
+- Morphing blob animations
+
+
+### Layout Patterns
+**Use modern grid systems:**
+- Bento grids (asymmetric card layouts)
+- Masonry layouts for varied content
+- Feature sections with diagonal cuts or curves
+- Overlapping elements with proper z-index
+- Split-screen designs with scroll-triggered reveals
+
+**Avoid:** Traditional 3-column equal grids
+
+### Scroll Animations
+**Engage users as they scroll:**
+- Fade-in and slide-up animations for sections
+- Scroll-triggered parallax effects
+- Progress indicators for long pages
+- Sticky elements that transform on scroll
+- Horizontal scroll sections for portfolios
+- Text reveal animations (word by word, letter by letter)
+- Number counters animating into view
+
+**Avoid:** Static pages with no scroll interaction
+
+### Call-to-Action Areas
+**Make CTAs impossible to miss:**
+- Gradient buttons with hover effects
+- Floating action buttons with micro-interactions
+- Animated borders or glowing effects
+- Scale/lift on hover
+- Interactive elements that respond to mouse position
+- Pulsing indicators for primary actions
+
+---
+
+## Dashboard Applications
+
+### Layout Structure
+**Always use collapsible side navigation:**
+- Sidebar that can collapse to icons only
+- Smooth transition animations between states
+- Persistent navigation state (remember user preference)
+- Mobile: drawer that slides in/out
+- Desktop: sidebar with expand/collapse toggle
+- Icons visible even when collapsed
+
+**Structure:**
+```
+/dashboard (layout wrapper with sidebar)
+  /dashboard/overview
+  /dashboard/analytics
+  /dashboard/settings
+  /dashboard/users
+  /dashboard/projects
+```
+
+All dashboard pages should be nested inside the dashboard layout, not separate routes.
+
+### Data Tables
+**Modern table design:**
+- Sticky headers on scroll
+- Row hover states with subtle elevation
+- Sortable columns with clear indicators
+- Pagination with items-per-page control
+- Search/filter with instant feedback
+- Selection checkboxes with bulk actions
+- Responsive: cards on mobile, table on desktop
+- Loading skeletons, not spinners
+- Empty states with illustrations or helpful text
+
+**Use modern table libraries:**
+- TanStack Table (React Table v8)
+- AG Grid for complex data
+- Data Grid from MUI (if using MUI)
+
+### Charts & Visualizations
+**Use the latest charting libraries:**
+- Recharts (for React, simple charts)
+- Chart.js v4 (versatile, well-maintained)
+- Apache ECharts (advanced, interactive)
+- D3.js (custom, complex visualizations)
+- Tremor (for dashboards, built on Recharts)
+
+**Chart best practices:**
+- Animated transitions when data changes
+- Interactive tooltips with detailed info
+- Responsive sizing
+- Color scheme matching design system
+- Legend placement that doesn't obstruct data
+- Loading states while fetching data
+
+### Dashboard Cards
+**Metric cards should stand out:**
+- Gradient backgrounds or colored accents
+- Trend indicators (↑ ↓ with color coding)
+- Sparkline charts for historical data
+- Hover effects revealing more detail
+- Icon representing the metric
+- Comparison to previous period
+
+---
+
+## Color & Visual Design
+
+### Color Palettes
+**Create depth with gradients:**
+- Primary gradient (not just solid primary color)
+- Subtle background gradients
+- Gradient text for headings
+- Gradient borders on cards
+- Elevated surfaces for depth
+
+**Color usage:**
+- 60-30-10 rule (dominant, secondary, accent)
+- Consistent semantic colors (success, warning, error)
+- Accessible contrast ratios (WCAG AA minimum)
+
+### Typography
+**Create hierarchy through contrast:**
+- Large, bold headings (48-72px for heroes)
+- Clear size differences between levels
+- Variable font weights (300, 400, 600, 700)
+- Letter spacing for small caps
+- Line height 1.5-1.7 for body text
+- Inter, Poppins, or DM Sans for modern feel
+
+### Shadows & Depth
+**Layer UI elements:**
+- Multi-layer shadows for realistic depth
+- Colored shadows matching element color
+- Elevated states on hover
+- Neumorphism for special elements (sparingly)
+
+---
+
+## Interactions & Micro-animations
+
+### Button Interactions
+**Every button should react:**
+- Scale slightly on hover (1.02-1.05)
+- Lift with shadow on hover
+- Ripple effect on click
+- Loading state with spinner or progress
+- Disabled state clearly visible
+- Success state with checkmark animation
+
+### Card Interactions
+**Make cards feel alive:**
+- Lift on hover with increased shadow
+- Subtle border glow on hover
+- Tilt effect following mouse (3D transform)
+- Smooth transitions (200-300ms)
+- Click feedback for interactive cards
+
+### Form Interactions
+**Guide users through forms:**
+- Input focus states with border color change
+- Floating labels that animate up
+- Real-time validation with inline messages
+- Success checkmarks for valid inputs
+- Error states with shake animation
+- Password strength indicators
+- Character count for text areas
+
+### Page Transitions
+**Smooth between views:**
+- Fade + slide for page changes
+- Skeleton loaders during data fetch
+- Optimistic UI updates
+- Stagger animations for lists
+- Route transition animations
+
+---
+
+## Mobile Responsiveness
+
+### Mobile-First Approach
+**Design for mobile, enhance for desktop:**
+- Touch targets minimum 44x44px
+- Generous padding and spacing
+- Sticky bottom navigation on mobile
+- Collapsible sections for long content
+- Swipeable cards and galleries
+- Pull-to-refresh where appropriate
+
+### Responsive Patterns
+**Adapt layouts intelligently:**
+- Hamburger menu → full nav bar
+- Card grid → stack on mobile
+- Sidebar → drawer
+- Multi-column → single column
+- Data tables → card list
+- Hide/show elements based on viewport
+
+---
+
+## Loading & Empty States
+
+### Loading States
+**Never leave users wondering:**
+- Skeleton screens matching content layout
+- Progress bars for known durations
+- Animated placeholders
+- Spinners only for short waits (<3s)
+- Stagger loading for multiple elements
+- Shimmer effects on skeletons
+
+### Empty States
+**Make empty states helpful:**
+- Illustrations or icons
+- Helpful copy explaining why it's empty
+- Clear CTA to add first item
+- Examples or suggestions
+- No "no data" text alone
+
+---
+
+## Unique Elements to Stand Out
+
+### Distinctive Features
+**Add personality:**
+- Custom cursor effects on landing pages
+- Animated page numbers or section indicators
+- Unusual hover effects (magnification, distortion)
+- Custom scrollbars
+- Glassmorphism for overlays
+- Animated SVG icons
+- Typewriter effects for hero text
+- Confetti or celebration animations for actions
+
+### Interactive Elements
+**Engage users:**
+- Drag-and-drop interfaces
+- Sliders and range controls
+- Toggle switches with animations
+- Progress steps with animations
+- Expandable/collapsible sections
+- Tabs with slide indicators
+- Image comparison sliders
+- Interactive demos or playgrounds
+
+---
+
+## Consistency Rules
+
+### Maintain Consistency
+**What should stay consistent:**
+- Spacing scale (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- Border radius values
+- Animation timing (200ms, 300ms, 500ms)
+- Color system (primary, secondary, accent, neutrals)
+- Typography scale
+- Icon style (outline vs filled)
+- Button styles across the app
+- Form element styles
+
+### What Can Vary
+**Project-specific customization:**
+- Color palette (different colors, same system)
+- Layout creativity (grids, asymmetry)
+- Illustration style
+- Animation personality
+- Feature-specific interactions
+- Hero section design
+- Card styling variations
+- Background patterns or textures
+
+---
+
+## Technical Excellence
+
+### Performance
+- Optimize images (WebP, lazy loading)
+- Code splitting for faster loads
+- Debounce search inputs
+- Virtualize long lists
+- Minimize re-renders
+- Use proper memoization
+
+### Accessibility
+- Keyboard navigation throughout
+- ARIA labels where needed
+- Focus indicators visible
+- Screen reader friendly
+- Sufficient color contrast
+- Respect reduced motion preferences
+
+---
+
+## Key Principles
+
+1. **Be Bold** - Don't be afraid to try unique layouts and interactions
+2. **Be Consistent** - Use the same patterns for similar functions
+3. **Be Responsive** - Design works beautifully on all devices
+4. **Be Fast** - Animations are smooth, loading is quick
+5. **Be Accessible** - Everyone can use what you build
+6. **Be Modern** - Use current design trends and technologies
+7. **Be Unique** - Each project should have its own personality
+8. **Be Intuitive** - Users shouldn't need instructions
+ for bestpractices and # Analytics & Reports
+
+## Overview
+Create a Studio-facing Analytics & Reports module and a user-focused Dashboard that together provide actionable insights into design decision workflows. The Analytics & Reports page delivers studio analytics such as decision response times, bottlenecks, most-used templates, and client responsiveness metrics, with drill-down capabilities and export options. The Dashboard provides a personalized entry point showing active projects, decisions awaiting client response, recent activity, and quick actions to create a decision or share client links. No external APIs are required for this task; all data is sourced from the existing Archject data layer and can be simulated for development with mock data until backend integrations are wired.
+
+---
+
+## Page Description (Full Detail)
+
+What this page is:
+- Analytics & Reports: A studio-facing analytics hub that surfaces decision workflow metrics, bottlenecks, template performance, and client responsiveness. It enables filtering by date range, grouping by project/client/template, and exporting reports.
+- Dashboard: A user-specific landing page that aggregates context for easy action—shows active projects, decisions awaiting client response, recent activity feed, and quick-create/sharing actions.
+
+Goals:
+- Provide clear, trusted metrics enabling studios to identify bottlenecks, optimize template usage, and improve client turnaround times.
+- Empower studios to export and schedule reports (CSV/PDF) and set up notifications or webhooks for automated reporting.
+- Deliver a cohesive, accessible, mobile-friendly experience aligned with Archject’s design system.
+
+Features connected:
+- Analytics & Reporting: Studio-facing analytics displaying decision bottlenecks, client responsiveness, and template performance.
+- Dashboard: User-specific overview with quick actions to create decisions and share client links.
+- Visualizations, KPI computations, export capabilities, and drill-down navigation to related decisions/projects.
+
+UI elements and how they need to look:
+- KPI Dashboard: 
+  - Metrics such as average time-to-approve (per decision), pending decisions count, and client approval rate.
+  - Visual cues with status badges and trend indicators.
+- Custom Reports:
+  - Date range selector (start date, end date) with quick presets (Last 7/30/90 days).
+  - Group-by controls (Project, Client, Template) with multi-select options.
+  - Template performance metrics (usage frequency, average approval time, success rate).
+- Export/Delivery:
+  - CSV and PDF export buttons with confirm dialogs.
+  - Scheduled reporting options via email or webhook (configurable cadence and recipients).
+- Drilldowns:
+  - Clickable KPI elements to navigate to related decisions or project detail views.
+  - In-depth tables with sortable columns and expandable rows for decision-level details.
+- Dashboard:
+  - Cards showing active projects, decisions awaiting client response, and recent activity.
+  - Quick actions: Create a new decision, Share client link, and a search/filters bar.
+  - Shortcuts to open analytics panels for a selected project.
+
+Visual guidance:
+- Use the shared design system: clean cards, soft shadows, spacious whitespace, and responsive layouts. Ensure consistent typography, color usage, and interactive states as described in the design guidelines below.
+
+---
+
+## Components to Build
+
+- AnalyticsDashboardPage
+  - KPI Cards (averageTimeToApprove, pendingDecisions, clientApprovalRate)
+  - Trend charts (time-series for approvals, bottlenecks over time)
+  - Bottleneck heatmap or pipeline view (stages vs. volume)
+  - Top templates table (template name, usage count, avg time, success rate)
+  - Client responsiveness gauges (avg response time, response rate)
+  - Drilldown panels: clickable KPIs leading to filtered decision lists
+  - Export panel: CSV/PDF export buttons and schedule options
+  - Date range picker and group-by controls
+  - API integration hooks to fetch analytics data
+
+- AnalyticsDrilldownView
+  - List of decisions filtered by KPI context (e.g., bottleneck stage)
+  - Filters: date range, project, client, template
+  - Actionable items: Open decision, share client link, export subset
+
+- CustomReportsPanel
+  - Date range selector
+  - Group-by multi-selects (project, client, template)
+  - Template performance metrics table
+  - Sorting, filtering, and pagination
+  - Export to CSV/PDF
+
+- ReportExportService
+  - Generate CSV/PDF based on current filters
+  - Schedule delivery via email or webhook
+  - Retry and error handling
+
+- DashboardPage
+  - ActiveProjectsCard
+  - DecisionsAwaitingClientCard
+  - RecentActivityCard
+  - QuickActionsBar (Create Decision, Share Client Link)
+  - Global search and filters
+
+- DataAdapters
+  - AnalyticsAPIAdapter (fetch metrics: averageTimeToApprove, pendingDecisions, clientApprovalRate, templateUsage, clientResponseTimes)
+  - DecisionsAPIAdapter (fetch decisions for drill-down)
+  - ProjectsAPIAdapter (fetch project metadata)
+  - TemplatesAPIAdapter (fetch template performance)
+
+---
+
+## Implementation Requirements
+
+### Frontend
+- Build responsive React (or your project’s framework) components following the design system.
+- Use a reusable Card component with header/body/actions sections.
+- Implement KPI cards with stat numbers, delta indicators, and small sparklines where appropriate.
+- Implement line/area charts for trends with minimal grid lines.
+- Implement a table component with sortable columns and expandable rows for details.
+- Implement date range picker with quick presets and validation (start <= end).
+- Implement multi-select group-by controls with clear feedback on selections.
+- Implement export UI for CSV/PDF and scheduling options (modal dialogs, form validation).
+- Implement drill-down navigation: KPI click navigates to filtered decision list view.
+- Implement a lightweight local state management (context/store) to share selected filters across components.
+- Accessibility: aria-labels, keyboard navigation, high-contrast enough color contrast, and focus states.
+- Performance: lazy-loading charts, pagination for large data, and avoid rendering huge datasets client-side.
+
+### Backend
+- No external APIs required for this task, but define API contracts:
+  - GET /api/analytics/studio?from=&to=&groupBy= [returns KPI metrics, time-series, and template usage]
+  - GET /api/analytics/studio/drilldown?type=bottleneck&from=&to=&filters= [returns filtered decisions]
+  - GET /api/reports/custom?from=&to=&groupBy=&filters= [returns dataset for custom reports]
+  - POST /api/reports/export (type: csv|pdf, filters) [returns generated file URL or streams]
+  - POST /api/reports/schedule (frequency, recipients, format, filters)
+- Database tables/entities (conceptual):
+  - decisions: id, project_id, template_id, client_id, stage, created_at, updated_at, approved_at
+  - decision_options: id, decision_id, option_text, is_selected, timestamp
+  - templates: id, name, usage_count, last_used_at
+  - projects: id, name, studio_id, status, created_at
+  - clients: id, name, response_time_ms, last_response_at
+  - analytics_snapshots: id, studio_id, period_start, period_end, avg_time_to_approve, pending_count, approval_rate
+- Functions to implement:
+  - computeAverageTimeToApprove(decisions_in_range)
+  - computePendingDecisions(projects_in_range)
+  - computeClientApprovalRate(decisions_in_range)
+  - aggregateTemplatePerformance(decisions_in_range, templates)
+  - computeClientResponsiveness(decisions, clients)
+
+### Integration
+- Frontend should consume the AnalyticsAPI to render KPIs, trends, and drill-down data.
+- Drill-down views must reuse existing decision and project detail components where possible.
+- Ensure consistency with Dashboard data sources (shared user/project context).
+- Implement event hooks to refresh analytics upon new decision creation, status updates, or client responses.
+- Export and scheduling services should be testable in a staging environment with mock data.
+
+---
+
+## User Experience Flow
+
+1) User lands on Analytics & Reports page
+- Sees a top KPI row with averageTimeToApprove, pendingDecisions, and clientApprovalRate.
+- The user can adjust date range and group-by settings (Project/Client/Template).
+- Trend charts and bottleneck visuals update in real time as filters change.
+
+2) User interacts with drill-down KPIs
+- Click on an KPI (e.g., bottleneck stage) to open AnalyticsDrilldownView showing filtered decisions.
+- Use filters to refine to a subset; open any decision to view details in the existing decision view.
+
+3) User generates a Custom Report
+- Open CustomReportsPanel, select date range, and group-by criteria.
+- Review template performance metrics in the table.
+- Click Export to CSV or PDF; optionally schedule the report to be delivered via email or webhook.
+
+4) User uses the Dashboard
+- Land on Dashboard with:
+  - ActiveProjectsCard listing projects with quick-glance status.
+  - DecisionsAwaitingClientCard highlighting decisions needing client response.
+  - RecentActivityCard summarizing last 24-72 hours.
+  - QuickActionsBar enabling Create Decision or Share Client Link.
+- Use quick actions to create a decision or share a client link directly from the dashboard.
+
+5) Scheduled/exported reports
+- User configures recurring reports; backend generates CSV/PDF and sends via configured delivery channels.
+- User can view scheduled items, edit, or cancel them from the UI.
+
+---
+
+## Technical Specifications
+
+Data Models: Schema details
+- decisions(id, project_id, template_id, client_id, stage, created_at, updated_at, approved_at, due_at, response_time_ms)
+- templates(id, name, usage_count, last_used_at)
+- projects(id, name, studio_id, status, created_at)
+- clients(id, name, avg_response_time_ms, last_response_at, approval_rate)
+- analytics_snapshots(id, studio_id, period_start, period_end, avg_time_to_approve, pending_count, approval_rate, bottleneck_count)
+- decision_options(id, decision_id, option_text, is_selected, created_at)
+
+API Endpoints:
+- GET /api/analytics/studio?from=DATE&to=DATE&groupBy=PROJECT|CLIENT|TEMPLATE
+  - Returns: kpis, timeSeries, templatePerformance, clientResponsiveness
+- GET /api/analytics/studio/drilldown?type=bottleneck&from=DATE&to=DATE&filters=...
+  - Returns: decisions list with relevant fields
+- GET /api/reports/custom?from=DATE&to=DATE&groupBy=...
+  - Returns: dataset for custom reports
+- POST /api/reports/export
+  - Body: { type: 'csv'|'pdf', from, to, groupBy, filters }
+  - Response: { url: 'https://...' }
+- POST /api/reports/schedule
+  - Body: { format: 'csv'|'pdf', cadence: 'daily'|'weekly'|'monthly', recipients: [], from, to, groupBy, filters }
+
+Security:
+- Authentication: OAuth2 or JWT with audience/studio scope; ensure only authenticated studio users can access analytics and dashboard.
+- Authorization: Studio-level access; verify studio_id matches the client’s context.
+- Data privacy: Restrict PII exposure; client names and decision data only shown per authorization.
+- Audit logging: Log analytics view access, drill-down navigation, report exports, and scheduled deliveries.
+
+Validation:
+- Date range validation: from <= to; date formats ISO 8601.
+- Group-by validation: allowed values: PROJECT, CLIENT, TEMPLATE.
+- Filter validation: ensure IDs exist; handle unknown IDs gracefully with user-friendly messages.
+- Export validation: ensure filters yield non-empty datasets or provide a graceful empty state message.
+
+---
+
+## Acceptance Criteria
+
+- [ ] KPI dashboard renders with correct values for average time-to-approve, pending decisions, and client approval rate within the selected date range.
+- [ ] Time-series charts display clear trends with correct axis labels, minimal grid lines, and accessible color coding.
+- [ ] Drill-down KPI interactions navigate to filtered decision lists; opening a decision reveals full details using existing components.
+- [ ] Custom Report panel executes and returns a CSV/PDF export; the export includes all selected group-by criteria and date range.
+- [ ] Report scheduling can be configured; backend stores schedule and delivers reports via configured channels.
+- [ ] Dashboard shows an accurate set of active projects, pending client responses, and recent activity; quick actions function (create decision, share client link) and reflect outputs immediately.
+- [ ] All UI components meet design system guidelines (colors, typography, spacing, and responsive behavior) and pass accessibility checks (WCAG AA where feasible).
+
+---
+
+## UI/UX Guidelines
+Apply the project's design system:
+- Cards with white backgrounds, soft shadows, 12–16px rounded corners, generous internal padding, and hover elevation.
+- Top navigation with pill-shaped tabs; active tab uses Deep green (#195C4A) and white text.
+- Cards, charts, and tables share a consistent card container style for visual unity.
+- Data visualization uses minimal grid lines, soft gray axes, and accessible color palettes.
+- Buttons: primary actions in deep green; secondary actions in soft backgrounds or outlined styles.
+- Status indicators use green/yellow/red rounded tags with bold text.
+- Form and filter controls: rounded inputs, soft backgrounds (#F5F6FA), clear focus states.
+- Typography: Inter/SF Pro/Manrope-like geometric sans-serif; weights 400/500/600; emphasis via color or weight.
+- Layout: 24–32px container padding, 16–24px spacing between components, 8px spacing increments; left-aligned content; responsive grid.
+
+---
+
+## Visual Style
+
+Refer to the provided Visual Style sections in the PROJECT CONTEXT. The Analytics & Reports and Dashboard pages should mirror that style, ensuring consistency with the Archject brand and the target audience (architecture/design studios).
+
+Color Palette (applied):
+- Backgrounds: #FFFFFF; secondary surfaces: #F5F6FA / #F7F8FA
+- Primary actions: #195C4A
+- Success: #7BE495
+- Warnings: #FFE8A3 (soft), #FFDCA8 (muted)
+- Destructive: #FF6C6C
+- Text: #23272F (primary), #6B7280 (secondary)
+- Shadows/borders: #E6E8F0, #D1D5DB
+
+Typography and spacing as described above.
+
+---
+
+## Connected Pages & Features
+
+Connected Pages:
+- Dashboard: User-specific dashboard summarizing active projects, decisions awaiting client response, recent activity, and quick actions to create a decision or share client links.
+
+Connected Features:
+- Analytics & Reporting: Studio-facing analytics displaying decision bottlenecks, client responsiveness, and template performance.
+
+---
+
+## Deliverables
+
+- Fully functional Analytics & Reports page with KPIs, trends, drill-downs, custom reporting, export, and scheduling.
+- Dashboard integration with quick actions and analytics contexts.
+- Clean, accessible implementation following the design system and visual style.
+- Documentation of API contracts, data model mappings, and a developer-friendly README for easy integration and testing.
+- Mock data utilities to simulate analytics data during development and clear instructions to connect to real backend data sources.
+
+If you need any adjustments to the data models, endpoints, or desired chart types (e.g., add a funnel view for bottlenecks), I can tailor the prompt accordingly. for style.
+
+CRITICAL DESIGN REQUIREMENTS:
+- You MUST follow ALL design principles and patterns specified in the Design Reference above
+- Do NOT deviate from the design specifications without explicit user permission
+- Implement ALL visual design elements (colors, typography, spacing, shadows, animations) as specified
+- Follow the layout patterns and component designs exactly as documented
+- Ensure all interactions and micro-animations match the reference specifications
+
+CRITICAL TECHNICAL REQUIREMENTS:
+- React 18.3.1, React Router 6.30.1
+- Tailwind CSS v3 with tailwind.config.js and custom keyframes
+- @tailwindcss/typography plugin for rich text content
+- Tailwind CSS animations (NOT Motion library or framer-motion)
+- Sonner for toasts
+- Recharts for data visualization
+- Native fetch() with API utilities in src/lib/api.ts
+- Design system with CSS custom properties
+- Use RGB color values for theming
+- When Supabase is configured: use Edge Functions for LLM and server-only logic; never expose API keys in the client
+
+=== TASK ===
+# Analytics & Reports
+
+## Overview
+Create a Studio-facing Analytics & Reports module and a user-focused Dashboard that together provide actionable insights into design decision workflows. The Analytics & Reports page delivers studio analytics such as decision response times, bottlenecks, most-used templates, and client responsiveness metrics, with drill-down capabilities and export options. The Dashboard provides a personalized entry point showing active projects, decisions awaiting client response, recent activity, and quick actions to create a decision or share client links. No external APIs are required for this task; all data is sourced from the existing Archject data layer and can be simulated for development with mock data until backend integrations are wired.
+
+---
+
+## Page Description (Full Detail)
+
+What this page is:
+- Analytics & Reports: A studio-facing analytics hub that surfaces decision workflow metrics, bottlenecks, template performance, and client responsiveness. It enables filtering by date range, grouping by project/client/template, and exporting reports.
+- Dashboard: A user-specific landing page that aggregates context for easy action—shows active projects, decisions awaiting client response, recent activity feed, and quick-create/sharing actions.
+
+Goals:
+- Provide clear, trusted metrics enabling studios to identify bottlenecks, optimize template usage, and improve client turnaround times.
+- Empower studios to export and schedule reports (CSV/PDF) and set up notifications or webhooks for automated reporting.
+- Deliver a cohesive, accessible, mobile-friendly experience aligned with Archject’s design system.
+
+Features connected:
+- Analytics & Reporting: Studio-facing analytics displaying decision bottlenecks, client responsiveness, and template performance.
+- Dashboard: User-specific overview with quick actions to create decisions and share client links.
+- Visualizations, KPI computations, export capabilities, and drill-down navigation to related decisions/projects.
+
+UI elements and how they need to look:
+- KPI Dashboard: 
+  - Metrics such as average time-to-approve (per decision), pending decisions count, and client approval rate.
+  - Visual cues with status badges and trend indicators.
+- Custom Reports:
+  - Date range selector (start date, end date) with quick presets (Last 7/30/90 days).
+  - Group-by controls (Project, Client, Template) with multi-select options.
+  - Template performance metrics (usage frequency, average approval time, success rate).
+- Export/Delivery:
+  - CSV and PDF export buttons with confirm dialogs.
+  - Scheduled reporting options via email or webhook (configurable cadence and recipients).
+- Drilldowns:
+  - Clickable KPI elements to navigate to related decisions or project detail views.
+  - In-depth tables with sortable columns and expandable rows for decision-level details.
+- Dashboard:
+  - Cards showing active projects, decisions awaiting client response, and recent activity.
+  - Quick actions: Create a new decision, Share client link, and a search/filters bar.
+  - Shortcuts to open analytics panels for a selected project.
+
+Visual guidance:
+- Use the shared design system: clean cards, soft shadows, spacious whitespace, and responsive layouts. Ensure consistent typography, color usage, and interactive states as described in the design guidelines below.
+
+---
+
+## Components to Build
+
+- AnalyticsDashboardPage
+  - KPI Cards (averageTimeToApprove, pendingDecisions, clientApprovalRate)
+  - Trend charts (time-series for approvals, bottlenecks over time)
+  - Bottleneck heatmap or pipeline view (stages vs. volume)
+  - Top templates table (template name, usage count, avg time, success rate)
+  - Client responsiveness gauges (avg response time, response rate)
+  - Drilldown panels: clickable KPIs leading to filtered decision lists
+  - Export panel: CSV/PDF export buttons and schedule options
+  - Date range picker and group-by controls
+  - API integration hooks to fetch analytics data
+
+- AnalyticsDrilldownView
+  - List of decisions filtered by KPI context (e.g., bottleneck stage)
+  - Filters: date range, project, client, template
+  - Actionable items: Open decision, share client link, export subset
+
+- CustomReportsPanel
+  - Date range selector
+  - Group-by multi-selects (project, client, template)
+  - Template performance metrics table
+  - Sorting, filtering, and pagination
+  - Export to CSV/PDF
+
+- ReportExportService
+  - Generate CSV/PDF based on current filters
+  - Schedule delivery via email or webhook
+  - Retry and error handling
+
+- DashboardPage
+  - ActiveProjectsCard
+  - DecisionsAwaitingClientCard
+  - RecentActivityCard
+  - QuickActionsBar (Create Decision, Share Client Link)
+  - Global search and filters
+
+- DataAdapters
+  - AnalyticsAPIAdapter (fetch metrics: averageTimeToApprove, pendingDecisions, clientApprovalRate, templateUsage, clientResponseTimes)
+  - DecisionsAPIAdapter (fetch decisions for drill-down)
+  - ProjectsAPIAdapter (fetch project metadata)
+  - TemplatesAPIAdapter (fetch template performance)
+
+---
+
+## Implementation Requirements
+
+### Frontend
+- Build responsive React (or your project’s framework) components following the design system.
+- Use a reusable Card component with header/body/actions sections.
+- Implement KPI cards with stat numbers, delta indicators, and small sparklines where appropriate.
+- Implement line/area charts for trends with minimal grid lines.
+- Implement a table component with sortable columns and expandable rows for details.
+- Implement date range picker with quick presets and validation (start <= end).
+- Implement multi-select group-by controls with clear feedback on selections.
+- Implement export UI for CSV/PDF and scheduling options (modal dialogs, form validation).
+- Implement drill-down navigation: KPI click navigates to filtered decision list view.
+- Implement a lightweight local state management (context/store) to share selected filters across components.
+- Accessibility: aria-labels, keyboard navigation, high-contrast enough color contrast, and focus states.
+- Performance: lazy-loading charts, pagination for large data, and avoid rendering huge datasets client-side.
+
+### Backend
+- No external APIs required for this task, but define API contracts:
+  - GET /api/analytics/studio?from=&to=&groupBy= [returns KPI metrics, time-series, and template usage]
+  - GET /api/analytics/studio/drilldown?type=bottleneck&from=&to=&filters= [returns filtered decisions]
+  - GET /api/reports/custom?from=&to=&groupBy=&filters= [returns dataset for custom reports]
+  - POST /api/reports/export (type: csv|pdf, filters) [returns generated file URL or streams]
+  - POST /api/reports/schedule (frequency, recipients, format, filters)
+- Database tables/entities (conceptual):
+  - decisions: id, project_id, template_id, client_id, stage, created_at, updated_at, approved_at
+  - decision_options: id, decision_id, option_text, is_selected, timestamp
+  - templates: id, name, usage_count, last_used_at
+  - projects: id, name, studio_id, status, created_at
+  - clients: id, name, response_time_ms, last_response_at
+  - analytics_snapshots: id, studio_id, period_start, period_end, avg_time_to_approve, pending_count, approval_rate
+- Functions to implement:
+  - computeAverageTimeToApprove(decisions_in_range)
+  - computePendingDecisions(projects_in_range)
+  - computeClientApprovalRate(decisions_in_range)
+  - aggregateTemplatePerformance(decisions_in_range, templates)
+  - computeClientResponsiveness(decisions, clients)
+
+### Integration
+- Frontend should consume the AnalyticsAPI to render KPIs, trends, and drill-down data.
+- Drill-down views must reuse existing decision and project detail components where possible.
+- Ensure consistency with Dashboard data sources (shared user/project context).
+- Implement event hooks to refresh analytics upon new decision creation, status updates, or client responses.
+- Export and scheduling services should be testable in a staging environment with mock data.
+
+---
+
+## User Experience Flow
+
+1) User lands on Analytics & Reports page
+- Sees a top KPI row with averageTimeToApprove, pendingDecisions, and clientApprovalRate.
+- The user can adjust date range and group-by settings (Project/Client/Template).
+- Trend charts and bottleneck visuals update in real time as filters change.
+
+2) User interacts with drill-down KPIs
+- Click on an KPI (e.g., bottleneck stage) to open AnalyticsDrilldownView showing filtered decisions.
+- Use filters to refine to a subset; open any decision to view details in the existing decision view.
+
+3) User generates a Custom Report
+- Open CustomReportsPanel, select date range, and group-by criteria.
+- Review template performance metrics in the table.
+- Click Export to CSV or PDF; optionally schedule the report to be delivered via email or webhook.
+
+4) User uses the Dashboard
+- Land on Dashboard with:
+  - ActiveProjectsCard listing projects with quick-glance status.
+  - DecisionsAwaitingClientCard highlighting decisions needing client response.
+  - RecentActivityCard summarizing last 24-72 hours.
+  - QuickActionsBar enabling Create Decision or Share Client Link.
+- Use quick actions to create a decision or share a client link directly from the dashboard.
+
+5) Scheduled/exported reports
+- User configures recurring reports; backend generates CSV/PDF and sends via configured delivery channels.
+- User can view scheduled items, edit, or cancel them from the UI.
+
+---
+
+## Technical Specifications
+
+Data Models: Schema details
+- decisions(id, project_id, template_id, client_id, stage, created_at, updated_at, approved_at, due_at, response_time_ms)
+- templates(id, name, usage_count, last_used_at)
+- projects(id, name, studio_id, status, created_at)
+- clients(id, name, avg_response_time_ms, last_response_at, approval_rate)
+- analytics_snapshots(id, studio_id, period_start, period_end, avg_time_to_approve, pending_count, approval_rate, bottleneck_count)
+- decision_options(id, decision_id, option_text, is_selected, created_at)
+
+API Endpoints:
+- GET /api/analytics/studio?from=DATE&to=DATE&groupBy=PROJECT|CLIENT|TEMPLATE
+  - Returns: kpis, timeSeries, templatePerformance, clientResponsiveness
+- GET /api/analytics/studio/drilldown?type=bottleneck&from=DATE&to=DATE&filters=...
+  - Returns: decisions list with relevant fields
+- GET /api/reports/custom?from=DATE&to=DATE&groupBy=...
+  - Returns: dataset for custom reports
+- POST /api/reports/export
+  - Body: { type: 'csv'|'pdf', from, to, groupBy, filters }
+  - Response: { url: 'https://...' }
+- POST /api/reports/schedule
+  - Body: { format: 'csv'|'pdf', cadence: 'daily'|'weekly'|'monthly', recipients: [], from, to, groupBy, filters }
+
+Security:
+- Authentication: OAuth2 or JWT with audience/studio scope; ensure only authenticated studio users can access analytics and dashboard.
+- Authorization: Studio-level access; verify studio_id matches the client’s context.
+- Data privacy: Restrict PII exposure; client names and decision data only shown per authorization.
+- Audit logging: Log analytics view access, drill-down navigation, report exports, and scheduled deliveries.
+
+Validation:
+- Date range validation: from <= to; date formats ISO 8601.
+- Group-by validation: allowed values: PROJECT, CLIENT, TEMPLATE.
+- Filter validation: ensure IDs exist; handle unknown IDs gracefully with user-friendly messages.
+- Export validation: ensure filters yield non-empty datasets or provide a graceful empty state message.
+
+---
+
+## Acceptance Criteria
+
+- [ ] KPI dashboard renders with correct values for average time-to-approve, pending decisions, and client approval rate within the selected date range.
+- [ ] Time-series charts display clear trends with correct axis labels, minimal grid lines, and accessible color coding.
+- [ ] Drill-down KPI interactions navigate to filtered decision lists; opening a decision reveals full details using existing components.
+- [ ] Custom Report panel executes and returns a CSV/PDF export; the export includes all selected group-by criteria and date range.
+- [ ] Report scheduling can be configured; backend stores schedule and delivers reports via configured channels.
+- [ ] Dashboard shows an accurate set of active projects, pending client responses, and recent activity; quick actions function (create decision, share client link) and reflect outputs immediately.
+- [ ] All UI components meet design system guidelines (colors, typography, spacing, and responsive behavior) and pass accessibility checks (WCAG AA where feasible).
+
+---
+
+## UI/UX Guidelines
+Apply the project's design system:
+- Cards with white backgrounds, soft shadows, 12–16px rounded corners, generous internal padding, and hover elevation.
+- Top navigation with pill-shaped tabs; active tab uses Deep green (#195C4A) and white text.
+- Cards, charts, and tables share a consistent card container style for visual unity.
+- Data visualization uses minimal grid lines, soft gray axes, and accessible color palettes.
+- Buttons: primary actions in deep green; secondary actions in soft backgrounds or outlined styles.
+- Status indicators use green/yellow/red rounded tags with bold text.
+- Form and filter controls: rounded inputs, soft backgrounds (#F5F6FA), clear focus states.
+- Typography: Inter/SF Pro/Manrope-like geometric sans-serif; weights 400/500/600; emphasis via color or weight.
+- Layout: 24–32px container padding, 16–24px spacing between components, 8px spacing increments; left-aligned content; responsive grid.
+
+---
+
+## Visual Style
+
+Refer to the provided Visual Style sections in the PROJECT CONTEXT. The Analytics & Reports and Dashboard pages should mirror that style, ensuring consistency with the Archject brand and the target audience (architecture/design studios).
+
+Color Palette (applied):
+- Backgrounds: #FFFFFF; secondary surfaces: #F5F6FA / #F7F8FA
+- Primary actions: #195C4A
+- Success: #7BE495
+- Warnings: #FFE8A3 (soft), #FFDCA8 (muted)
+- Destructive: #FF6C6C
+- Text: #23272F (primary), #6B7280 (secondary)
+- Shadows/borders: #E6E8F0, #D1D5DB
+
+Typography and spacing as described above.
+
+---
+
+## Connected Pages & Features
+
+Connected Pages:
+- Dashboard: User-specific dashboard summarizing active projects, decisions awaiting client response, recent activity, and quick actions to create a decision or share client links.
+
+Connected Features:
+- Analytics & Reporting: Studio-facing analytics displaying decision bottlenecks, client responsiveness, and template performance.
+
+---
+
+## Deliverables
+
+- Fully functional Analytics & Reports page with KPIs, trends, drill-downs, custom reporting, export, and scheduling.
+- Dashboard integration with quick actions and analytics contexts.
+- Clean, accessible implementation following the design system and visual style.
+- Documentation of API contracts, data model mappings, and a developer-friendly README for easy integration and testing.
+- Mock data utilities to simulate analytics data during development and clear instructions to connect to real backend data sources.
+
+If you need any adjustments to the data models, endpoints, or desired chart types (e.g., add a funnel view for bottlenecks), I can tailor the prompt accordingly.
+
+=== SUCCESS CRITERIA ===
+# Success Criteria Checklist
+
+## Code Quality
+
+### TypeScript
+- [ ] No TypeScript errors (`tsc --noEmit` passes)
+- [ ] All functions and components have proper type definitions
+- [ ] No `any` types used (use `unknown` if type is truly unknown)
+- [ ] Props interfaces defined for all components
+- [ ] API responses have type definitions
+
+### Code Standards
+- [ ] All imports use path aliases (@/ prefix)
+- [ ] Components follow the established naming convention
+- [ ] Files are organized in correct directories
+- [ ] No unused imports or variables
+- [ ] Consistent code formatting
+
+## Component Implementation
+
+### UI Components
+- [ ] Use shadcn/ui components (Button, Card, Input, etc.) instead of building from scratch
+- [ ] All interactive elements have hover states
+- [ ] Components use the `cn()` utility for class merging
+- [ ] Proper TypeScript props interfaces defined
+- [ ] Components are responsive (mobile, tablet, desktop)
+
+### Animations
+- [ ] Motion library used for all animations (NOT framer-motion)
+- [ ] Page transitions implemented with fade/slide
+- [ ] Interactive elements have whileHover/whileTap animations
+- [ ] List items use stagger animations where appropriate
+- [ ] Animations respect `prefers-reduced-motion`
+
+### Icons
+- [ ] Lucide React icons used consistently
+- [ ] Icons have consistent sizing (h-4 w-4, h-5 w-5, h-6 w-6)
+- [ ] Icon colors match design system (text-primary, text-muted-foreground)
+
+## Data Management
+
+### React Query
+- [ ] All data fetching uses React Query hooks
+- [ ] Query keys follow the established pattern
+- [ ] Mutations invalidate related queries
+- [ ] Loading and error states handled
+- [ ] Optimistic updates implemented where appropriate
+
+### Forms
+- [ ] Forms use react-hook-form
+- [ ] Validation uses Zod schemas
+- [ ] Error messages display properly
+- [ ] Form submission shows loading state
+- [ ] Success/error feedback via toast notifications
+
+### API Layer
+- [ ] API functions in src/api/ directory
+- [ ] Axios used for HTTP requests
+- [ ] Proper error handling with try/catch
+- [ ] Auth tokens handled by interceptors
+- [ ] Type-safe API function signatures
+
+## User Experience
+
+### Notifications
+- [ ] Sonner toasts used for all notifications
+- [ ] Success actions show success toast
+- [ ] Errors show descriptive error messages
+- [ ] Loading states show toast.loading()
+
+### Loading States
+- [ ] Skeleton loaders shown during data fetch
+- [ ] Buttons show loading state during submission
+- [ ] Disabled state applied during async operations
+
+### Error Handling
+- [ ] Network errors caught and displayed
+- [ ] User-friendly error messages (no stack traces)
+- [ ] Fallback UI for error states
+- [ ] No unhandled promise rejections
+
+## Navigation
+
+### Route Accessibility
+- [ ] All pages have routes defined in router configuration
+- [ ] Every page is accessible through navigation (menu, sidebar, or direct URL)
+- [ ] Main pages (Dashboard, Home, Settings, etc.) accessible from primary navigation
+- [ ] Secondary pages accessible through contextual navigation or direct links
+- [ ] Deep-linked pages have breadcrumbs or back navigation
+- [ ] 404/Not Found page implemented for invalid routes
+- [ ] Protected routes have proper authentication checks
+- [ ] Navigation state persists across page refreshes where appropriate
+
+### Navigation UX
+- [ ] Active route highlighted in navigation menu
+- [ ] Clear visual hierarchy in navigation structure
+- [ ] Mobile navigation is accessible and usable
+- [ ] Navigation items have hover/focus states
+- [ ] Nested routes show parent-child relationships
+- [ ] User can always return to main areas (Dashboard/Home)
+
+## Styling
+
+### Tailwind CSS
+- [ ] Tailwind v3 classes used
+- [ ] HSL color variables from design system
+- [ ] Custom CSS properties used where defined
+- [ ] Responsive breakpoints: mobile-first approach
+- [ ] Dark mode support via CSS variables
+
+### Design System
+- [ ] Colors use theme variables (primary, secondary, accent)
+- [ ] Spacing uses Tailwind scale (p-4, gap-6, etc.)
+- [ ] Border radius uses theme values (rounded-lg)
+- [ ] Shadows use theme values (shadow-card)
+- [ ] Typography follows Inter font system
+
+## Accessibility
+
+- [ ] Semantic HTML elements used
+- [ ] Buttons have descriptive labels
+- [ ] Forms have proper labels
+- [ ] Focus states visible on interactive elements
+- [ ] Color contrast meets WCAG standards
+
+## Performance
+
+- [ ] No console.log statements in production code
+- [ ] No console errors in browser
+- [ ] Images optimized (WebP, lazy loading)
+- [ ] Large lists use virtualization if needed
+- [ ] React Query cache configured appropriately
+
+## Testing Readiness
+
+- [ ] Components structured for easy testing
+- [ ] Business logic separated from presentation
+- [ ] Mock-friendly API layer
+- [ ] No hardcoded values that should be configurable
+- [ ] Environment variables properly configured
+
+## Final Checks
+
+- [ ] Code builds without errors (`npm run build`)
+- [ ] Development server runs without errors (`npm run dev`)
+- [ ] No TypeScript errors in editor
+- [ ] Browser console is clean (no errors or warnings)
+- [ ] All functionality works as expected
+- [ ] Code follows existing project patterns
+- [ ] Changes are consistent with the rest of the codebase
+
+
+
+IMPORTANT: ALL styling and design decisions must follow the Design Reference section above EXACTLY. Do not make arbitrary design choices.
+
+Analyze the existing project structure and implement the task following the patterns already established. Ensure all success criteria are met.
