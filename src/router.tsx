@@ -11,6 +11,7 @@ import { PasswordResetGuard, ProtectedRoute } from '@/components/auth'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DashboardOverview } from '@/pages/dashboard/overview'
 import { ProjectsPage } from '@/pages/dashboard/projects'
+import { ProjectWorkspacePage } from '@/pages/dashboard/project-workspace'
 import { DecisionsPage } from '@/pages/dashboard/decisions'
 import { DecisionDetailPage } from '@/pages/dashboard/decision-detail'
 import { CreateDecisionPlaceholder } from '@/pages/dashboard/create-decision-placeholder'
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <DashboardOverview /> },
           { path: 'projects', element: <ProjectsPage /> },
+          { path: 'projects/:projectId', element: <ProjectWorkspacePage /> },
           { path: 'decisions', element: <DecisionsPage /> },
           { path: 'decisions/new', element: <CreateDecisionPlaceholder /> },
           { path: 'decisions/:id', element: <DecisionDetailPage /> },

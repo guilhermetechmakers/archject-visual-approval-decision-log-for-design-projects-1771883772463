@@ -54,7 +54,7 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
             </div>
             <div className="min-w-0 flex-1">
               <Link
-                to={`/dashboard/projects?project=${project.id}`}
+                to={`/dashboard/projects/${project.id}`}
                 className="font-semibold text-foreground hover:text-primary transition-colors"
               >
                 {project.name}
@@ -81,12 +81,12 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link to={`/dashboard/decisions?project=${project.id}`}>
-                  View decisions
+                <Link to={`/dashboard/projects/${project.id}`}>
+                  Open workspace
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to={`/dashboard/projects?project=${project.id}`}>
+                <Link to={`/dashboard/projects/${project.id}`}>
                   Project settings
                 </Link>
               </DropdownMenuItem>

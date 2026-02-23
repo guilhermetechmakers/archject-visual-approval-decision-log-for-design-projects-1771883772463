@@ -26,7 +26,7 @@ export function ProjectsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {mockProjects.map((project) => (
-          <Link key={project.id} to={`/dashboard/projects/${project.id}`}>
+          <Link key={project.id} to={`/dashboard/projects/${project.id}`} className="block">
             <Card className="transition-all hover:shadow-card-hover">
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">

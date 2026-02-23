@@ -1,0 +1,235 @@
+/**
+ * Mock data for Project Workspace - used when API is not available
+ */
+
+import type {
+  Project,
+  Decision,
+  ProjectFile,
+  TeamMember,
+  Template,
+  ActivityLog,
+  ClientLink,
+} from '@/types/workspace'
+
+export const mockProject: Project = {
+  id: 'proj-1',
+  name: 'Riverside Villa',
+  client_id: 'client-1',
+  client_name: 'Acme Construction',
+  branding_logo_url: null,
+  branding_color: '#195C4A',
+  domain_prefix: 'riverside',
+  storage_quota_bytes: 5 * 1024 * 1024 * 1024, // 5GB
+  current_storage_bytes: 1.2 * 1024 * 1024 * 1024, // 1.2GB
+  status: 'active',
+  deadline: '2025-06-30',
+  project_type: 'Residential',
+  created_at: '2025-01-15T10:00:00Z',
+  updated_at: '2025-02-20T14:30:00Z',
+  archived: false,
+}
+
+export const mockDecisions: Decision[] = [
+  {
+    id: 'dec-1',
+    project_id: 'proj-1',
+    title: 'Kitchen Finishes - Countertops',
+    status: 'pending',
+    due_date: '2025-03-01',
+    assignee_id: 'user-2',
+    assignee_name: 'Sarah Chen',
+    created_by: 'user-1',
+    created_at: '2025-02-10T09:00:00Z',
+    updated_at: '2025-02-18T11:00:00Z',
+    description: 'Select countertop material and finish for kitchen island.',
+    options_count: 3,
+  },
+  {
+    id: 'dec-2',
+    project_id: 'proj-1',
+    title: 'Exterior Paint Color',
+    status: 'approved',
+    due_date: '2025-02-15',
+    assignee_id: 'user-2',
+    assignee_name: 'Sarah Chen',
+    created_by: 'user-1',
+    created_at: '2025-02-01T10:00:00Z',
+    updated_at: '2025-02-14T16:00:00Z',
+    approved_at: '2025-02-14T16:00:00Z',
+    description: 'Final exterior paint selection.',
+    options_count: 4,
+  },
+  {
+    id: 'dec-3',
+    project_id: 'proj-1',
+    title: 'Floor Plan Revision - Master Suite',
+    status: 'draft',
+    due_date: null,
+    assignee_id: null,
+    assignee_name: null,
+    created_by: 'user-1',
+    created_at: '2025-02-19T14:00:00Z',
+    updated_at: '2025-02-19T14:00:00Z',
+    description: 'Layout options for master bedroom and bath.',
+    options_count: 0,
+  },
+]
+
+export const mockFiles: ProjectFile[] = [
+  {
+    id: 'file-1',
+    project_id: 'proj-1',
+    file_name: 'floor-plan-v2.pdf',
+    file_type: 'drawing',
+    file_url: '/files/floor-plan-v2.pdf',
+    version: 2,
+    uploaded_by: 'user-1',
+    uploaded_at: '2025-02-18T10:00:00Z',
+    associated_decision_id: 'dec-3',
+    is_preview_generated: true,
+    mime_type: 'application/pdf',
+  },
+  {
+    id: 'file-2',
+    project_id: 'proj-1',
+    file_name: 'countertop-specs.pdf',
+    file_type: 'spec',
+    file_url: '/files/countertop-specs.pdf',
+    version: 1,
+    uploaded_by: 'user-2',
+    uploaded_at: '2025-02-15T09:30:00Z',
+    associated_decision_id: 'dec-1',
+    is_preview_generated: true,
+    mime_type: 'application/pdf',
+  },
+  {
+    id: 'file-3',
+    project_id: 'proj-1',
+    file_name: 'exterior-render.png',
+    file_type: 'image',
+    file_url: '/files/exterior-render.png',
+    version: 1,
+    uploaded_by: 'user-1',
+    uploaded_at: '2025-02-10T14:00:00Z',
+    associated_decision_id: 'dec-2',
+    is_preview_generated: true,
+    mime_type: 'image/png',
+  },
+]
+
+export const mockTeam: TeamMember[] = [
+  {
+    id: 'tm-1',
+    project_id: 'proj-1',
+    user_id: 'user-1',
+    name: 'Alex Morgan',
+    email: 'alex@studio.com',
+    avatar_url: null,
+    role: 'owner',
+    invited_at: '2025-01-15T10:00:00Z',
+    accepted_at: '2025-01-15T10:00:00Z',
+  },
+  {
+    id: 'tm-2',
+    project_id: 'proj-1',
+    user_id: 'user-2',
+    name: 'Sarah Chen',
+    email: 'sarah@studio.com',
+    avatar_url: null,
+    role: 'editor',
+    invited_at: '2025-01-20T09:00:00Z',
+    accepted_at: '2025-01-21T11:00:00Z',
+  },
+  {
+    id: 'tm-3',
+    project_id: 'proj-1',
+    user_id: 'user-3',
+    name: 'Client Contact',
+    email: 'client@acme.com',
+    avatar_url: null,
+    role: 'client',
+    invited_at: '2025-02-01T14:00:00Z',
+    accepted_at: '2025-02-02T10:00:00Z',
+  },
+]
+
+export const mockTemplates: Template[] = [
+  {
+    id: 'tpl-1',
+    name: 'Finishes Selection',
+    type: 'finishes',
+    content_json: { fields: ['material', 'color', 'finish'] },
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+  },
+  {
+    id: 'tpl-2',
+    name: 'Layout Options',
+    type: 'layouts',
+    content_json: { fields: ['layout_a', 'layout_b', 'layout_c'] },
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+  },
+  {
+    id: 'tpl-3',
+    name: 'Change Request',
+    type: 'change_request',
+    content_json: { fields: ['scope', 'impact', 'cost'] },
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+  },
+]
+
+export const mockActivity: ActivityLog[] = [
+  {
+    id: 'act-1',
+    project_id: 'proj-1',
+    type: 'decision_created',
+    reference_id: 'dec-3',
+    created_at: '2025-02-19T14:00:00Z',
+    summary: 'Floor Plan Revision - Master Suite created',
+    actor: 'Alex Morgan',
+  },
+  {
+    id: 'act-2',
+    project_id: 'proj-1',
+    type: 'approval',
+    reference_id: 'dec-2',
+    created_at: '2025-02-14T16:00:00Z',
+    summary: 'Exterior Paint Color approved',
+    actor: 'Client Contact',
+  },
+  {
+    id: 'act-3',
+    project_id: 'proj-1',
+    type: 'upload',
+    reference_id: 'file-1',
+    created_at: '2025-02-18T10:00:00Z',
+    summary: 'floor-plan-v2.pdf uploaded',
+    actor: 'Alex Morgan',
+  },
+  {
+    id: 'act-4',
+    project_id: 'proj-1',
+    type: 'link_shared',
+    reference_id: 'dec-1',
+    created_at: '2025-02-17T11:00:00Z',
+    summary: 'Client portal link shared for Kitchen Finishes',
+    actor: 'Sarah Chen',
+  },
+]
+
+export const mockClientLinks: ClientLink[] = [
+  {
+    id: 'link-1',
+    project_id: 'proj-1',
+    decision_id: 'dec-1',
+    url: 'https://app.archject.com/portal/abc123xyz',
+    expires_at: '2025-03-15T23:59:59Z',
+    otp_required: false,
+    created_at: '2025-02-17T11:00:00Z',
+    used_at: null,
+    is_active: true,
+  },
+]
