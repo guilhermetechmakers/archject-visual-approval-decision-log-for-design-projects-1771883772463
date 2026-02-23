@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { PasswordStrengthIndicator } from './password-strength'
+import { PasswordStrengthIndicator, PASSWORD_POLICY } from './password-strength'
 import { ForgotPasswordLink } from './forgot-password-link'
 import { TermsCheckbox } from './terms-checkbox'
 import { cn } from '@/lib/utils'
@@ -23,11 +23,11 @@ const signupSchema = z
     email: z.string().email('Invalid email'),
     password: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
-      .refine(
-        (p) => /\d/.test(p) || /[^a-zA-Z0-9]/.test(p),
-        'Include a number or special character'
-      ),
+      .min(PASSWORD_POLICY.minLength, `Password must be at least ${PASSWORD_POLICY.minLength} characters`)
+      .refine((p) => /[a-z]/.test(p), 'Include at least one lowercase letter')
+      .refine((p) => /[A-Z]/.test(p), 'Include at least one uppercase letter')
+      .refine((p) => /\d/.test(p), 'Include at least one number')
+      .refine((p) => /[^a-zA-Z0-9]/.test(p), 'Include at least one special character'),
     confirmPassword: z.string(),
     workspaceName: z.string().optional(),
     rememberMe: z.boolean().optional(),

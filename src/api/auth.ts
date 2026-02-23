@@ -87,7 +87,9 @@ async function mockForgotPassword(_data: ForgotPasswordRequest): Promise<{ succe
   return { success: true }
 }
 
-async function mockResetPassword(_data: ResetPasswordRequest): Promise<{ success: boolean }> {
+async function mockResetPassword(
+  _data: ResetPasswordRequest
+): Promise<{ success: boolean }> {
   await new Promise((r) => setTimeout(r, 400))
   return { success: true }
 }

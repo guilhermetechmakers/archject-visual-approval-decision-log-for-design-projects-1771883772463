@@ -4,7 +4,9 @@ import { LandingPage } from '@/pages/landing'
 import { DemoRequestPage } from '@/pages/demo-request'
 import { AuthLoginPage } from '@/pages/auth/auth-login-page'
 import { PasswordResetPage } from '@/pages/auth/password-reset-page'
-import { ResetPasswordWithTokenPage } from '@/pages/auth/reset-password-with-token-page'
+import { ResetPasswordRoute } from '@/pages/auth/reset-password-route'
+import { PasswordResetConfirmPage } from '@/pages/auth/password-reset-confirm-page'
+import { PasswordResetGuard } from '@/components/auth'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DashboardOverview } from '@/pages/dashboard/overview'
 import { ProjectsPage } from '@/pages/dashboard/projects'
@@ -28,10 +30,29 @@ export const router = createBrowserRouter([
       { path: '/', element: <LandingPage /> },
       { path: '/auth/login', element: <AuthLoginPage /> },
       { path: '/auth/signup', element: <AuthLoginPage /> },
-      { path: '/auth/password-reset', element: <PasswordResetPage /> },
+      {
+        path: '/auth/password-reset',
+        element: (
+          <PasswordResetGuard>
+            <PasswordResetPage />
+          </PasswordResetGuard>
+        ),
+      },
+      {
+        path: '/auth/password-reset/confirm',
+        element: (
+          <PasswordResetGuard>
+            <PasswordResetConfirmPage />
+          </PasswordResetGuard>
+        ),
+      },
       {
         path: '/auth/reset-password/:token',
-        element: <ResetPasswordWithTokenPage />,
+        element: (
+          <PasswordResetGuard>
+            <ResetPasswordRoute />
+          </PasswordResetGuard>
+        ),
       },
       { path: '/demo-request', element: <DemoRequestPage /> },
       { path: '/privacy', element: <PrivacyPage /> },
