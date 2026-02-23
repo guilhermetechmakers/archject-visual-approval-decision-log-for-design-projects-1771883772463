@@ -18,19 +18,37 @@ export interface Workspace {
   id: string
   account_id: string
   name: string
-  status: 'active' | 'suspended' | 'archived'
+  status: 'active' | 'suspended' | 'archived' | 'disabled' | 'pending'
   plan: 'free' | 'pro' | 'enterprise'
   created_at: string
   last_activity: string
+  domain?: string
+  domain_alias?: string
+  owner_user_id?: string
+  owner_email?: string
+  owner_name?: string
+  retention_policy?: RetentionPolicy
+  associated_user_ids?: string[]
+}
+
+export interface RetentionPolicy {
+  id: string
+  scope: string
+  duration_days: number
+  enabled: boolean
 }
 
 export interface AdminUser {
   id: string
   account_id: string
   email: string
+  name?: string
   role: string
-  status: 'active' | 'suspended' | 'pending'
+  status: 'active' | 'suspended' | 'pending' | 'inactive'
   last_login: string
+  tenant_id?: string
+  associated_workspace_ids?: string[]
+  flags?: { billing_exception?: boolean; dispute_status?: boolean }
 }
 
 export interface Dispute {
@@ -47,11 +65,13 @@ export interface Dispute {
 export interface BillingException {
   id: string
   account_id: string
+  workspace_id?: string
   amount: number
   currency: string
   reason: string
   status: 'pending' | 'approved' | 'rejected'
   created_at: string
+  resolved_at?: string
 }
 
 export interface SystemHealth {
@@ -80,22 +100,33 @@ export interface ExportJob {
   location?: string
 }
 
-export interface RetentionPolicy {
-  id: string
-  scope: string
-  duration_days: number
-  enabled: boolean
-}
-
 export interface AdminAuditLog {
   id: string
   admin_id: string
+  actor_id?: string
   action: string
-  target_type: string
+  action_type?: string
+  target_type: 'user' | 'workspace' | 'system'
   target_id: string
   timestamp: string
+  payload?: Record<string, unknown>
   before_state?: Record<string, unknown>
   after_state?: Record<string, unknown>
+  ip_address?: string
+  device_info?: string
+}
+
+export interface Escalation {
+  id: string
+  workspace_id: string
+  user_id?: string
+  reason: string
+  priority: 'low' | 'medium' | 'high' | 'critical'
+  status: 'open' | 'in_progress' | 'resolved' | 'closed'
+  created_at: string
+  created_by: string
+  notes?: string
+  assigned_team?: string
 }
 
 export interface DashboardSummary {
@@ -118,4 +149,15 @@ export interface DashboardSummary {
     billing_tickets: number
     escalated_count: number
   }
+  recent_escalations?: Escalation[]
+  alerts?: SystemAlert[]
+  top_tenants?: { workspace_id: string; workspace_name: string; usage: number }[]
+}
+
+export interface SystemAlert {
+  id: string
+  type: 'maintenance' | 'error' | 'warning' | 'info'
+  message: string
+  created_at: string
+  resolved_at?: string
 }

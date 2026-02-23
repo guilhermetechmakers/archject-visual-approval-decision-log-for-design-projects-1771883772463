@@ -1,5 +1,5 @@
 /**
- * Admin Data Table - sortable, filterable, paginated.
+ * Admin Data Table - sortable, filterable, paginated, with optional row selection.
  */
 
 import * as React from 'react'
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -38,6 +39,10 @@ interface AdminDataTableProps<T> {
   emptyMessage?: string
   emptyIcon?: React.ElementType
   getRowId: (row: T) => string
+  selectable?: boolean
+  selectedIds?: Set<string>
+  onSelectionChange?: (ids: Set<string>) => void
+  hideSearch?: boolean
 }
 
 export function AdminDataTable<T>({
@@ -54,10 +59,31 @@ export function AdminDataTable<T>({
   emptyMessage = 'No data',
   emptyIcon: EmptyIcon,
   getRowId,
+  selectable = false,
+  selectedIds = new Set(),
+  onSelectionChange,
+  hideSearch = false,
 }: AdminDataTableProps<T>) {
   const totalPages = totalCount != null ? Math.ceil(totalCount / pageSize) : 1
-  const hasSearch = onSearchChange != null
+  const hasSearch = onSearchChange != null && !hideSearch
   const hasPagination = onPageChange != null && totalCount != null
+
+  const toggleRow = (id: string) => {
+    if (!onSelectionChange) return
+    const next = new Set(selectedIds)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    onSelectionChange(next)
+  }
+
+  const toggleAll = () => {
+    if (!onSelectionChange) return
+    if (selectedIds.size === data.length) {
+      onSelectionChange(new Set())
+    } else {
+      onSelectionChange(new Set(data.map((r) => getRowId(r))))
+    }
+  }
 
   const getCellValue = (row: T, col: ColumnDef<T>): React.ReactNode => {
     if (typeof col.accessor === 'function') {
@@ -98,6 +124,15 @@ export function AdminDataTable<T>({
           <Table>
             <TableHeader>
               <TableRow>
+                {selectable && (
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={data.length > 0 && selectedIds.size === data.length}
+                      onCheckedChange={toggleAll}
+                      aria-label="Select all"
+                    />
+                  </TableHead>
+                )}
                 {columns.map((col) => (
                   <TableHead key={col.id} className={col.className}>
                     {col.header}
@@ -106,18 +141,30 @@ export function AdminDataTable<T>({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((row) => (
-                <TableRow
-                  key={getRowId(row)}
-                  className="transition-colors hover:bg-muted/50"
-                >
-                  {columns.map((col) => (
-                    <TableCell key={col.id} className={col.className}>
-                      {getCellValue(row, col)}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              {data.map((row) => {
+                const id = getRowId(row)
+                return (
+                  <TableRow
+                    key={id}
+                    className="transition-colors hover:bg-muted/50"
+                  >
+                    {selectable && (
+                      <TableCell className="w-12">
+                        <Checkbox
+                          checked={selectedIds.has(id)}
+                          onCheckedChange={() => toggleRow(id)}
+                          aria-label={`Select row ${id}`}
+                        />
+                      </TableCell>
+                    )}
+                    {columns.map((col) => (
+                      <TableCell key={col.id} className={col.className}>
+                        {getCellValue(row, col)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         )}

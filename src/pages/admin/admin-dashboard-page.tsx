@@ -1,5 +1,5 @@
 /**
- * Admin Dashboard - overview with accounts, health, support, usage.
+ * Admin Dashboard - overview with accounts, health, support, usage, alerts, escalations.
  */
 
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,10 @@ import {
   SystemHealthPanel,
   SupportQueuePanel,
   UsagePanel,
+  QuickActionsRail,
+  AlertsPanel,
+  RecentEscalationsPanel,
+  TopTenantsPanel,
 } from '@/components/admin'
 import { useAdminDashboardSummary } from '@/hooks/use-admin'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -23,6 +27,7 @@ export function AdminDashboardPage() {
           <Skeleton className="h-9 w-48" />
           <Skeleton className="h-10 w-32" />
         </div>
+        <QuickActionsRail />
         <div className="grid gap-6 lg:grid-cols-2">
           <Skeleton className="h-64" />
           <Skeleton className="h-64" />
@@ -53,6 +58,12 @@ export function AdminDashboardPage() {
         </Button>
       </div>
 
+      <QuickActionsRail />
+
+      {data.alerts && data.alerts.length > 0 && (
+        <AlertsPanel alerts={data.alerts} />
+      )}
+
       <AccountsOverviewCard data={data.accounts} />
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -60,7 +71,17 @@ export function AdminDashboardPage() {
         <SupportQueuePanel summary={data.support_queue} />
       </div>
 
-      <UsagePanel data={data.usage} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <UsagePanel data={data.usage} />
+        <div className="space-y-6">
+          {data.recent_escalations && data.recent_escalations.length > 0 && (
+            <RecentEscalationsPanel escalations={data.recent_escalations} />
+          )}
+          {data.top_tenants && data.top_tenants.length > 0 && (
+            <TopTenantsPanel topTenants={data.top_tenants} />
+          )}
+        </div>
+      </div>
     </div>
   )
 }
