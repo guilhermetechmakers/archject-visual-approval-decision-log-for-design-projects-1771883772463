@@ -1,141 +1,352 @@
-import { useState } from 'react'
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { useParams } from 'react-router-dom'
+import { Check, Loader2 } from 'lucide-react'
+import {
+  BrandedHeader,
+  ShareExportBar,
+  VerificationModal,
+  VisualSideBySideViewer,
+  OptionCard,
+  CommentThread,
+  NotificationTray,
+  OperationSuccessModal,
+} from '@/components/client-portal'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-const mockOptions = [
-  { id: 'a', title: 'Option A', description: 'Natural oak finish with matte seal' },
-  { id: 'b', title: 'Option B', description: 'White laminate with gloss finish' },
-]
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useClientPortalNoLogin } from '@/hooks/use-client-portal'
+import { cn } from '@/lib/utils'
+import type { ClientPortalAnnotation } from '@/types/client-portal'
 
 export function ClientPortalPage() {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null)
-  const [approved, setApproved] = useState(false)
-  const [, setCompareIndex] = useState(0)
+  const { token } = useParams<{ token: string }>()
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
+  const [clientName, setClientName] = useState('')
+  const [showVerification, setShowVerification] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [successType, setSuccessType] = useState<
+    'approval_recorded' | 'changes_requested' | 'generic'
+  >('generic')
+  const [localAnnotations, setLocalAnnotations] = useState<ClientPortalAnnotation[]>([])
+  const [activeCommentOptionId, setActiveCommentOptionId] = useState<string | null>(null)
+  const [notifyStudio, setNotifyStudio] = useState(false)
 
-  if (approved) {
+  const {
+    data,
+    isLoading,
+    error,
+    approve,
+    requestChanges,
+    addComment,
+    addAnnotation,
+    handleExportPdf,
+    handleExportJson,
+    handleVerifyOtp,
+    handleSendOtp,
+    isExporting,
+    isApproving,
+    isRequestingChanges,
+  } = useClientPortalNoLogin(token ?? '')
+
+  const accentColor = data?.branding?.accentColor ?? 'rgb(var(--primary))'
+
+  const allAnnotations = [
+    ...(data?.annotations ?? []),
+    ...localAnnotations,
+  ]
+
+  const handleApprove = useCallback(async () => {
+    if (!selectedOptionId || !data) return
+    if (data.requiresOtp) {
+      setShowVerification(true)
+      return
+    }
+    try {
+      await approve({
+        optionId: selectedOptionId,
+        clientName: clientName || undefined,
+        timestamp: new Date().toISOString(),
+      })
+      setSuccessType('approval_recorded')
+      setShowSuccess(true)
+    } catch {
+      // toast handled in hook
+    }
+  }, [selectedOptionId, data, clientName, approve])
+
+  const handleRequestChanges = useCallback(async () => {
+    if (!data) return
+    if (data.requiresOtp) {
+      setShowVerification(true)
+      return
+    }
+    try {
+      await requestChanges({ clientName: clientName || undefined })
+      setSuccessType('changes_requested')
+      setShowSuccess(true)
+    } catch {
+      // toast handled in hook
+    }
+  }, [data, clientName, requestChanges])
+
+  const handleAddComment = useCallback(
+    async (optionId: string, text: string, mentions?: string[]) => {
+      await addComment({ optionId, text, mentions })
+    },
+    [addComment]
+  )
+
+  const handleAddAnnotation = useCallback(
+    async (optionId: string, mediaId: string, annotationData: unknown) => {
+      const d = annotationData as {
+        shape: 'point' | 'rectangle' | 'area'
+        coordinates: { x: number; y: number; width?: number; height?: number }
+        note?: string
+        color?: string
+      }
+      try {
+        await addAnnotation({ optionId, mediaId, annotationData: d })
+      } catch {
+        setLocalAnnotations((prev) => [
+          ...prev,
+          {
+            id: `local-${Date.now()}`,
+            optionId,
+            mediaId,
+            shape: d.shape,
+            coordinates: d.coordinates,
+            note: d.note,
+            color: d.color,
+            createdAt: new Date().toISOString(),
+          },
+        ])
+      }
+    },
+    [addAnnotation]
+  )
+
+  if (!token) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-secondary/30 px-4">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-6">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/20 text-success">
-              <Check className="h-8 w-8" />
-            </div>
-            <h2 className="mt-4 text-xl font-semibold">Approval received</h2>
-            <p className="mt-2 text-muted-foreground">
-              Thank you for your decision. The studio has been notified.
-            </p>
-            <p className="mt-4 text-sm text-muted-foreground">
-              You can close this window.
-            </p>
-          </CardContent>
-        </Card>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-muted-foreground">Invalid or missing link.</p>
       </div>
     )
   }
 
+  if (error) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+        <p className="text-destructive">Failed to load. The link may have expired.</p>
+      </div>
+    )
+  }
+
+  if (isLoading || !data) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    )
+  }
+
+  const approved = data.approvals?.some((a) => a.approved) ?? false
+
+  if (approved) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-secondary/30 px-4">
+        <div className="w-full max-w-md animate-fade-in-up rounded-2xl border border-border bg-card p-8 text-center shadow-card">
+          <div
+            className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+            style={{ backgroundColor: `${accentColor}20` }}
+          >
+            <Check className="h-8 w-8" style={{ color: accentColor }} />
+          </div>
+          <h2 className="mt-4 text-xl font-semibold">Approval received</h2>
+          <p className="mt-2 text-muted-foreground">
+            Thank you for your decision. The studio has been notified.
+          </p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            You can close this window.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const commentsForOption = (optId: string) =>
+    data.comments.filter((c) => c.optionId === optId)
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card px-4 py-4">
-        <div className="container mx-auto flex items-center justify-between">
-          <span className="text-lg font-semibold text-primary">Archject</span>
-          <span className="text-sm text-muted-foreground">Kitchen finish options</span>
-        </div>
-      </header>
+      <BrandedHeader
+        decisionTitle={data.decision.title}
+        branding={data.branding}
+        instructions="Please review the options below and select your preferred choice."
+        helpTip="Use the side-by-side viewer to compare options. Add comments or annotations to provide feedback."
+      />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="mx-auto max-w-4xl space-y-8">
-          <div>
-            <h1 className="text-2xl font-bold">Kitchen finish options</h1>
-            <p className="mt-1 text-muted-foreground">
-              Please review the options below and select your preferred choice.
-            </p>
+        <div className="mx-auto max-w-5xl space-y-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <ShareExportBar
+              linkExpiresAt={data.linkExpiresAt}
+              onExportPdf={handleExportPdf}
+              onExportJson={handleExportJson}
+              onPrint={() => window.print()}
+              isExporting={isExporting}
+            />
+            <NotificationTray
+              notifications={[]}
+              accentColor={accentColor}
+            />
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Visual comparison</CardTitle>
-              <CardContent className="pt-0 text-sm text-muted-foreground">
-                Swipe or use arrows to compare
-              </CardContent>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCompareIndex((i) => (i === 0 ? 1 : 0))}
-                  className="shrink-0"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div className="grid flex-1 grid-cols-2 gap-4">
-                  <div className="aspect-video rounded-lg bg-secondary flex items-center justify-center">
-                    Option A
-                  </div>
-                  <div className="aspect-video rounded-lg bg-secondary flex items-center justify-center">
-                    Option B
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCompareIndex((i) => (i === 0 ? 1 : 0))}
-                  className="shrink-0"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <section className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <VisualSideBySideViewer
+              options={data.options}
+              annotations={allAnnotations}
+              selectedOptionId={selectedOptionId}
+              onSelectOption={setSelectedOptionId}
+              onAnnotate={handleAddAnnotation}
+              accentColor={accentColor}
+            />
+          </section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Select your choice</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <section
+            className="grid gap-6 md:grid-cols-2"
+            style={{ animationDelay: '0.2s' }}
+          >
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Select your choice</h2>
               <div className="grid gap-4 sm:grid-cols-2">
-                {mockOptions.map((opt) => (
-                  <button
+                {data.options.map((opt) => (
+                  <OptionCard
                     key={opt.id}
-                    type="button"
-                    onClick={() => setSelectedOption(opt.id)}
-                    className={`rounded-lg border-2 p-4 text-left transition-all ${
-                      selectedOption === opt.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`h-5 w-5 rounded-full border-2 ${
-                          selectedOption === opt.id
-                            ? 'border-primary bg-primary'
-                            : 'border-muted-foreground'
-                        }`}
-                      />
-                      <span className="font-medium">{opt.title}</span>
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {opt.description}
-                    </p>
-                  </button>
+                    option={opt}
+                    isSelected={selectedOptionId === opt.id}
+                    onSelect={() => setSelectedOptionId(opt.id)}
+                    accentColor={accentColor}
+                  />
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:justify-end">
-            <Button variant="outline">Request changes</Button>
-            <Button
-              disabled={!selectedOption}
-              onClick={() => setApproved(true)}
-            >
-              Approve selection
-            </Button>
-          </div>
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Comments</h2>
+              {data.options.length > 1 && (
+                <div className="flex flex-wrap gap-2">
+                  {data.options.map((opt) => (
+                    <Button
+                      key={opt.id}
+                      variant={
+                        (activeCommentOptionId ?? data.options[0]?.id) === opt.id
+                          ? 'default'
+                          : 'outline'
+                      }
+                      size="sm"
+                      onClick={() => setActiveCommentOptionId(opt.id)}
+                      style={
+                        (activeCommentOptionId ?? data.options[0]?.id) === opt.id
+                          ? { backgroundColor: accentColor }
+                          : undefined
+                      }
+                    >
+                      {opt.title}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              <CommentThread
+                optionId={activeCommentOptionId ?? data.options[0]?.id ?? ''}
+                optionTitle={
+                  data.options.find((o) => o.id === (activeCommentOptionId ?? data.options[0]?.id))
+                    ?.title
+                }
+                comments={commentsForOption(
+                  activeCommentOptionId ?? data.options[0]?.id ?? ''
+                )}
+                onAddComment={(text, mentions) =>
+                  handleAddComment(
+                    activeCommentOptionId ?? data.options[0]?.id ?? '',
+                    text,
+                    mentions
+                  )
+                }
+                notifyStudio={notifyStudio}
+                onNotifyStudioChange={setNotifyStudio}
+                accentColor={accentColor}
+              />
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div className="rounded-xl border border-border bg-card p-6 shadow-card">
+              <Label htmlFor="client-name" className="text-sm font-medium">
+                Your name (optional, for the approval record)
+              </Label>
+              <Input
+                id="client-name"
+                type="text"
+                placeholder="John Smith"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="mt-2 max-w-xs"
+              />
+            </div>
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-end">
+              <Button
+                variant="outline"
+                onClick={handleRequestChanges}
+                disabled={isRequestingChanges}
+                className="transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+              >
+                {isRequestingChanges ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Request changes
+              </Button>
+              <Button
+                disabled={!selectedOptionId || isApproving}
+                onClick={handleApprove}
+                className={cn(
+                  'transition-all duration-200 hover:scale-[1.02] hover:shadow-md'
+                )}
+                style={{ backgroundColor: accentColor }}
+              >
+                {isApproving ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Approve selection
+              </Button>
+            </div>
+          </section>
         </div>
       </main>
+
+      <VerificationModal
+        open={showVerification}
+        onOpenChange={setShowVerification}
+        requireOtp={data.requiresOtp}
+        onVerifyOtp={handleVerifyOtp}
+        onSendOtp={handleSendOtp}
+        onSkip={() => setShowVerification(false)}
+        onNameCapture={() => {}}
+        allowSkip={!data.requiresOtp}
+        allowRemember
+      />
+
+      <OperationSuccessModal
+        open={showSuccess}
+        onOpenChange={setShowSuccess}
+        type={successType}
+        accentColor={accentColor}
+        onClose={() => {
+          setSelectedOptionId(null)
+          setClientName('')
+        }}
+      />
     </div>
   )
 }

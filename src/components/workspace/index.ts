@@ -13,3 +13,6 @@ export { CreateDecisionModal, type CreateDecisionFormData } from './create-decis
 export { DecisionLogExporter } from './decision-log-exporter'
 export { WebhookTaskingCenter } from './webhook-tasking-center'
 export { IntegrationsHub } from './integrations-hub'
+export { BrandingPanel } from './branding-panel'
+export { LinkManager } from './link-manager'
+export { NotificationsCenter } from './notifications-center'
