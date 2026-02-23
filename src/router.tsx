@@ -12,6 +12,7 @@ import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DashboardOverview } from '@/pages/dashboard/overview'
 import { ProjectsPage } from '@/pages/dashboard/projects'
 import { ProjectWorkspacePage } from '@/pages/dashboard/project-workspace'
+import { DecisionsListPage } from '@/pages/dashboard/decisions-list-page'
 import { DecisionsPage } from '@/pages/dashboard/decisions'
 import { DecisionDetailPage } from '@/pages/dashboard/decision-detail'
 import { CreateDecisionPlaceholder } from '@/pages/dashboard/create-decision-placeholder'
@@ -90,6 +91,7 @@ export const router = createBrowserRouter([
           { index: true, element: <DashboardOverview /> },
           { path: 'projects', element: <ProjectsPage /> },
           { path: 'projects/:projectId', element: <ProjectWorkspacePage /> },
+          { path: 'projects/:projectId/decisions', element: <DecisionsListPage /> },
           { path: 'projects/:projectId/decisions/new', element: <CreateDecisionPage /> },
           { path: 'projects/:projectId/decisions/:decisionId/edit', element: <EditDecisionPage /> },
           { path: 'projects/:projectId/decisions/:decisionId/internal', element: <DecisionDetailInternalPage /> },

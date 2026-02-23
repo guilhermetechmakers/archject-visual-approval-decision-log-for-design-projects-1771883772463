@@ -1,4 +1,5 @@
-import { Image } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Image, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
@@ -6,6 +7,7 @@ import type { Project } from '@/types/workspace'
 
 export interface OverviewCardProps {
   project: Project
+  projectId?: string
   decisionsCount?: number
   filesCount?: number
   templatesUsed?: number
@@ -19,6 +21,7 @@ function formatBytes(bytes: number): string {
 
 export function OverviewCard({
   project,
+  projectId,
   decisionsCount = 0,
   filesCount = 0,
   templatesUsed = 0,
@@ -94,8 +97,23 @@ export function OverviewCard({
 
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-muted-foreground">Decisions</p>
-            <p className="font-semibold">{decisionsCount}</p>
+            {projectId ? (
+              <Link
+                to={`/dashboard/projects/${projectId}/decisions`}
+                className="group flex items-center justify-between rounded-lg p-1 -m-1 hover:bg-secondary/50 transition-colors"
+              >
+                <div>
+                  <p className="text-muted-foreground">Decisions</p>
+                  <p className="font-semibold">{decisionsCount}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+              </Link>
+            ) : (
+              <div>
+                <p className="text-muted-foreground">Decisions</p>
+                <p className="font-semibold">{decisionsCount}</p>
+              </div>
+            )}
           </div>
           <div>
             <p className="text-muted-foreground">Files</p>

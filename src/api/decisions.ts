@@ -1,72 +1,118 @@
 /**
- * Decision CRUD API - Create, Read, Update, Delete decisions
+ * Decisions List API - RESTful endpoints for decisions CRUD and bulk actions
  */
 
 import { api } from '@/lib/api'
+import type {
+  DecisionPreview,
+  DecisionsListParams,
+  DecisionsListResponse,
+  BulkExportPayload,
+  BulkSharePayload,
+  BulkChangeStatusPayload,
+} from '@/types/decisions-list'
 import type { Decision } from '@/types/workspace'
 
-export interface CreateDecisionPayload {
-  title: string
-  description?: string
-  template_id?: string | null
-  due_date?: string | null
-  priority?: 'low' | 'medium' | 'high'
-  status: 'draft' | 'pending'
-  assignee_id?: string | null
-  options?: Array<{
-    title: string
-    description?: string
-    order: number
-    caption?: string
-    cost?: string
-    media_files?: Array<{
-      file_name: string
-      url: string
-      type: string
-      version: number
-      is_primary?: boolean
-    }>
-  }>
-  approval_rules?: Array<{
-    approver_id: string
-    required: boolean
-    deadline?: string
-    allow_comments: boolean
-  }>
-  reminders?: Array<{
-    schedule_type: string
-    schedule_value: string
-    message: string
-    channel: string
-    enabled: boolean
-  }>
-  triggers?: Array<{
-    type: 'webhook' | 'task'
-    target_url?: string
-    payload_template?: string
-    active: boolean
-    outcome?: string
-  }>
+export async function fetchDecisionsList(
+  params: DecisionsListParams
+): Promise<DecisionsListResponse> {
+  const { projectId, filters, sort = 'updated_at', order = 'desc', page = 1, pageSize = 25 } = params
+  const qs = new URLSearchParams()
+  if (filters?.search) qs.set('search', filters.search)
+  if (filters?.status?.length) qs.set('status', filters.status.join(','))
+  if (filters?.assigneeId) qs.set('assigneeId', filters.assigneeId)
+  if (filters?.templateType) qs.set('templateType', filters.templateType)
+  if (filters?.dueDateFrom) qs.set('dueDateFrom', filters.dueDateFrom)
+  if (filters?.dueDateTo) qs.set('dueDateTo', filters.dueDateTo)
+  if (filters?.quickFilter) qs.set('quickFilter', filters.quickFilter)
+  qs.set('sort', sort)
+  qs.set('order', order)
+  qs.set('page', String(page))
+  qs.set('pageSize', String(pageSize))
+  const query = qs.toString()
+  return api.get<DecisionsListResponse>(
+    `/projects/${projectId}/decisions${query ? `?${query}` : ''}`
+  )
+}
+
+export async function fetchDecisionPreview(
+  projectId: string,
+  decisionId: string
+): Promise<DecisionPreview> {
+  return api.get<DecisionPreview>(
+    `/projects/${projectId}/decisions/${decisionId}/preview`
+  )
 }
 
 export async function createDecision(
   projectId: string,
-  payload: CreateDecisionPayload
+  data: {
+    title: string
+    status?: string
+    due_date?: string
+    assignee_id?: string
+    template_id?: string
+    summary?: string
+    metadata?: Record<string, unknown>
+    options?: Record<string, unknown>
+  }
 ): Promise<Decision> {
-  return api.post<Decision>(`/projects/${projectId}/decisions`, payload)
-}
-
-export async function fetchDecision(decisionId: string): Promise<Decision> {
-  return api.get<Decision>(`/decisions/${decisionId}`)
+  return api.post<Decision>(`/projects/${projectId}/decisions`, data)
 }
 
 export async function updateDecision(
+  projectId: string,
   decisionId: string,
-  payload: Partial<CreateDecisionPayload>
+  data: Partial<{
+    title: string
+    status: string
+    due_date: string
+    assignee_id: string
+    summary: string
+    metadata: Record<string, unknown>
+    options: Record<string, unknown>
+  }>
 ): Promise<Decision> {
-  return api.patch<Decision>(`/decisions/${decisionId}`, payload)
+  return api.patch<Decision>(
+    `/projects/${projectId}/decisions/${decisionId}`,
+    data
+  )
 }
 
-export async function deleteDecision(decisionId: string): Promise<void> {
-  return api.delete(`/decisions/${decisionId}`)
+export async function deleteDecision(
+  projectId: string,
+  decisionId: string
+): Promise<void> {
+  return api.delete(`/projects/${projectId}/decisions/${decisionId}`)
+}
+
+export async function cloneDecision(
+  projectId: string,
+  decisionId: string
+): Promise<Decision> {
+  return api.post<Decision>(
+    `/projects/${projectId}/decisions/${decisionId}/clone`,
+    {}
+  )
+}
+
+export async function bulkExport(
+  projectId: string,
+  payload: BulkExportPayload
+): Promise<{ job_id: string; status: string }> {
+  return api.post(`/projects/${projectId}/decisions/bulk/export`, payload)
+}
+
+export async function bulkShare(
+  projectId: string,
+  payload: BulkSharePayload
+): Promise<{ links: Array<{ decision_id: string; url: string }> }> {
+  return api.post(`/projects/${projectId}/decisions/bulk/share`, payload)
+}
+
+export async function bulkChangeStatus(
+  projectId: string,
+  payload: BulkChangeStatusPayload
+): Promise<void> {
+  return api.post(`/projects/${projectId}/decisions/bulk/change-status`, payload)
 }

@@ -7,7 +7,6 @@ import {
   ProjectHeader,
   WorkspaceNav,
   OverviewCard,
-  DecisionsList,
   TeamPanel,
   TemplatesLibrary,
   ActivitySidebar,
@@ -144,7 +143,11 @@ export function ProjectWorkspacePage() {
 
       <div className="flex flex-col gap-6 lg:flex-row">
         <aside className="w-full shrink-0 lg:w-56">
-          <WorkspaceNav activeTab={activeTab} onTabChange={setActiveTab} />
+          <WorkspaceNav
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            projectId={projectId}
+          />
         </aside>
 
         <main className="min-w-0 flex-1">
@@ -153,6 +156,7 @@ export function ProjectWorkspacePage() {
               <div className="lg:col-span-2">
                 <OverviewCard
                   project={project}
+                  projectId={projectId}
                   decisionsCount={decisions.length}
                   filesCount={files.length}
                   templatesUsed={0}
@@ -180,16 +184,6 @@ export function ProjectWorkspacePage() {
                 <ActivitySidebar activity={activity} />
               </div>
             </div>
-          )}
-
-          {activeTab === 'decisions' && (
-            <DecisionsList
-              decisions={decisions}
-              projectId={projectId}
-              onCreateDecision={handleNavigateToCreateDecision}
-              onApplyTemplate={() => toast.info('Select a template')}
-              onExportLog={() => setExportModalOpen(true)}
-            />
           )}
 
           {activeTab === 'files' && (
@@ -230,6 +224,7 @@ export function ProjectWorkspacePage() {
               <div>
                 <OverviewCard
                   project={project}
+                  projectId={projectId}
                   decisionsCount={decisions.length}
                   filesCount={files.length}
                 />

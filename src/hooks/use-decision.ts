@@ -4,21 +4,33 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import * as decisionsApi from '@/api/decisions'
+import * as decisionsApi from '@/api/workspace'
 import type { Decision } from '@/types/workspace'
 import type { DecisionEditorState } from '@/types/decision-editor'
+
+interface DecisionCreatePayload {
+  title: string
+  description?: string
+  template_id?: string | null
+  due_date?: string | null
+  status?: string
+  assignee_id?: string | null
+  options?: unknown[]
+  approval_rules?: unknown[]
+  reminders?: unknown[]
+  triggers?: unknown[]
+}
 
 function buildCreatePayload(
   state: DecisionEditorState,
   overrides: { status?: 'draft' | 'pending' }
-): decisionsApi.CreateDecisionPayload {
+): DecisionCreatePayload {
   const status = overrides.status ?? state.status
   return {
     title: state.title,
     description: state.description || undefined,
     template_id: state.templateId,
     due_date: state.dueDate,
-    priority: state.priority,
     status: status === 'approved' || status === 'rejected' ? 'draft' : status,
     assignee_id: state.assigneeId,
     options: state.options.map((o, i) => ({
@@ -74,8 +86,8 @@ export function useCreateDecisionMutation(
         const mock: Decision = {
           id: `dec-${Date.now()}`,
           project_id: projectId,
-          title: payload.title,
-          status: overrides.status ?? 'draft',
+          title: payload.title ?? 'Untitled',
+          status: (overrides.status ?? 'draft') as Decision['status'],
           due_date: payload.due_date ?? null,
           assignee_id: payload.assignee_id ?? null,
           assignee_name: null,
@@ -89,7 +101,14 @@ export function useCreateDecisionMutation(
         }
         return mock
       }
-      return decisionsApi.createDecision(projectId, payload)
+      return decisionsApi.createDecision(projectId, {
+        title: payload.title,
+        description: payload.description,
+        template_id: payload.template_id,
+        due_date: payload.due_date,
+        status: payload.status as Decision['status'],
+        assignee_id: payload.assignee_id,
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace', 'decisions', projectId] })
@@ -157,7 +176,14 @@ export function useUpdateDecisionMutation(
           options_count: payload.options?.length ?? 0,
         }
       }
-      return decisionsApi.updateDecision(decisionId, payload)
+      return decisionsApi.updateDecision(decisionId, {
+        title: payload.title,
+        description: payload.description,
+        template_id: payload.template_id,
+        due_date: payload.due_date,
+        status: payload.status as Decision['status'],
+        assignee_id: payload.assignee_id,
+      })
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['decision', decisionId] })
@@ -175,7 +201,7 @@ export function useUpdateDecision(decisionId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (payload: Partial<decisionsApi.CreateDecisionPayload>) =>
+    mutationFn: (payload: Partial<Decision>) =>
       decisionsApi.updateDecision(decisionId, payload),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['decision', decisionId] })
