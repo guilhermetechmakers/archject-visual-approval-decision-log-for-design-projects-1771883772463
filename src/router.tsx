@@ -42,6 +42,11 @@ import { TermsPage } from '@/pages/legal/terms'
 import { CookiesPage } from '@/pages/legal/cookies'
 import { NotFoundPage } from '@/pages/errors/not-found'
 import { ServerErrorPage } from '@/pages/errors/server-error'
+import { AdminLayout } from '@/components/admin'
+import { AdminDashboardPage } from '@/pages/admin/admin-dashboard-page'
+import { AdminUsersPage } from '@/pages/admin/admin-users-page'
+import { AdminToolsPage } from '@/pages/admin/admin-tools-page'
+import { AdminSettingsPage } from '@/pages/admin/admin-settings-page'
 
 export const router = createBrowserRouter([
   {
@@ -80,6 +85,21 @@ export const router = createBrowserRouter([
       { path: '/terms', element: <TermsPage /> },
       { path: '/cookies', element: <CookiesPage /> },
       { path: '/portal/:token', element: <ClientPortalPage /> },
+      {
+        path: '/admin',
+        element: (
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <Navigate to="/admin/dashboard" replace /> },
+          { path: 'dashboard', element: <AdminDashboardPage /> },
+          { path: 'users', element: <AdminUsersPage /> },
+          { path: 'tools', element: <AdminToolsPage /> },
+          { path: 'settings', element: <AdminSettingsPage /> },
+        ],
+      },
       {
         path: '/dashboard',
         element: (
