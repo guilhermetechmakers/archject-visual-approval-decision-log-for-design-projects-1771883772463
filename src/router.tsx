@@ -20,7 +20,18 @@ import { EditDecisionPage } from '@/pages/dashboard/edit-decision-page'
 import { DecisionDetailInternalPage } from '@/pages/dashboard/decision-detail-internal'
 import { FilesLibraryPage } from '@/pages/dashboard/files-library-page'
 import { TeamPage } from '@/pages/dashboard/team'
-import { SettingsPage } from '@/pages/dashboard/settings'
+import { SettingsLayout } from '@/components/layout/settings-layout'
+import { SettingsOverview } from '@/pages/dashboard/settings/settings-overview'
+import { SettingsAccount } from '@/pages/dashboard/settings/settings-account'
+import { SettingsBranding } from '@/pages/dashboard/settings/settings-branding'
+import { SettingsNotifications } from '@/pages/dashboard/settings/settings-notifications'
+import { SettingsIntegrations } from '@/pages/dashboard/settings/settings-integrations'
+import { SettingsApiKeys } from '@/pages/dashboard/settings/settings-api-keys'
+import { SettingsDataExport } from '@/pages/dashboard/settings/settings-data-export'
+import { SettingsSessions } from '@/pages/dashboard/settings/settings-sessions'
+import { SettingsSecurity } from '@/pages/dashboard/settings/settings-security'
+import { SettingsTeam } from '@/pages/dashboard/settings/settings-team'
+import { SettingsBilling } from '@/pages/dashboard/settings/settings-billing'
 import { BillingPage } from '@/pages/dashboard/billing'
 import { ClientPortalPage } from '@/pages/client-portal'
 import { PrivacyPage } from '@/pages/legal/privacy'
@@ -85,7 +96,23 @@ export const router = createBrowserRouter([
           { path: 'decisions/new', element: <CreateDecisionPlaceholder /> },
           { path: 'decisions/:id', element: <DecisionDetailPage /> },
           { path: 'team', element: <TeamPage /> },
-          { path: 'settings', element: <SettingsPage /> },
+          {
+            path: 'settings',
+            element: <SettingsLayout />,
+            children: [
+              { index: true, element: <SettingsOverview /> },
+              { path: 'account', element: <SettingsAccount /> },
+              { path: 'branding', element: <SettingsBranding /> },
+              { path: 'notifications', element: <SettingsNotifications /> },
+              { path: 'integrations', element: <SettingsIntegrations /> },
+              { path: 'api-keys', element: <SettingsApiKeys /> },
+              { path: 'data-export', element: <SettingsDataExport /> },
+              { path: 'sessions', element: <SettingsSessions /> },
+              { path: 'security', element: <SettingsSecurity /> },
+              { path: 'team', element: <SettingsTeam /> },
+              { path: 'billing', element: <SettingsBilling /> },
+            ],
+          },
           { path: 'billing', element: <BillingPage /> },
         ],
       },
