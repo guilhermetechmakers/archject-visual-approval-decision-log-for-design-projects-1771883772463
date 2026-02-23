@@ -45,6 +45,7 @@ import { CookiesPage } from '@/pages/legal/cookies'
 import { NotFoundPage } from '@/pages/errors/not-found'
 import { ServerErrorPage } from '@/pages/errors/server-error'
 import { AdminLayout } from '@/components/admin'
+import { HelpPage } from '@/pages/dashboard/help-page'
 import { AdminDashboardPage } from '@/pages/admin/admin-dashboard-page'
 import { AdminUsersPage } from '@/pages/admin/admin-users-page'
 import { AdminToolsPage } from '@/pages/admin/admin-tools-page'
@@ -144,6 +145,7 @@ export const router = createBrowserRouter([
           { path: 'billing/history', element: <BillingHistoryPage /> },
           { path: 'billing', element: <BillingPage /> },
           { path: 'checkout', element: <CheckoutPage /> },
+          { path: 'help', element: <HelpPage /> },
         ],
       },
       { path: '/login', element: <Navigate to="/auth/login" replace /> },
@@ -154,7 +156,7 @@ export const router = createBrowserRouter([
       },
       { path: '/features', element: <Navigate to="/#features" replace /> },
       { path: '/pricing', element: <Navigate to="/#pricing" replace /> },
-      { path: '/about', element: <Navigate to="/#features" replace /> },
+      { path: '/about', element: <Navigate to="/dashboard/help" replace /> },
       { path: '/500', element: <ServerErrorPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

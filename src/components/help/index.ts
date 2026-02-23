@@ -1,0 +1,7 @@
+export { HelpNavTabs } from './help-nav-tabs'
+export { GettingStartedSection } from './getting-started-section'
+export { KnowledgeBaseSection } from './knowledge-base-section'
+export { FAQSection } from './faq-section'
+export { OnboardingGuidesSection } from './onboarding-guides-section'
+export { ChangelogSection } from './changelog-section'
+export { ContactSupportSection } from './contact-support-section'
