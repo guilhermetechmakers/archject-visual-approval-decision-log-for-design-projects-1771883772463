@@ -72,4 +72,40 @@ export const billingApi = {
 
   exportBilling: (format: 'pdf' | 'csv') =>
     api.get<{ download_url: string }>(`/billing/export?format=${format}`),
+
+  // Billing History / Transaction History
+  getHistory: (params?: import('@/types/billing-history').BillingHistoryParams) => {
+    const search = new URLSearchParams()
+    if (params?.start_date) search.set('start_date', params.start_date)
+    if (params?.end_date) search.set('end_date', params.end_date)
+    if (params?.types?.length) search.set('types', params.types.join(','))
+    if (params?.query) search.set('query', params.query)
+    if (params?.page != null) search.set('page', String(params.page))
+    if (params?.page_size != null) search.set('page_size', String(params.page_size))
+    if (params?.sort_by) search.set('sort_by', params.sort_by)
+    if (params?.sort_order) search.set('sort_order', params.sort_order)
+    if (params?.currency) search.set('currency', params.currency)
+    const qs = search.toString()
+    return api.get<import('@/types/billing-history').BillingHistoryResponse>(
+      `/billing/history${qs ? `?${qs}` : ''}`
+    )
+  },
+
+  getHistoryItem: (itemId: string) =>
+    api.get<import('@/types/billing-history').BillingHistoryItem>(
+      `/billing/history/${itemId}`
+    ),
+
+  getInvoiceDownloadUrl: (invoiceId: string) =>
+    api.get<{ url: string }>(`/billing/invoice/${invoiceId}/download`),
+
+  getSubscriptionTimeline: (subscriptionId: string) =>
+    api.get<import('@/types/billing-history').SubscriptionTimelineResponse>(
+      `/billing/subscription/${subscriptionId}/timeline`
+    ),
+
+  getSubscription: (subscriptionId: string) =>
+    api.get<{ id: string; plan_id: string; status: string }>(
+      `/billing/subscription/${subscriptionId}`
+    ),
 }
