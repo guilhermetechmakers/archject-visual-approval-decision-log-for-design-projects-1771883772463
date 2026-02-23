@@ -39,7 +39,7 @@ function formatDate(dateStr: string | null | undefined): string {
 
 export function DecisionsList({
   decisions,
-  projectId: _projectId,
+  projectId,
   onCreateDecision,
   onApplyTemplate,
   onExportLog,
@@ -87,7 +87,7 @@ export function DecisionsList({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
-                        to={`/dashboard/decisions/${decision.id}`}
+                        to={projectId ? `/dashboard/projects/${projectId}/decisions/${decision.id}/internal` : `/dashboard/decisions/${decision.id}`}
                         className="font-medium text-foreground hover:text-primary transition-colors"
                       >
                         {decision.title}
@@ -114,7 +114,7 @@ export function DecisionsList({
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <Button variant="outline" size="sm" asChild>
-                      <Link to={`/dashboard/decisions/${decision.id}`}>
+                      <Link to={projectId ? `/dashboard/projects/${projectId}/decisions/${decision.id}/internal` : `/dashboard/decisions/${decision.id}`}>
                         Open
                       </Link>
                     </Button>
@@ -131,7 +131,7 @@ export function DecisionsList({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link to={`/dashboard/decisions/${decision.id}/edit`}>
+                          <Link to={projectId ? `/dashboard/projects/${projectId}/decisions/${decision.id}/edit` : `/dashboard/decisions/${decision.id}/edit`}>
                             Edit
                           </Link>
                         </DropdownMenuItem>

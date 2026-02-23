@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -27,6 +27,7 @@ import { toast } from 'sonner'
 
 export function ProjectWorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>()
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('overview')
   const [createDecisionOpen, setCreateDecisionOpen] = useState(false)
   const [exportModalOpen, setExportModalOpen] = useState(false)
@@ -73,9 +74,16 @@ export function ProjectWorkspacePage() {
   }
 
   const handleCreateDecision = async (_data: CreateDecisionFormData) => {
-    // In real app: call API
     toast.success('Decision created')
     setCreateDecisionOpen(false)
+  }
+
+  const handleNavigateToCreateDecision = () => {
+    if (projectId) {
+      navigate(`/dashboard/projects/${projectId}/decisions/new`)
+    } else {
+      setCreateDecisionOpen(true)
+    }
   }
 
   const storagePercent = project
@@ -178,7 +186,7 @@ export function ProjectWorkspacePage() {
             <DecisionsList
               decisions={decisions}
               projectId={projectId}
-              onCreateDecision={() => setCreateDecisionOpen(true)}
+              onCreateDecision={handleNavigateToCreateDecision}
               onApplyTemplate={() => toast.info('Select a template')}
               onExportLog={() => setExportModalOpen(true)}
             />
@@ -206,9 +214,9 @@ export function ProjectWorkspacePage() {
               projectId={projectId}
               onApplyTemplate={(id) => {
                 toast.info(`Applying template ${id}`)
-                setCreateDecisionOpen(true)
+                handleNavigateToCreateDecision()
               }}
-              onCreateDecision={() => setCreateDecisionOpen(true)}
+              onCreateDecision={handleNavigateToCreateDecision}
             />
           )}
 

@@ -15,6 +15,9 @@ import { ProjectWorkspacePage } from '@/pages/dashboard/project-workspace'
 import { DecisionsPage } from '@/pages/dashboard/decisions'
 import { DecisionDetailPage } from '@/pages/dashboard/decision-detail'
 import { CreateDecisionPlaceholder } from '@/pages/dashboard/create-decision-placeholder'
+import { CreateDecisionPage } from '@/pages/dashboard/create-decision-page'
+import { EditDecisionPage } from '@/pages/dashboard/edit-decision-page'
+import { DecisionDetailInternalPage } from '@/pages/dashboard/decision-detail-internal'
 import { TeamPage } from '@/pages/dashboard/team'
 import { SettingsPage } from '@/pages/dashboard/settings'
 import { BillingPage } from '@/pages/dashboard/billing'
@@ -73,6 +76,9 @@ export const router = createBrowserRouter([
           { index: true, element: <DashboardOverview /> },
           { path: 'projects', element: <ProjectsPage /> },
           { path: 'projects/:projectId', element: <ProjectWorkspacePage /> },
+          { path: 'projects/:projectId/decisions/new', element: <CreateDecisionPage /> },
+          { path: 'projects/:projectId/decisions/:decisionId/edit', element: <EditDecisionPage /> },
+          { path: 'projects/:projectId/decisions/:decisionId/internal', element: <DecisionDetailInternalPage /> },
           { path: 'decisions', element: <DecisionsPage /> },
           { path: 'decisions/new', element: <CreateDecisionPlaceholder /> },
           { path: 'decisions/:id', element: <DecisionDetailPage /> },
