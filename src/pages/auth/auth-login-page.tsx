@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Navigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   AuthContainer,
@@ -18,35 +18,50 @@ import type {
 } from '@/components/auth/email-auth-form'
 
 export function AuthLoginPage() {
-  const { login, register } = useAuth()
-  const { pathname } = useLocation()
+  const { login, register, isAuthenticated, isLoading: isAuthLoading } = useAuth()
+  const { pathname, state } = useLocation()
   const initialTab: AuthTabValue = pathname.includes('signup') ? 'signup' : 'login'
   const [activeTab, setActiveTab] = useState<AuthTabValue>(initialTab)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [signupEmail, setSignupEmail] = useState<string | null>(null)
+  const [requiresVerification, setRequiresVerification] = useState(false)
 
   useEffect(() => {
     setActiveTab(initialTab)
   }, [initialTab])
-  const [isLoading, setIsLoading] = useState(false)
-  const [signupEmail, setSignupEmail] = useState<string | null>(null)
-  const [requiresVerification, setRequiresVerification] = useState(false)
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center" aria-busy="true">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
 
   const handleLogin = async (data: LoginFormData) => {
-    setIsLoading(true)
+    setIsSubmitting(true)
     try {
-      await login(data.email, data.password, data.rememberMe)
+      const redirectTo =
+        (state as { from?: { pathname?: string } } | null)?.from?.pathname ??
+        '/dashboard'
+      await login(data.email, data.password, data.rememberMe, redirectTo)
     } catch (e) {
       if (isApiError(e)) {
-        toast.error(e.message ?? 'Sign in failed')
+        toast.error(e.message ?? 'Sign in failed. Please check your email and password.')
       } else {
-        toast.error('Sign in failed')
+        toast.error('Sign in failed. Please try again.')
       }
     } finally {
-      setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
   const handleSignup = async (data: SignupFormData) => {
-    setIsLoading(true)
+    setIsSubmitting(true)
     try {
       const result = await register({
         email: data.email,
@@ -57,16 +72,16 @@ export function AuthLoginPage() {
       setSignupEmail(data.email)
       setRequiresVerification(result.requiresEmailVerification)
       if (!result.requiresEmailVerification) {
-        toast.success('Account created')
+        toast.success('Account created! Redirecting to dashboard…')
       }
     } catch (e) {
       if (isApiError(e)) {
-        toast.error(e.message ?? 'Sign up failed')
+        toast.error(e.message ?? 'Sign up failed. Please try again.')
       } else {
-        toast.error('Sign up failed')
+        toast.error('Sign up failed. Please try again.')
       }
     } finally {
-      setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -83,7 +98,7 @@ export function AuthLoginPage() {
       <EmailAuthForm
         mode="login"
         onSubmit={handleAuthSubmit}
-        isLoading={isLoading}
+        isLoading={isSubmitting}
       />
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -93,7 +108,7 @@ export function AuthLoginPage() {
           <span className="bg-card px-2 text-muted-foreground">or</span>
         </div>
       </div>
-      <GoogleOAuthButton mode="login" disabled={isLoading} />
+      <GoogleOAuthButton mode="login" disabled={isSubmitting} />
     </div>
   )
 
@@ -105,7 +120,7 @@ export function AuthLoginPage() {
       <EmailAuthForm
         mode="signup"
         onSubmit={handleAuthSubmit}
-        isLoading={isLoading}
+        isLoading={isSubmitting}
       />
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -115,7 +130,7 @@ export function AuthLoginPage() {
           <span className="bg-card px-2 text-muted-foreground">or</span>
         </div>
       </div>
-      <GoogleOAuthButton mode="signup" disabled={isLoading} />
+      <GoogleOAuthButton mode="signup" disabled={isSubmitting} />
       <SecurityHintsPanel />
     </div>
   )

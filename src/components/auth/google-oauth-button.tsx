@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/auth-context'
@@ -45,14 +46,18 @@ export function GoogleOAuthButton({
   className,
 }: GoogleOAuthButtonProps) {
   const { googleSignIn } = useAuth()
+  const { state } = useLocation()
   const [isLoading, setIsLoading] = React.useState(false)
+  const redirectTo =
+    (state as { from?: { pathname?: string } } | null)?.from?.pathname ??
+    '/dashboard'
 
   const handleClick = React.useCallback(async () => {
     setIsLoading(true)
     try {
       // Mock: simulate Google OAuth - in production, use Google Identity Services
       const mockIdToken = `mock_google_${btoa(JSON.stringify({ email: 'user@example.com', sub: 'google_123' }))}`
-      await googleSignIn(mockIdToken)
+      await googleSignIn(mockIdToken, redirectTo)
     } catch (e) {
       if (isApiError(e)) {
         toast.error(e.message ?? 'Sign in failed')
@@ -62,7 +67,7 @@ export function GoogleOAuthButton({
     } finally {
       setIsLoading(false)
     }
-  }, [googleSignIn])
+  }, [googleSignIn, redirectTo])
 
   const label = mode === 'login' ? 'Sign in with Google' : 'Sign up with Google'
 

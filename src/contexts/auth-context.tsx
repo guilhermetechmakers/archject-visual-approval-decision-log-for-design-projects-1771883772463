@@ -1,25 +1,36 @@
 import * as React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import {
   authApi,
   getStoredToken,
   setStoredToken,
   isApiError,
 } from '@/api/auth'
+
+/** Clear all stored auth tokens (session + persistent) */
+function clearStoredToken(): void {
+  setStoredToken(null)
+}
 import type { AuthSession } from '@/types/auth'
 
 interface AuthContextValue {
   session: AuthSession | null
   isLoading: boolean
   isAuthenticated: boolean
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
+  login: (
+    email: string,
+    password: string,
+    rememberMe?: boolean,
+    redirectTo?: string
+  ) => Promise<void>
   register: (data: {
     email: string
     password: string
     workspaceName?: string
     agreeToTerms: boolean
   }) => Promise<{ requiresEmailVerification: boolean }>
-  googleSignIn: (idToken: string) => Promise<void>
+  googleSignIn: (idToken: string, redirectTo?: string) => Promise<void>
   logout: () => void
   setSession: (session: AuthSession | null) => void
 }
@@ -66,11 +77,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const setSession = React.useCallback((s: AuthSession | null) => {
     setSessionState(s)
-    if (!s) setStoredToken(null)
+    if (!s) clearStoredToken()
   }, [])
 
   const login = React.useCallback(
-    async (email: string, password: string, rememberMe?: boolean) => {
+    async (
+      email: string,
+      password: string,
+      rememberMe?: boolean,
+      redirectTo?: string
+    ) => {
       const res = await authApi.login({ email, password, rememberMe })
       setSessionState({
         token: res.token,
@@ -78,7 +94,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         workspaceId: res.workspaceId,
         emailVerified: res.emailVerified,
       })
-      navigate('/dashboard')
+      toast.success('Welcome back!')
+      navigate(redirectTo ?? '/dashboard', { replace: true })
     },
     [navigate]
   )
@@ -102,13 +119,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         workspaceId: res.workspaceId,
         emailVerified: !res.requiresEmailVerification,
       })
+      if (!res.requiresEmailVerification) {
+        navigate('/dashboard', { replace: true })
+      }
       return { requiresEmailVerification: res.requiresEmailVerification }
     },
-    []
+    [navigate]
   )
 
   const googleSignIn = React.useCallback(
-    async (idToken: string) => {
+    async (idToken: string, redirectTo?: string) => {
       const res = await authApi.googleSignIn({ idToken })
       setSessionState({
         token: res.token,
@@ -116,15 +136,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         workspaceId: res.workspaceId,
         emailVerified: res.emailVerified,
       })
-      navigate('/dashboard')
+      toast.success('Welcome back!')
+      navigate(redirectTo ?? '/dashboard', { replace: true })
     },
     [navigate]
   )
 
   const logout = React.useCallback(() => {
-    setStoredToken(null)
+    clearStoredToken()
     setSessionState(null)
-    navigate('/login')
+    toast.success('Signed out successfully')
+    navigate('/auth/login', { replace: true })
   }, [navigate])
 
   const value: AuthContextValue = {

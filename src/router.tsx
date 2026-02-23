@@ -7,7 +7,7 @@ import { PasswordResetPage } from '@/pages/auth/password-reset-page'
 import { ResetPasswordRoute } from '@/pages/auth/reset-password-route'
 import { PasswordResetConfirmPage } from '@/pages/auth/password-reset-confirm-page'
 import { EmailVerificationPage } from '@/pages/auth/email-verification-page'
-import { PasswordResetGuard } from '@/components/auth'
+import { PasswordResetGuard, ProtectedRoute } from '@/components/auth'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DashboardOverview } from '@/pages/dashboard/overview'
 import { ProjectsPage } from '@/pages/dashboard/projects'
@@ -63,7 +63,11 @@ export const router = createBrowserRouter([
       { path: '/portal/:token', element: <ClientPortalPage /> },
       {
         path: '/dashboard',
-        element: <DashboardLayout />,
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
         children: [
           { index: true, element: <DashboardOverview /> },
           { path: 'projects', element: <ProjectsPage /> },

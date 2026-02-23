@@ -22,6 +22,7 @@ export type { PasswordResetRequestFormData } from './password-reset-request-card
 export { PasswordResetFormCard } from './password-reset-form-card'
 export type { PasswordResetFormData } from './password-reset-form-card'
 export { PasswordResetGuard } from './password-reset-guard'
+export { ProtectedRoute } from './protected-route'
 export {
   StatusIcon,
   TokenExpiryHint,

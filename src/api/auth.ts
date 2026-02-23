@@ -25,21 +25,36 @@ const USE_MOCK = !import.meta.env.VITE_API_URL
 
 /** Mock auth storage for development - in production use httpOnly cookies */
 const MOCK_STORAGE_KEY = 'archject_mock_session'
+const MOCK_STORAGE_KEY_PERSIST = 'archject_mock_session_persist'
+const TOKEN_KEY = 'archject_token'
+const TOKEN_KEY_PERSIST = 'archject_token_persist'
 
-export function getStoredToken(): string | null {
-  if (USE_MOCK) {
-    return sessionStorage.getItem(MOCK_STORAGE_KEY)
-  }
-  return sessionStorage.getItem('archject_token')
+function getStorageKey(persist: boolean): string {
+  if (USE_MOCK) return persist ? MOCK_STORAGE_KEY_PERSIST : MOCK_STORAGE_KEY
+  return persist ? TOKEN_KEY_PERSIST : TOKEN_KEY
 }
 
-export function setStoredToken(token: string | null): void {
-  if (USE_MOCK) {
-    if (token) sessionStorage.setItem(MOCK_STORAGE_KEY, token)
-    else sessionStorage.removeItem(MOCK_STORAGE_KEY)
+export function getStoredToken(): string | null {
+  if (typeof window === 'undefined') return null
+  const sessionKey = getStorageKey(false)
+  const persistKey = getStorageKey(true)
+  return localStorage.getItem(persistKey) ?? sessionStorage.getItem(sessionKey) ?? null
+}
+
+export function setStoredToken(token: string | null, rememberMe?: boolean): void {
+  const sessionKey = getStorageKey(false)
+  const persistKey = getStorageKey(true)
+  if (token) {
+    if (rememberMe) {
+      localStorage.setItem(persistKey, token)
+      sessionStorage.removeItem(sessionKey)
+    } else {
+      sessionStorage.setItem(sessionKey, token)
+      localStorage.removeItem(persistKey)
+    }
   } else {
-    if (token) sessionStorage.setItem('archject_token', token)
-    else sessionStorage.removeItem('archject_token')
+    sessionStorage.removeItem(sessionKey)
+    localStorage.removeItem(persistKey)
   }
 }
 
@@ -49,7 +64,7 @@ async function mockRegister(_data: RegisterRequest): Promise<RegisterResponse> {
   const userId = `user_${Date.now()}`
   const workspaceId = `ws_${Date.now()}`
   const token = `mock_${btoa(JSON.stringify({ userId, workspaceId }))}`
-  setStoredToken(token)
+  setStoredToken(token, false)
   return {
     userId,
     workspaceId,
@@ -58,12 +73,12 @@ async function mockRegister(_data: RegisterRequest): Promise<RegisterResponse> {
   }
 }
 
-async function mockLogin(_data: LoginRequest): Promise<LoginResponse> {
+async function mockLogin(data: LoginRequest): Promise<LoginResponse> {
   await new Promise((r) => setTimeout(r, 500))
   const userId = `user_${Date.now()}`
   const workspaceId = `ws_${Date.now()}`
   const token = `mock_${btoa(JSON.stringify({ userId, workspaceId }))}`
-  setStoredToken(token)
+  setStoredToken(token, data.rememberMe)
   return {
     token,
     userId,
@@ -77,7 +92,7 @@ async function mockGoogleSignIn(_data: GoogleSignInRequest): Promise<LoginRespon
   const userId = `user_oauth_${Date.now()}`
   const workspaceId = `ws_${Date.now()}`
   const token = `mock_${btoa(JSON.stringify({ userId, workspaceId }))}`
-  setStoredToken(token)
+  setStoredToken(token, true)
   return {
     token,
     userId,
@@ -142,19 +157,19 @@ async function mockResendVerificationToken(
 /** Real API calls - used when VITE_API_URL is set */
 async function realRegister(data: RegisterRequest): Promise<RegisterResponse> {
   const res = await api.post<RegisterResponse>('/auth/register', data)
-  if (res?.token) setStoredToken(res.token)
+  if (res?.token) setStoredToken(res.token, false)
   return res as RegisterResponse
 }
 
 async function realLogin(data: LoginRequest): Promise<LoginResponse> {
   const res = await api.post<LoginResponse>('/auth/login', data)
-  if (res?.token) setStoredToken(res.token)
+  if (res?.token) setStoredToken(res.token, data.rememberMe)
   return res as LoginResponse
 }
 
 async function realGoogleSignIn(data: GoogleSignInRequest): Promise<LoginResponse> {
   const res = await api.post<LoginResponse>('/auth/google-signin', data)
-  if (res?.token) setStoredToken(res.token)
+  if (res?.token) setStoredToken(res.token, true)
   return res as LoginResponse
 }
 
