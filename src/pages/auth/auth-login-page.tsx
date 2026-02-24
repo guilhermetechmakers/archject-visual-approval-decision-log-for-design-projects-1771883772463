@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, Navigate } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   AuthContainer,
@@ -33,8 +34,16 @@ export function AuthLoginPage() {
 
   if (isAuthLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center" aria-busy="true">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <div
+        className="flex min-h-[50vh] items-center justify-center"
+        role="status"
+        aria-busy="true"
+        aria-label="Loading authentication"
+      >
+        <Loader2
+          className="h-10 w-10 animate-spin text-primary"
+          aria-hidden
+        />
       </div>
     )
   }
@@ -164,7 +173,8 @@ export function AuthLoginPage() {
             <button
               type="button"
               onClick={() => setActiveTab('signup')}
-              className="text-primary hover:underline font-medium"
+              className="font-medium text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+              aria-label="Switch to sign up"
             >
               Sign up
             </button>
@@ -175,7 +185,8 @@ export function AuthLoginPage() {
             <button
               type="button"
               onClick={() => setActiveTab('login')}
-              className="text-primary hover:underline font-medium"
+              className="font-medium text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+              aria-label="Switch to log in"
             >
               Log in
             </button>
