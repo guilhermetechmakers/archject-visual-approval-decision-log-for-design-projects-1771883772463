@@ -25,8 +25,12 @@ export function AuthContainer({
       )}
     >
       <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Left: form content */}
-        <div className="flex-1 flex items-center justify-center px-4 py-12 lg:py-16">
+        {/* Left: main form content - proper landmark and heading hierarchy */}
+        <main
+          className="flex-1 flex items-center justify-center px-4 py-12 lg:py-16"
+          id="auth-main-content"
+          aria-labelledby="auth-page-title"
+        >
           <div className="w-full max-w-md">
             <Link
               to="/"
@@ -36,7 +40,10 @@ export function AuthContainer({
             </Link>
             <Card className="shadow-card border-border rounded-2xl overflow-hidden">
               <CardHeader className="pb-2">
-                <h1 className="text-2xl font-semibold text-foreground">
+                <h1
+                  id="auth-page-title"
+                  className="text-2xl font-semibold text-foreground"
+                >
                   {title}
                 </h1>
                 {description && (
@@ -46,13 +53,16 @@ export function AuthContainer({
               <CardContent className="pt-2">{children}</CardContent>
             </Card>
           </div>
-        </div>
+        </main>
 
-        {/* Right: illustration panel - visible on larger viewports */}
-        <div className="hidden lg:flex flex-1 items-center justify-center p-12 bg-secondary/20">
+        {/* Right: complementary illustration panel - visible on larger viewports */}
+        <aside
+          className="hidden lg:flex flex-1 items-center justify-center p-12 bg-secondary/20"
+          aria-label="Product overview"
+        >
           <div className="max-w-md text-center">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-primary/10 text-primary mb-6">
-              <LayoutGrid className="h-12 w-12" />
+              <LayoutGrid className="h-12 w-12" aria-hidden />
             </div>
             <h2 className="text-xl font-semibold text-foreground mb-2">
               Visual approval & decision log
@@ -62,7 +72,7 @@ export function AuthContainer({
               your design projects.
             </p>
           </div>
-        </div>
+        </aside>
       </div>
 
       <footer className="py-6">

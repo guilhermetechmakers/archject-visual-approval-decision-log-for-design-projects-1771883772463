@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -127,8 +127,21 @@ function LoginFormInner({
         </label>
         <ForgotPasswordLink />
       </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Signing in...' : 'Sign in'}
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isLoading}
+        aria-busy={isLoading}
+        aria-live="polite"
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            Signing in...
+          </>
+        ) : (
+          'Sign in'
+        )}
       </Button>
     </form>
   )
@@ -236,8 +249,21 @@ function SignupFormInner({
         onCheckedChange={(v) => setValue('agreeToTerms', v)}
         error={errors.agreeToTerms?.message}
       />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Creating account...' : 'Create account'}
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isLoading}
+        aria-busy={isLoading}
+        aria-live="polite"
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            Creating account...
+          </>
+        ) : (
+          'Create account'
+        )}
       </Button>
     </form>
   )

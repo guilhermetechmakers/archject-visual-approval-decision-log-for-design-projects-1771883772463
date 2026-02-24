@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useLocation, Navigate } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   AuthContainer,
@@ -11,6 +10,9 @@ import {
   EmailVerificationBanner,
   EnterpriseSSOPanel,
 } from '@/components/auth'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
 import type { AuthTabValue } from '@/components/auth'
 import { useAuth } from '@/contexts/auth-context'
 import { isApiError } from '@/api/auth'
@@ -35,15 +37,27 @@ export function AuthLoginPage() {
   if (isAuthLoading) {
     return (
       <div
-        className="flex min-h-[50vh] items-center justify-center"
+        className="flex min-h-screen flex-col bg-gradient-to-br from-secondary/30 via-background to-accent/5"
         role="status"
         aria-busy="true"
         aria-label="Loading authentication"
       >
-        <Loader2
-          className="h-10 w-10 animate-spin text-primary"
-          aria-hidden
-        />
+        <div className="flex-1 flex items-center justify-center px-4 py-12 lg:py-16">
+          <div className="w-full max-w-md space-y-8">
+            <Skeleton className="h-8 w-32 rounded-pill" />
+            <Card className="shadow-card border-border rounded-2xl overflow-hidden">
+              <CardHeader className="pb-2">
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="mt-2 h-4 w-1/2" />
+              </CardHeader>
+              <CardContent className="pt-2 space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     )
   }
@@ -170,26 +184,28 @@ export function AuthLoginPage() {
         {activeTab === 'login' ? (
           <>
             Don&apos;t have an account?{' '}
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={() => setActiveTab('signup')}
-              className="font-medium text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+              className="h-auto p-0 font-medium"
               aria-label="Switch to sign up"
             >
               Sign up
-            </button>
+            </Button>
           </>
         ) : (
           <>
             Already have an account?{' '}
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={() => setActiveTab('login')}
-              className="font-medium text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+              className="h-auto p-0 font-medium"
               aria-label="Switch to log in"
             >
               Log in
-            </button>
+            </Button>
           </>
         )}
       </p>
