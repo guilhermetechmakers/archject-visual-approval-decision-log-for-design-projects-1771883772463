@@ -124,9 +124,7 @@ export function AdminDashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <UsagePanel data={data.usage} />
         <div className="space-y-6">
-          {data.recent_escalations && data.recent_escalations.length > 0 && (
-            <RecentEscalationsPanel escalations={data.recent_escalations} />
-          )}
+          <RecentEscalationsPanel escalations={data.recent_escalations ?? []} />
           <TopTenantsPanel topTenants={data.top_tenants ?? []} />
         </div>
       </div>
