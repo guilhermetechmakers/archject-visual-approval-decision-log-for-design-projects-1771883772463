@@ -22,6 +22,7 @@ import {
   type WorkspaceTab,
   type CreateDecisionFormData,
 } from '@/components/workspace'
+import { ExportsPanel } from '@/components/exports'
 import { ShareLinkModal } from '@/components/dashboard'
 import { FilesLibraryView } from '@/components/files-library'
 import {
@@ -211,6 +212,13 @@ export function ProjectWorkspacePage() {
                   />
                 </div>
                 <div className="mt-6">
+                  <ExportsPanel
+                    projectId={projectId}
+                    decisionIds={[]}
+                    onExportComplete={() => refetch()}
+                  />
+                </div>
+                <div className="mt-6">
                   <LinkManagementPanel
                     links={clientLinks}
                     projectId={projectId}
@@ -317,8 +325,10 @@ export function ProjectWorkspacePage() {
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
         projectId={projectId}
+        decisionIds={[]}
         onExport={handleExport}
         isExporting={createExportMutation.isPending}
+        showFullPanel
       />
     </div>
   )

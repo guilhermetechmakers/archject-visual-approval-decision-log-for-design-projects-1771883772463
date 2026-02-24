@@ -38,6 +38,8 @@ import {
   exportDecisionAsPDF,
   downloadBlob,
 } from '@/lib/export-decision'
+import { createExport, getExportStatus } from '@/api/exports'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import type { DecisionOption } from '@/types/decision-detail'
 
 export function DecisionDetailInternalPage() {
@@ -92,43 +94,86 @@ export function DecisionDetailInternalPage() {
 
   const handleExport = useCallback(
     async (format: 'pdf' | 'csv' | 'json') => {
-      if (!decision) return
+      if (!decision || !projectId) return
       setIsExporting(true)
+      const payload = {
+        decision: {
+          id: decision.id,
+          title: decision.title,
+          status: decision.status,
+          description: decision.description,
+          due_date: (decision as { dueDate?: string }).dueDate ?? null,
+          created_at: decision.createdAt,
+          updated_at: decision.updatedAt,
+        },
+        options,
+        comments,
+        approvals,
+        files,
+      }
       try {
-        const payload = {
-          decision: {
-            id: decision.id,
-            title: decision.title,
-            status: decision.status,
-            description: decision.description,
-            due_date: (decision as { dueDate?: string }).dueDate ?? null,
-            created_at: decision.createdAt,
-            updated_at: decision.updatedAt,
-          },
-          options,
-          comments,
-          approvals,
-          files,
-        }
-        if (format === 'pdf') {
-          exportDecisionAsPDF(payload)
-        } else if (format === 'csv') {
-          const csv = exportDecisionAsCSV(payload)
-          const blob = new Blob([csv], { type: 'text/csv' })
-          downloadBlob(blob, `decision-${decision.id}.csv`)
+        if (isSupabaseConfigured) {
+          const fmt = format.toUpperCase() as 'PDF' | 'CSV' | 'JSON'
+          const res = await createExport({
+            projectId,
+            format: fmt,
+            scope: 'decision',
+            decisionIds: [decision.id],
+          })
+          if (res.status === 'completed' && res.artifactUrl) {
+            const a = document.createElement('a')
+            a.href = res.artifactUrl
+            a.download = `decision-${decision.id}.${format}`
+            a.click()
+            toast.success(`Exported as ${format.toUpperCase()}`)
+          } else if (res.exportId) {
+            for (let i = 0; i < 60; i++) {
+              const status = await getExportStatus(res.exportId)
+              if (status.status === 'completed' && (status.artifactUrl ?? status.fileUrl)) {
+                const a = document.createElement('a')
+                a.href = status.artifactUrl ?? status.fileUrl!
+                a.download = `decision-${decision.id}.${format}`
+                a.click()
+                toast.success(`Exported as ${format.toUpperCase()}`)
+                break
+              }
+              if (status.status === 'failed') throw new Error(status.errorMessage ?? 'Export failed')
+              await new Promise((r) => setTimeout(r, 1000))
+            }
+          }
         } else {
-          const json = exportDecisionAsJSON(payload)
-          const blob = new Blob([json], { type: 'application/json' })
-          downloadBlob(blob, `decision-${decision.id}.json`)
+          if (format === 'pdf') {
+            exportDecisionAsPDF(payload)
+          } else if (format === 'csv') {
+            const csv = exportDecisionAsCSV(payload)
+            const blob = new Blob([csv], { type: 'text/csv' })
+            downloadBlob(blob, `decision-${decision.id}.csv`)
+          } else {
+            const json = exportDecisionAsJSON(payload)
+            const blob = new Blob([json], { type: 'application/json' })
+            downloadBlob(blob, `decision-${decision.id}.json`)
+          }
+          toast.success(`Exported as ${format.toUpperCase()}`)
         }
-        toast.success(`Exported as ${format.toUpperCase()}`)
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Export failed')
+        if (!isSupabaseConfigured) {
+          if (format === 'pdf') exportDecisionAsPDF(payload)
+          else if (format === 'csv') {
+            const csv = exportDecisionAsCSV(payload)
+            downloadBlob(new Blob([csv], { type: 'text/csv' }), `decision-${decision.id}.csv`)
+          } else {
+            const json = exportDecisionAsJSON(payload)
+            downloadBlob(new Blob([json], { type: 'application/json' }), `decision-${decision.id}.json`)
+          }
+          toast.success(`Exported as ${format.toUpperCase()}`)
+        } else {
+          toast.error(err instanceof Error ? err.message : 'Export failed')
+        }
       } finally {
         setIsExporting(false)
       }
     },
-    [decision, options, comments, approvals, files]
+    [decision, options, comments, approvals, files, projectId]
   )
 
   const handleRevokeApproval = useCallback(() => {

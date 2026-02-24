@@ -401,10 +401,26 @@ export function useCreateExport(projectId: string) {
           user_id: null,
         }
       }
-      return workspaceApi.createExport(projectId, type)
+      const { createExport } = await import('@/api/exports')
+      const format = type.toUpperCase() as 'PDF' | 'CSV' | 'JSON'
+      const res = await createExport({
+        projectId,
+        format,
+        scope: 'project',
+      })
+      return {
+        id: res.exportId,
+        project_id: projectId,
+        type,
+        status: res.status === 'completed' ? 'completed' : 'processing',
+        created_at: new Date().toISOString(),
+        user_id: null,
+        artifact_url: res.artifactUrl,
+      }
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['workspace', 'exports', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['exports', projectId] })
       toast.success(`Export started: ${data.type.toUpperCase()}`)
     },
     onError: (err) => {

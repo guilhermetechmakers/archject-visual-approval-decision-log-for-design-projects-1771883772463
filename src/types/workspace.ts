@@ -162,6 +162,42 @@ export interface ExportJob {
   user_id?: string | null
 }
 
+export type ExportFormat = 'PDF' | 'CSV' | 'JSON'
+export type ExportStatus = 'queued' | 'processing' | 'completed' | 'failed'
+
+export interface DecisionExport {
+  id: string
+  project_id: string
+  scope: 'project' | 'decision'
+  decision_ids: string[]
+  format: ExportFormat
+  status: ExportStatus
+  progress: number
+  artifact_url?: string | null
+  artifact_size?: number | null
+  request_payload?: Record<string, unknown>
+  branding_profile_id?: string | null
+  created_by?: string | null
+  created_at: string
+  updated_at: string
+  completed_at?: string | null
+  error_message?: string | null
+  retry_count: number
+}
+
+export interface BrandingProfile {
+  id: string
+  project_id?: string | null
+  workspace_id?: string | null
+  name: string
+  logo_url?: string | null
+  primary_color?: string | null
+  accent_color?: string | null
+  typography_settings?: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
 export interface SearchFilters {
   projects?: string[]
   decision_status?: DecisionStatus[]

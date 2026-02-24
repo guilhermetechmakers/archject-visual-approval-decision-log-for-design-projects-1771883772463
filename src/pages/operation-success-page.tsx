@@ -77,6 +77,7 @@ export function OperationSuccessPage() {
   } = useDecisionLogExport({
     projectId: projectId || undefined,
     decisionLogId: decisionLogId || undefined,
+    decisionIds: decisionLogId ? [decisionLogId] : undefined,
   })
 
   const exportOptions =

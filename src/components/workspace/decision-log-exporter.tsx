@@ -8,14 +8,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { ExportsPanel } from '@/components/exports'
 import { cn } from '@/lib/utils'
 
 export interface DecisionLogExporterProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   projectId?: string
-  onExport: (type: 'pdf' | 'csv' | 'json') => void
+  decisionIds?: string[]
+  onExport?: (type: 'pdf' | 'csv' | 'json') => void
   isExporting?: boolean
+  /** When true, shows full ExportsPanel with scope/format/history; else compact format picker */
+  showFullPanel?: boolean
 }
 
 const exportOptions = [
@@ -42,10 +46,32 @@ const exportOptions = [
 export function DecisionLogExporter({
   open,
   onOpenChange,
-  projectId: _projectId,
+  projectId,
+  decisionIds = [],
   onExport,
   isExporting = false,
+  showFullPanel = false,
 }: DecisionLogExporterProps) {
+  if (showFullPanel && projectId) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Export Decision Log</DialogTitle>
+            <DialogDescription>
+              Export decisions, options, comments, approvals, and attachments.
+            </DialogDescription>
+          </DialogHeader>
+          <ExportsPanel
+            projectId={projectId}
+            decisionIds={decisionIds}
+            onExportComplete={() => onOpenChange(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -64,7 +90,7 @@ export function DecisionLogExporter({
                 key={opt.type}
                 type="button"
                 onClick={() => {
-                  onExport(opt.type)
+                  onExport?.(opt.type)
                   onOpenChange(false)
                 }}
                 disabled={isExporting}
