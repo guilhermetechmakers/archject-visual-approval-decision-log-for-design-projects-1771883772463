@@ -13,12 +13,16 @@ import { Button } from '@/components/ui/button'
 import {
   useFilesLibrary,
   useUploadFiles,
+  useUploadProgress,
   useFileDetail,
   useRevertVersion,
   useLinkFileToDecision,
   useProjectDecisions,
+  useDeleteFile,
+  useExportFileBundle,
 } from '@/hooks/use-files-library'
 import { useProjectWorkspace } from '@/hooks/use-workspace'
+import { computeFileHash } from '@/lib/file-hash'
 import type { LibraryFile, FileFilters, FileVersion } from '@/types/files-library'
 
 export interface FilesLibraryViewProps {
@@ -46,12 +50,15 @@ export function FilesLibraryView({
   const { project } = useProjectWorkspace(projectId ?? '')
   const { data, isLoading } = useFilesLibrary(projectId ?? '', filters)
   const uploadMutation = useUploadFiles(projectId ?? '')
+  const { progress, setProgressList, clearProgress } = useUploadProgress()
   const { data: detailData } = useFileDetail(
     projectId ?? '',
     detailFile?.id ?? null
   )
   const revertMutation = useRevertVersion(projectId ?? '')
   const linkMutation = useLinkFileToDecision(projectId ?? '')
+  const deleteMutation = useDeleteFile(projectId ?? '')
+  const exportMutation = useExportFileBundle(projectId ?? '')
   const { data: decisions = [] } = useProjectDecisions(projectId ?? '')
 
   const files = data?.files ?? []
@@ -64,14 +71,34 @@ export function FilesLibraryView({
       : 0)
 
   const handleUpload = useCallback(
-    (fileList: File[]) => {
+    async (fileList: File[]) => {
       if (onUploadProp) {
         onUploadProp(fileList)
-      } else {
-        uploadMutation.mutate(fileList)
+        return
       }
+      clearProgress()
+      const hashes: Record<string, string> = {}
+      try {
+        for (let i = 0; i < fileList.length; i++) {
+          hashes[fileList[i].name] = await computeFileHash(fileList[i])
+        }
+      } catch {
+        // Hash optional; continue without
+      }
+      uploadMutation.mutate(
+        {
+          files: fileList,
+          onProgress: setProgressList,
+          hash: Object.keys(hashes).length ? hashes : undefined,
+        },
+        {
+          onSettled: () => {
+            setTimeout(clearProgress, 2000)
+          },
+        }
+      )
     },
-    [onUploadProp, uploadMutation]
+    [onUploadProp, uploadMutation, setProgressList, clearProgress]
   )
 
   const handleDetail = useCallback((file: LibraryFile) => {
@@ -116,6 +143,20 @@ export function FilesLibraryView({
     [projectId]
   )
 
+  const handleDeleteFile = useCallback(
+    (file: LibraryFile) => {
+      deleteMutation.mutate(file.id)
+    },
+    [deleteMutation]
+  )
+
+  const handleExportFile = useCallback(
+    (file: LibraryFile) => {
+      exportMutation.mutate(file.id)
+    },
+    [exportMutation]
+  )
+
   if (!projectId) return null
 
   return (
@@ -140,6 +181,7 @@ export function FilesLibraryView({
         <FileUploadZone
           onUpload={handleUpload}
           isUploading={uploadMutation.isPending}
+          progress={progress}
           storageUsedPercent={storagePercent}
         />
 
@@ -149,14 +191,15 @@ export function FilesLibraryView({
           files={files}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
-          onPreview={(f) => {
-            handleDetail(f)
-          }}
+          onPreview={(f) => handleDetail(f)}
           onDownload={(f) => {
             if (f.cdnUrl) window.open(f.cdnUrl, '_blank')
           }}
           onLinkToDecision={handleAttachToDecision}
           onNavigateToDecision={handleNavigateToDecision}
+          onDelete={handleDeleteFile}
+          onExport={handleExportFile}
+          canDelete
           isLoading={isLoading}
         />
       </div>

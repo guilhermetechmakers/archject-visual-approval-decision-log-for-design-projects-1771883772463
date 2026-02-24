@@ -6,6 +6,9 @@ import type { FileType } from '@/types/workspace'
 
 export type AttachmentType = 'primary' | 'reference'
 
+/** Preview generation status for files */
+export type PreviewStatus = 'queued' | 'processing' | 'available' | 'failed'
+
 export interface FileVersion {
   id: string
   fileId: string
@@ -16,6 +19,7 @@ export interface FileVersion {
   notes?: string | null
   assetUrl: string
   previewUrl?: string | null
+  previewStatus?: PreviewStatus
   size?: number
 }
 
@@ -43,6 +47,7 @@ export interface LibraryFile {
   projectId: string
   isDeleted: boolean
   previewUrl?: string | null
+  previewStatus?: PreviewStatus
   cdnUrl?: string | null
   etag?: string | null
   version: number
@@ -56,6 +61,8 @@ export interface FileFilters {
   dateTo?: string
   linkedDecision?: boolean
   search?: string
+  /** Filter by preview status: queued, processing, available, failed */
+  previewStatus?: PreviewStatus[]
 }
 
 export interface UploadProgress {

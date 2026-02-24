@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import {
   Download,
   ChevronLeft,
@@ -36,8 +36,11 @@ export function PreviewModal({
   onDownload,
 }: PreviewModalProps) {
   const [zoom, setZoom] = useState(1)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
   const [rotation, setRotation] = useState(0)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isPanning, setIsPanning] = useState(false)
+  const panStartRef = useRef({ x: 0, y: 0 })
 
   const currentFile = file ?? (files.length ? files[currentIndex] : null)
   const hasMultiple = files.length > 1

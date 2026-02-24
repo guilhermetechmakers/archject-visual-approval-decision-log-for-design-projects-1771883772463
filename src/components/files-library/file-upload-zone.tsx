@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
-import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle, X, RotateCcw } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { validateFile } from '@/hooks/use-files-library'
 import type { UploadProgress } from '@/types/files-library'
@@ -10,6 +11,8 @@ export interface FileUploadZoneProps {
   isUploading?: boolean
   progress?: UploadProgress[]
   storageUsedPercent?: number
+  onCancel?: () => void
+  onRetry?: (fileId: string) => void
   className?: string
 }
 
@@ -18,6 +21,8 @@ export function FileUploadZone({
   isUploading = false,
   progress = [],
   storageUsedPercent = 0,
+  onCancel,
+  onRetry,
   className,
 }: FileUploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false)
@@ -166,22 +171,52 @@ export function FileUploadZone({
 
       {hasProgress && (
         <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-card">
-          <p className="text-sm font-medium">Upload progress</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">Upload progress</p>
+            {isUploading && onCancel && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onCancel}
+                className="text-muted-foreground hover:text-destructive"
+                aria-label="Cancel upload"
+              >
+                <X className="mr-1 h-4 w-4" />
+                Cancel
+              </Button>
+            )}
+          </div>
           {progress.map((p) => (
             <div key={p.fileId} className="space-y-1">
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between gap-2 text-sm">
                 <span className="truncate text-muted-foreground">
                   {p.fileName}
                 </span>
-                {p.status === 'success' && (
-                  <CheckCircle className="h-4 w-4 text-success" />
-                )}
-                {p.status === 'error' && (
-                  <span className="text-destructive">{p.error}</span>
-                )}
-                {p.status === 'uploading' && (
-                  <span className="text-muted-foreground">{p.progress}%</span>
-                )}
+                <div className="flex shrink-0 items-center gap-2">
+                  {p.status === 'success' && (
+                    <CheckCircle className="h-4 w-4 text-success" aria-hidden />
+                  )}
+                  {p.status === 'error' && (
+                    <>
+                      <span className="text-destructive text-xs">{p.error}</span>
+                      {onRetry && (
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => onRetry(p.fileId)}
+                          aria-label={`Retry ${p.fileName}`}
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  {(p.status === 'uploading' || p.status === 'pending') && (
+                    <span className="text-muted-foreground tabular-nums">
+                      {p.progress}%
+                    </span>
+                  )}
+                </div>
               </div>
               {(p.status === 'uploading' || p.status === 'pending') && (
                 <Progress value={p.progress} className="h-2" />

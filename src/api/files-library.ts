@@ -2,7 +2,7 @@
  * Files & Drawings Library API - RESTful endpoints for file management
  */
 
-import { api } from '@/lib/api'
+import { api, getCachedAuthToken } from '@/lib/api'
 import type { LibraryFile, FileVersion, DecisionAttachment, FileFilters } from '@/types/files-library'
 import type { Decision } from '@/types/workspace'
 
@@ -42,20 +42,66 @@ export async function fetchFileDetail(
   return api.get<FileDetailResponse>(`/projects/${projectId}/files/${fileId}`)
 }
 
+export interface UploadOptions {
+  hash?: string | null
+  targetDecisionId?: string | null
+  onProgress?: (percent: number) => void
+  signal?: AbortSignal
+}
+
 export async function uploadFiles(
+  projectId: string,
+  formData: FormData,
+  options?: UploadOptions
+): Promise<{ files: LibraryFile[] }> {
+  const API_BASE = import.meta.env.VITE_API_URL ?? '/api'
+  if (options?.hash) formData.append('hash', options.hash)
+  if (options?.targetDecisionId) formData.append('target_decision_id', options.targetDecisionId)
+
+  const xhr = new XMLHttpRequest()
+  return new Promise((resolve, reject) => {
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable && options?.onProgress) {
+        options.onProgress(Math.round((e.loaded / e.total) * 100))
+      }
+    })
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText))
+        } catch {
+          reject(new Error('Invalid response'))
+        }
+      } else {
+        try {
+          const err = JSON.parse(xhr.responseText)
+          reject(new Error(err.message ?? xhr.statusText))
+        } catch {
+          reject(new Error(xhr.statusText))
+        }
+      }
+    })
+    xhr.addEventListener('error', () => reject(new Error('Upload failed')))
+    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')))
+
+    if (options?.signal) {
+      options.signal.addEventListener('abort', () => xhr.abort())
+    }
+
+    const token = getCachedAuthToken()
+    xhr.open('POST', `${API_BASE}/projects/${projectId}/files`)
+    xhr.withCredentials = true
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+    xhr.send(formData)
+  })
+}
+
+/** Re-export for upload without progress (backward compatible) */
+export async function uploadFilesSimple(
   projectId: string,
   formData: FormData
 ): Promise<{ files: LibraryFile[] }> {
-  const API_BASE = import.meta.env.VITE_API_URL ?? '/api'
-  const response = await fetch(`${API_BASE}/projects/${projectId}/files`, {
-    method: 'POST',
-    body: formData,
-  })
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.message ?? response.statusText)
-  }
-  return response.json()
+  return uploadFiles(projectId, formData)
 }
 
 export async function createFileVersion(
@@ -112,6 +158,13 @@ export async function unlinkFileFromDecision(
     `/projects/${projectId}/files/${fileId}/unlink-decision`,
     { decisionId }
   )
+}
+
+export async function deleteFile(
+  projectId: string,
+  fileId: string
+): Promise<void> {
+  return api.delete(`/projects/${projectId}/files/${fileId}`)
 }
 
 export async function fetchProjectDecisions(

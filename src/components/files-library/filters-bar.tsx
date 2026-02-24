@@ -1,4 +1,4 @@
-import { Search, Filter, X } from 'lucide-react'
+import { Search, Filter, X, Calendar } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import type { FileFilters } from '@/types/files-library'
+import type { FileFilters, PreviewStatus } from '@/types/files-library'
 import type { FileType } from '@/types/workspace'
 
 const FILE_TYPES: { value: FileType; label: string }[] = [
@@ -17,6 +17,13 @@ const FILE_TYPES: { value: FileType; label: string }[] = [
   { value: 'spec', label: 'Specification' },
   { value: 'image', label: 'Image' },
   { value: 'BIM', label: 'BIM' },
+]
+
+const PREVIEW_STATUSES: { value: PreviewStatus; label: string }[] = [
+  { value: 'queued', label: 'Queued' },
+  { value: 'processing', label: 'Processing' },
+  { value: 'available', label: 'Ready' },
+  { value: 'failed', label: 'Failed' },
 ]
 
 export interface FiltersBarProps {
@@ -60,6 +67,28 @@ export function FiltersBar({
     }
   }
 
+  const handlePreviewStatusChange = (value: string) => {
+    if (value === 'all') {
+      const { previewStatus: _, ...rest } = filters
+      onFiltersChange(rest)
+    } else {
+      onFiltersChange({
+        ...filters,
+        previewStatus: [value as PreviewStatus],
+      })
+    }
+  }
+
+  const handleDateFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value || undefined
+    onFiltersChange({ ...filters, dateFrom: v })
+  }
+
+  const handleDateToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value || undefined
+    onFiltersChange({ ...filters, dateTo: v })
+  }
+
   const handleClearFilters = () => {
     onFiltersChange({})
   }
@@ -69,6 +98,7 @@ export function FiltersBar({
     filters.dateFrom ||
     filters.dateTo ||
     filters.linkedDecision !== undefined ||
+    filters.previewStatus?.length ||
     (filters.search?.trim().length ?? 0) > 0
 
   return (

@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { VersionHistoryPanel } from './version-history-panel'
+import { VersionTimeline } from './version-timeline'
 import { DecisionLinkIndicator } from './decision-link-indicator'
 import type { LibraryFile, FileVersion } from '@/types/files-library'
 
@@ -152,7 +152,7 @@ export function FileDetailModal({
               )}
             </div>
 
-            <VersionHistoryPanel
+            <VersionTimeline
               versions={versions}
               currentVersionId={file.currentVersionId}
               onRevert={onRevertVersion}

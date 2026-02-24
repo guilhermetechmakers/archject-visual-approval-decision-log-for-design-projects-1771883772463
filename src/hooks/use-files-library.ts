@@ -10,6 +10,7 @@ import {
   mockLibraryFiles,
   mockFileVersions,
 } from '@/lib/files-library-mock'
+import { computeFileHash } from '@/lib/file-hash'
 import type {
   LibraryFile,
   FileFilters,
@@ -50,6 +51,11 @@ function filterFiles(
       (f) =>
         f.name.toLowerCase().includes(q) ||
         f.type.toLowerCase().includes(q)
+    )
+  }
+  if (filters.previewStatus?.length) {
+    result = result.filter(
+      (f) => f.previewStatus && filters.previewStatus!.includes(f.previewStatus)
     )
   }
   return result
@@ -103,15 +109,47 @@ export function useFileDetail(projectId: string, fileId: string | null) {
   })
 }
 
+export interface UploadFilesOptions {
+  files: File[]
+  onProgress?: (progress: UploadProgress[]) => void
+  hash?: Record<string, string>
+}
+
 export function useUploadFiles(projectId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (files: File[]) => {
+    mutationFn: async (input: File[] | UploadFilesOptions) => {
+      const opts = Array.isArray(input)
+        ? { files: input }
+        : input
+      const { files, onProgress, hash: hashes } = opts
+      const fileIds = files.map((_, i) => `file-${Date.now()}-${i}`)
+      const initialProgress: UploadProgress[] = files.map((f, i) => ({
+        fileId: fileIds[i],
+        fileName: f.name,
+        progress: 0,
+        status: 'pending',
+      }))
+      onProgress?.(initialProgress)
+
+      const updateProgress = (idx: number, updates: Partial<UploadProgress>) => {
+        const next = [...initialProgress]
+        next[idx] = { ...next[idx], ...updates }
+        onProgress?.(next)
+      }
+
       if (USE_MOCK) {
-        await new Promise((r) => setTimeout(r, 1500))
+        for (let i = 0; i < files.length; i++) {
+          updateProgress(i, { status: 'uploading', progress: 0 })
+          for (let p = 0; p <= 100; p += 20) {
+            await new Promise((r) => setTimeout(r, 80))
+            updateProgress(i, { progress: p })
+          }
+          updateProgress(i, { status: 'success', progress: 100 })
+        }
         return {
           files: files.map((f, i) => ({
-            id: `file-new-${Date.now()}-${i}`,
+            id: fileIds[i],
             name: f.name,
             type: 'drawing' as const,
             size: f.size,
@@ -123,6 +161,7 @@ export function useUploadFiles(projectId: string) {
             projectId,
             isDeleted: false,
             previewUrl: null,
+            previewStatus: 'processing' as const,
             cdnUrl: URL.createObjectURL(f),
             version: 1,
             linkedDecisionsCount: 0,
@@ -130,9 +169,18 @@ export function useUploadFiles(projectId: string) {
           })) as LibraryFile[],
         }
       }
+
       const formData = new FormData()
       files.forEach((f) => formData.append('files', f))
-      return filesApi.uploadFiles(projectId, formData)
+      const firstHash = hashes && Object.keys(hashes).length ? Object.values(hashes)[0] : undefined
+      const result = await filesApi.uploadFiles(projectId, formData, {
+        hash: firstHash,
+        onProgress: (percent) => {
+          files.forEach((_, i) => updateProgress(i, { status: 'uploading', progress: percent }))
+        },
+      })
+      files.forEach((_, i) => updateProgress(i, { status: 'success', progress: 100 }))
+      return result
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['files-library', projectId] })
@@ -210,6 +258,53 @@ export function useLinkFileToDecision(projectId: string) {
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : 'Link failed')
+    },
+  })
+}
+
+export function useDeleteFile(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (fileId: string) =>
+      filesApi.deleteFile(projectId, fileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['files-library', projectId] })
+      toast.success('File removed')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Delete failed')
+    },
+  })
+}
+
+export function useDeleteFile(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (fileId: string) => filesApi.deleteFile(projectId, fileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['files-library', projectId] })
+      toast.success('File removed')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to remove file')
+    },
+  })
+}
+
+export function useExportFileBundle(projectId: string) {
+  return useMutation({
+    mutationFn: (fileId: string) => filesApi.exportFileBundle(projectId, fileId),
+    onSuccess: (blob) => {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `export-${Date.now()}.zip`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Export downloaded')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Export failed')
     },
   })
 }

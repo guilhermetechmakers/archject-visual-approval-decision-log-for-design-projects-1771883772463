@@ -8,6 +8,9 @@ import {
   Eye,
   Grid3X3,
   List,
+  Loader2,
+  AlertCircle,
+  Trash2,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -21,8 +24,18 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { DecisionLinkIndicator } from './decision-link-indicator'
-import type { LibraryFile } from '@/types/files-library'
+import type { LibraryFile, PreviewStatus } from '@/types/files-library'
 import type { FileType } from '@/types/workspace'
+
+const previewStatusConfig: Record<
+  PreviewStatus,
+  { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }
+> = {
+  queued: { label: 'Queued', variant: 'secondary' },
+  processing: { label: 'Processing', variant: 'secondary' },
+  available: { label: 'Ready', variant: 'default' },
+  failed: { label: 'Failed', variant: 'destructive' },
+}
 
 const fileTypeIcons: Record<FileType, React.ComponentType<{ className?: string }>> = {
   drawing: FileText,
@@ -53,6 +66,9 @@ export interface FileCardGridProps {
   onDownload?: (file: LibraryFile) => void
   onLinkToDecision?: (file: LibraryFile) => void
   onNavigateToDecision?: (decisionId: string) => void
+  onDelete?: (file: LibraryFile) => void
+  onExport?: (file: LibraryFile) => void
+  canDelete?: boolean
   isLoading?: boolean
   className?: string
 }
@@ -65,6 +81,9 @@ export function FileCardGrid({
   onDownload,
   onLinkToDecision,
   onNavigateToDecision,
+  onDelete,
+  onExport,
+  canDelete = false,
   isLoading = false,
   className,
 }: FileCardGridProps) {
@@ -149,6 +168,8 @@ export function FileCardGrid({
             onDownload={onDownload}
             onLinkToDecision={onLinkToDecision}
             onNavigateToDecision={onNavigateToDecision}
+            onDelete={canDelete ? onDelete : undefined}
+            onExport={onExport}
           />
         ))}
       </div>
@@ -163,6 +184,8 @@ function FileCard({
   onDownload,
   onLinkToDecision,
   onNavigateToDecision,
+  onDelete,
+  onExport,
 }: {
   file: LibraryFile
   viewMode: 'grid' | 'list'
@@ -170,6 +193,8 @@ function FileCard({
   onDownload?: (file: LibraryFile) => void
   onLinkToDecision?: (file: LibraryFile) => void
   onNavigateToDecision?: (decisionId: string) => void
+  onDelete?: (file: LibraryFile) => void
+  onExport?: (file: LibraryFile) => void
 }) {
   const Icon = fileTypeIcons[file.type] ?? File
 
@@ -211,6 +236,20 @@ function FileCard({
           linkedDecisions={file.linkedDecisions}
           onNavigate={onNavigateToDecision}
         />
+        {file.previewStatus && file.previewStatus !== 'available' && (
+          <Badge
+            variant={previewStatusConfig[file.previewStatus]?.variant ?? 'secondary'}
+            className="text-xs gap-1"
+          >
+            {(file.previewStatus === 'queued' || file.previewStatus === 'processing') && (
+              <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+            )}
+            {file.previewStatus === 'failed' && (
+              <AlertCircle className="h-3 w-3" aria-hidden />
+            )}
+            {previewStatusConfig[file.previewStatus]?.label ?? file.previewStatus}
+          </Badge>
+        )}
         {file.version > 1 && (
           <Badge variant="secondary" className="text-xs">
             Updated
@@ -279,9 +318,20 @@ function FileCard({
             <DropdownMenuItem onClick={() => onLinkToDecision?.(file)}>
               Link to decision
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              Remove
-            </DropdownMenuItem>
+            {onExport && (
+              <DropdownMenuItem onClick={() => onExport?.(file)}>
+                Export bundle
+              </DropdownMenuItem>
+            )}
+            {onDelete && (
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => onDelete?.(file)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Remove
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
