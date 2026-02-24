@@ -1,6 +1,7 @@
 /**
  * User Filters Panel - search, status, role, last activity.
  * Advanced filters for Admin User Management.
+ * Uses design tokens, accessible labels, mobile-first layout.
  */
 
 import * as React from 'react'
@@ -82,69 +83,98 @@ export function UserFiltersPanel({
     (filters.search ?? '').trim() !== ''
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-4', className)}>
-      <div className="relative max-w-xs flex-1">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <div
+      role="group"
+      aria-label="User filters"
+      className={cn(
+        'flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center',
+        className
+      )}
+    >
+      <div className="relative w-full flex-1 sm:max-w-xs">
+        <Search
+          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+          aria-hidden
+        />
         <Input
           type="search"
           placeholder="Search by name, email, ID..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="pl-9"
-          aria-label="Search users"
+          className="min-h-[44px] pl-9"
+          aria-label="Search users by name, email, or ID"
         />
       </div>
-      <Select
-        value={filters.status}
-        onValueChange={(v) => onFiltersChange({ ...filters, status: v })}
-      >
-        <SelectTrigger className="w-[140px]">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          {STATUS_OPTIONS.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select
-        value={filters.role}
-        onValueChange={(v) => onFiltersChange({ ...filters, role: v })}
-      >
-        <SelectTrigger className="w-[140px]">
-          <SelectValue placeholder="Role" />
-        </SelectTrigger>
-        <SelectContent>
-          {ROLE_OPTIONS.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select
-        value={filters.lastActivity}
-        onValueChange={(v) => onFiltersChange({ ...filters, lastActivity: v })}
-      >
-        <SelectTrigger className="w-[160px]">
-          <SelectValue placeholder="Last activity" />
-        </SelectTrigger>
-        <SelectContent>
-          {ACTIVITY_OPTIONS.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {hasActiveFilters && (
-        <Button variant="ghost" size="sm" onClick={onReset}>
-          <X className="mr-1 h-4 w-4" />
-          Reset
-        </Button>
-      )}
+      <div className="flex flex-wrap items-center gap-4">
+        <Select
+          value={filters.status}
+          onValueChange={(v) => onFiltersChange({ ...filters, status: v })}
+        >
+          <SelectTrigger
+            className="min-h-[44px] w-full sm:w-[140px]"
+            aria-label="Filter by status"
+          >
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={filters.role}
+          onValueChange={(v) => onFiltersChange({ ...filters, role: v })}
+        >
+          <SelectTrigger
+            className="min-h-[44px] w-full sm:w-[140px]"
+            aria-label="Filter by role"
+          >
+            <SelectValue placeholder="Role" />
+          </SelectTrigger>
+          <SelectContent>
+            {ROLE_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={filters.lastActivity}
+          onValueChange={(v) =>
+            onFiltersChange({ ...filters, lastActivity: v })
+          }
+        >
+          <SelectTrigger
+            className="min-h-[44px] w-full sm:w-[160px]"
+            aria-label="Filter by last activity"
+          >
+            <SelectValue placeholder="Last activity" />
+          </SelectTrigger>
+          <SelectContent>
+            {ACTIVITY_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onReset}
+            className="min-h-[44px]"
+            aria-label="Reset all filters"
+          >
+            <X className="mr-1 h-4 w-4" aria-hidden />
+            Reset
+          </Button>
+        )}
+      </div>
     </div>
   )
 }
