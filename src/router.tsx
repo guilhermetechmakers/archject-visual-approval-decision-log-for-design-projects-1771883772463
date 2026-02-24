@@ -165,6 +165,7 @@ export const router = createBrowserRouter([
       { path: '/pricing', element: <Navigate to="/#pricing" replace /> },
       { path: '/about', element: <Navigate to="/dashboard/help" replace /> },
       { path: '/500', element: <ServerErrorPage /> },
+      { path: '/server-error', element: <ServerErrorPage /> },
       { path: '/404', element: <NotFoundPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
