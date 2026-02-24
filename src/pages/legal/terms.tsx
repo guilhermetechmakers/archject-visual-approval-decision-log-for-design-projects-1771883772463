@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
-import { AlertCircle, FileText } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { AlertCircle, FileText, Home } from 'lucide-react'
 import { HeaderNav } from '@/components/layout/header-nav'
 import {
   HeroHeader,
@@ -151,7 +152,7 @@ export function TermsPage() {
             </div>
           </div>
         ) : (
-          <TermsPageEmptyState />
+          <TermsPageEmptyState onRetry={refetch} />
         )}
       </main>
     </div>
@@ -184,10 +185,14 @@ function TermsPageSkeleton() {
   )
 }
 
-function TermsPageEmptyState() {
+interface TermsPageEmptyStateProps {
+  onRetry?: () => void
+}
+
+function TermsPageEmptyState({ onRetry }: TermsPageEmptyStateProps) {
   return (
     <Card
-      className="flex flex-col items-center justify-center gap-4 py-12 text-center"
+      className="flex flex-col items-center justify-center gap-6 py-12 px-6 text-center shadow-card"
       role="status"
       aria-label="No content available"
     >
@@ -203,6 +208,30 @@ function TermsPageEmptyState() {
           The Terms of Service document could not be found. Please try again
           later or contact support.
         </p>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        {onRetry && (
+          <Button
+            onClick={onRetry}
+            size="sm"
+            className="rounded-full transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
+            aria-label="Retry loading Terms of Service"
+          >
+            Try again
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          asChild
+          className="rounded-full transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
+          aria-label="Go to home"
+        >
+          <Link to="/">
+            <Home className="mr-2 h-4 w-4" aria-hidden />
+            Go to home
+          </Link>
+        </Button>
       </div>
     </Card>
   )
