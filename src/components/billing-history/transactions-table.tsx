@@ -8,6 +8,9 @@ import {
   FileText,
   MoreHorizontal,
   ExternalLink,
+  Filter,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -53,6 +56,9 @@ interface TransactionsTableProps {
   sortBy: 'date' | 'type' | 'amount'
   sortOrder: 'asc' | 'desc'
   isLoading?: boolean
+  error?: Error | null
+  onRetry?: () => void
+  onEmptyStateAction?: () => void
   onPageChange: (page: number) => void
   onSortChange: (sortBy: 'date' | 'type' | 'amount', sortOrder: 'asc' | 'desc') => void
   onHighlightItem?: (id: string | null) => void
@@ -116,9 +122,9 @@ function TransactionRow({
               variant="ghost"
               size="icon-sm"
               className="h-8 w-8"
-              aria-label="Row actions"
+              aria-label={`Actions for transaction: ${item.description ?? item.invoice_id ?? item.id}`}
             >
-              <MoreHorizontal className="h-4 w-4" />
+              <MoreHorizontal className="h-4 w-4" aria-hidden />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="rounded-xl">
@@ -152,6 +158,39 @@ function TransactionRow({
   )
 }
 
+function TransactionsTableSkeleton() {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="min-w-[600px]">
+        <div className="flex border-b border-border bg-muted/30 px-4 py-3">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="ml-6 h-4 w-16" />
+          <Skeleton className="ml-6 h-4 w-32" />
+          <Skeleton className="ml-6 h-4 w-24" />
+          <Skeleton className="ml-6 h-4 w-16" />
+          <Skeleton className="ml-6 h-4 w-28" />
+          <Skeleton className="ml-6 h-4 w-16" />
+        </div>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center border-b border-border px-4 py-4 last:border-b-0"
+            role="presentation"
+          >
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="ml-6 h-4 w-20" />
+            <Skeleton className="ml-6 h-4 w-40" />
+            <Skeleton className="ml-6 h-4 w-20" />
+            <Skeleton className="ml-6 h-5 w-14 rounded-md" />
+            <Skeleton className="ml-6 h-4 w-16" />
+            <Skeleton className="ml-6 h-8 w-8 rounded-md" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function TransactionsTable({
   items,
   total,
@@ -160,6 +199,9 @@ export function TransactionsTable({
   sortBy,
   sortOrder,
   isLoading,
+  error,
+  onRetry,
+  onEmptyStateAction,
   onPageChange,
   onSortChange,
   onHighlightItem: _onHighlightItem,
@@ -189,10 +231,15 @@ export function TransactionsTable({
   const renderSortIcon = (column: 'date' | 'type' | 'amount') => {
     if (sortBy !== column) return null
     return sortOrder === 'asc' ? (
-      <ChevronUp className="h-4 w-4" />
+      <ChevronUp className="h-4 w-4" aria-hidden />
     ) : (
-      <ChevronDown className="h-4 w-4" />
+      <ChevronDown className="h-4 w-4" aria-hidden />
     )
+  }
+
+  const getSortAriaLabel = (column: 'date' | 'type' | 'amount') => {
+    const order = sortBy === column ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'
+    return `Sort by ${column} ${order}`
   }
 
   return (
@@ -214,21 +261,59 @@ export function TransactionsTable({
           </div>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
+          {error ? (
+            <div
+              className="flex flex-col items-center justify-center rounded-xl border border-dashed border-destructive/30 bg-destructive/5 py-16 px-6 text-center"
+              role="alert"
+              aria-live="polite"
+            >
+              <AlertCircle className="h-12 w-12 text-destructive" aria-hidden />
+              <p className="mt-4 text-sm font-medium text-foreground">
+                Unable to load transactions
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {error.message || 'Something went wrong. Please try again.'}
+              </p>
+              {onRetry && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onRetry}
+                  className="mt-4 rounded-lg"
+                  aria-label="Retry loading transactions"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Try again
+                </Button>
+              )}
             </div>
+          ) : isLoading ? (
+            <TransactionsTableSkeleton />
           ) : items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground" />
-              <p className="mt-2 text-sm font-medium text-foreground">
+            <div
+              className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 py-16 px-6 text-center"
+              role="status"
+              aria-label="No transactions found"
+            >
+              <FileText className="h-12 w-12 text-muted-foreground" aria-hidden />
+              <p className="mt-4 text-sm font-medium text-foreground">
                 No transactions found
               </p>
-              <p className="text-sm text-muted-foreground">
-                Adjust your filters or date range to see more results
+              <p className="mt-1 text-sm text-muted-foreground">
+                Adjust your filters or date range to see more results. Try expanding the date range or clearing type filters.
               </p>
+              {onEmptyStateAction && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onEmptyStateAction}
+                  className="mt-4 rounded-lg"
+                  aria-label="Adjust filters to find transactions"
+                >
+                  <Filter className="h-4 w-4" />
+                  Adjust filters
+                </Button>
+              )}
             </div>
           ) : (
             <>
@@ -240,7 +325,8 @@ export function TransactionsTable({
                         <button
                           type="button"
                           onClick={() => handleSort('date')}
-                          className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
+                          className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
+                          aria-label={getSortAriaLabel('date')}
                         >
                           Date
                           {renderSortIcon('date')}
@@ -250,7 +336,8 @@ export function TransactionsTable({
                         <button
                           type="button"
                           onClick={() => handleSort('type')}
-                          className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
+                          className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
+                          aria-label={getSortAriaLabel('type')}
                         >
                           Type
                           {renderSortIcon('type')}
@@ -261,7 +348,8 @@ export function TransactionsTable({
                         <button
                           type="button"
                           onClick={() => handleSort('amount')}
-                          className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
+                          className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
+                          aria-label={getSortAriaLabel('amount')}
                         >
                           Amount
                           {renderSortIcon('amount')}

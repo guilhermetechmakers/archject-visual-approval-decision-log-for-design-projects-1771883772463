@@ -114,7 +114,7 @@ export function BillingHistoryPage() {
     sort_order: sortOrder,
   }
 
-  const { data, isLoading, refetch } = useBillingHistory(historyParams)
+  const { data, isLoading, isError, error, refetch } = useBillingHistory(historyParams)
   const items = data?.items ?? []
   const total = data?.total ?? 0
 
@@ -195,16 +195,27 @@ export function BillingHistoryPage() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="rounded-lg">
-              <Download className="h-4 w-4" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-lg"
+              aria-label="Export transactions to CSV or JSON"
+            >
+              <Download className="h-4 w-4" aria-hidden />
               Export
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="rounded-xl">
-            <DropdownMenuItem onClick={() => exportToCsv(items)}>
+            <DropdownMenuItem
+              onClick={() => exportToCsv(items)}
+              aria-label="Export transactions as CSV file"
+            >
               Export as CSV
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToJson(items)}>
+            <DropdownMenuItem
+              onClick={() => exportToJson(items)}
+              aria-label="Export transactions as JSON file"
+            >
               Export as JSON
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -230,6 +241,9 @@ export function BillingHistoryPage() {
             sortBy={sortBy}
             sortOrder={sortOrder}
             isLoading={isLoading}
+            error={isError && error ? (error as Error) : null}
+            onRetry={() => refetch()}
+            onEmptyStateAction={handleReset}
             onPageChange={setPage}
             onSortChange={(by, order) => {
               setSortBy(by)
