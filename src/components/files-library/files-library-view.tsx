@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import {
   FileUploadZone,
   FileCardGrid,
@@ -10,6 +11,7 @@ import {
   ProjectWorkspaceLink,
 } from '@/components/files-library'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   useFilesLibrary,
   useUploadFiles,
@@ -48,7 +50,14 @@ export function FilesLibraryView({
   const [attachFile, setAttachFile] = useState<LibraryFile | null>(null)
 
   const { project } = useProjectWorkspace(projectId ?? '')
-  const { data, isLoading } = useFilesLibrary(projectId ?? '', filters)
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useFilesLibrary(projectId ?? '', filters)
   const uploadMutation = useUploadFiles(projectId ?? '')
   const { progress, setProgressList, clearProgress } = useUploadProgress()
   const { data: detailData } = useFileDetail(
@@ -160,14 +169,72 @@ export function FilesLibraryView({
 
   if (!projectId) return null
 
+  if (isError) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to load files'
+    return (
+      <div className={className}>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold text-foreground">
+            Files & Drawings Library
+          </h2>
+        </div>
+        <Card
+          className="border-destructive/30 bg-destructive/5"
+          role="alert"
+          aria-label="Failed to load files"
+        >
+          <CardContent className="flex flex-col items-center justify-center px-6 py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+              <AlertCircle
+                className="h-7 w-7 text-destructive"
+                aria-hidden
+              />
+            </div>
+            <h2 className="mt-6 text-lg font-semibold text-foreground">
+              Unable to load files
+            </h2>
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+              {errorMessage}
+            </p>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              Please check your connection and try again.
+            </p>
+            <Button
+              variant="outline"
+              className="mt-6 rounded-lg"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              aria-label={
+                isFetching ? 'Retrying to load files' : 'Retry loading files'
+              }
+            >
+              {isFetching ? (
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" aria-hidden />
+              )}
+              {isFetching ? 'Retrying…' : 'Retry'}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className={className}>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold">Files & Drawings Library</h2>
+        <h2 className="text-lg font-semibold text-foreground">
+          Files & Drawings Library
+        </h2>
         <div className="flex items-center gap-2">
           {showFullLibraryLink && (
             <Button variant="outline" size="sm" asChild>
-              <Link to={`/dashboard/projects/${projectId}/files`}>
+              <Link
+                to={`/dashboard/projects/${projectId}/files`}
+                aria-label="Open full files library"
+              >
                 Open full library
               </Link>
             </Button>
@@ -202,6 +269,17 @@ export function FilesLibraryView({
           onExport={handleExportFile}
           canDelete
           isLoading={isLoading}
+          hasActiveFilters={
+            !!(
+              filters.type?.length ||
+              filters.dateFrom ||
+              filters.dateTo ||
+              filters.linkedDecision !== undefined ||
+              filters.previewStatus?.length ||
+              (filters.search?.trim().length ?? 0) > 0
+            )
+          }
+          onClearFilters={() => setFilters({})}
         />
       </div>
 

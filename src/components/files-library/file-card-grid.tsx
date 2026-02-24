@@ -70,6 +70,10 @@ export interface FileCardGridProps {
   onExport?: (file: LibraryFile) => void
   canDelete?: boolean
   isLoading?: boolean
+  /** When true and files are empty, shows "No files match your filters" instead of "No files yet" */
+  hasActiveFilters?: boolean
+  /** Called when user clicks "Clear filters" in empty state (when hasActiveFilters) */
+  onClearFilters?: () => void
   className?: string
 }
 
@@ -85,6 +89,8 @@ export function FileCardGrid({
   onExport,
   canDelete = false,
   isLoading = false,
+  hasActiveFilters = false,
+  onClearFilters,
   className,
 }: FileCardGridProps) {
   if (isLoading) {
@@ -97,15 +103,17 @@ export function FileCardGrid({
             : 'grid-cols-1',
           className
         )}
+        role="status"
+        aria-label="Loading files"
       >
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <Card key={i} className="overflow-hidden">
             <CardContent className="p-0">
-              <Skeleton className="h-32 w-full" />
-              <div className="p-4 space-y-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-                <Skeleton className="h-3 w-1/3" />
+              <Skeleton className="h-32 w-full" aria-hidden />
+              <div className="space-y-2 p-4">
+                <Skeleton className="h-4 w-3/4" aria-hidden />
+                <Skeleton className="h-3 w-1/2" aria-hidden />
+                <Skeleton className="h-3 w-1/3" aria-hidden />
               </div>
             </CardContent>
           </Card>
@@ -116,13 +124,39 @@ export function FileCardGrid({
 
   if (files.length === 0) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <FileText className="h-12 w-12 text-muted-foreground" />
-          <p className="mt-4 font-medium">No files yet</p>
-          <p className="text-sm text-muted-foreground">
-            Upload drawings, specs, or BIM files to get started.
+      <Card
+        className="border-dashed border-border"
+        role="status"
+        aria-label={
+          hasActiveFilters
+            ? 'No files match your current filters'
+            : 'No files in library'
+        }
+      >
+        <CardContent className="flex flex-col items-center justify-center px-6 py-16 text-center">
+          <FileText
+            className="h-12 w-12 text-muted-foreground"
+            aria-hidden
+          />
+          <h3 className="mt-4 text-base font-semibold text-foreground">
+            {hasActiveFilters ? 'No files match your filters' : 'No files yet'}
+          </h3>
+          <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+            {hasActiveFilters
+              ? 'Try adjusting your filters or clear them to see all files.'
+              : 'Drag and drop files in the upload zone above, or click to browse. Supports PDF, images, and BIM files.'}
           </p>
+          {hasActiveFilters && onClearFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-6 rounded-lg"
+              onClick={onClearFilters}
+              aria-label="Clear filters to show all files"
+            >
+              Clear filters
+            </Button>
+          )}
         </CardContent>
       </Card>
     )
@@ -264,9 +298,9 @@ function FileCard({
             e.stopPropagation()
             onPreview?.(file)
           }}
-          aria-label="Preview"
+          aria-label={`Preview ${file.name}`}
         >
-          <Eye className="h-4 w-4" />
+          <Eye className="h-4 w-4" aria-hidden />
         </Button>
         <Button
           variant="ghost"
@@ -276,14 +310,21 @@ function FileCard({
             onDownload?.(file)
           }}
           asChild={!!file.cdnUrl}
-          aria-label="Download"
+          aria-label={`Download ${file.name}`}
         >
           {file.cdnUrl ? (
-            <a href={file.cdnUrl} download target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
-              <Download className="h-4 w-4" />
+            <a
+              href={file.cdnUrl}
+              download
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              aria-label={`Download ${file.name}`}
+            >
+              <Download className="h-4 w-4" aria-hidden />
             </a>
           ) : (
-            <Download className="h-4 w-4" />
+            <Download className="h-4 w-4" aria-hidden />
           )}
         </Button>
         <Button
@@ -293,9 +334,9 @@ function FileCard({
             e.stopPropagation()
             onLinkToDecision?.(file)
           }}
-          aria-label="Link to decision"
+          aria-label={`Link ${file.name} to decision`}
         >
-          <Link2 className="h-4 w-4" />
+          <Link2 className="h-4 w-4" aria-hidden />
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -303,9 +344,9 @@ function FileCard({
               variant="ghost"
               size="icon-sm"
               onClick={(e) => e.stopPropagation()}
-              aria-label="More actions"
+              aria-label={`More actions for ${file.name}`}
             >
-              <MoreHorizontal className="h-4 w-4" />
+              <MoreHorizontal className="h-4 w-4" aria-hidden />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
