@@ -37,6 +37,7 @@ interface AdminDataTableProps<T> {
   totalCount?: number
   onPageChange?: (page: number) => void
   emptyMessage?: string
+  emptyDescription?: string
   emptyIcon?: React.ElementType
   getRowId: (row: T) => string
   selectable?: boolean
@@ -57,6 +58,7 @@ export function AdminDataTable<T>({
   totalCount,
   onPageChange,
   emptyMessage = 'No data',
+  emptyDescription,
   emptyIcon: EmptyIcon,
   getRowId,
   selectable = false,
@@ -116,9 +118,20 @@ export function AdminDataTable<T>({
             ))}
           </div>
         ) : data.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            {EmptyIcon && <EmptyIcon className="h-12 w-12 text-muted-foreground" />}
-            <p className="mt-4 font-medium">{emptyMessage}</p>
+          <div
+            className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center"
+            role="status"
+            aria-live="polite"
+          >
+            {EmptyIcon && (
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-muted">
+                <EmptyIcon className="h-7 w-7 text-muted-foreground" aria-hidden />
+              </div>
+            )}
+            <p className="mt-6 text-lg font-semibold text-foreground">{emptyMessage}</p>
+            {emptyDescription && (
+              <p className="mt-2 max-w-sm text-sm text-muted-foreground">{emptyDescription}</p>
+            )}
           </div>
         ) : (
           <Table>

@@ -7,6 +7,7 @@ import { useSearchParams } from 'react-router-dom'
 import {
   UserMinus,
   UserCheck,
+  Users,
   Building2,
   CreditCard,
   MessageSquare,
@@ -306,6 +307,8 @@ export function AdminToolsPage() {
                   data={users ?? []}
                   getRowId={(r) => r.id}
                   emptyMessage="No users found"
+                  emptyDescription="Users will appear here once they sign up or are invited to workspaces. Check back later or verify your admin filters."
+                  emptyIcon={Users}
                 />
               )}
             </CardContent>
@@ -351,6 +354,8 @@ export function AdminToolsPage() {
                   data={workspaces ?? []}
                   getRowId={(r) => r.id}
                   emptyMessage="No workspaces found"
+                  emptyDescription="Workspaces will appear here once they are created. Check back later or verify your admin filters."
+                  emptyIcon={Building2}
                   selectable
                   selectedIds={selectedWorkspaceIds}
                   onSelectionChange={setSelectedWorkspaceIds}
