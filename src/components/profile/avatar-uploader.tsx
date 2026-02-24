@@ -179,6 +179,18 @@ export function AvatarUploader({
               Cancel selection
             </Button>
           )}
+          {value && !previewUrl && !isUploading && onRemove && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-destructive"
+              onClick={onRemove}
+              disabled={disabled}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Remove avatar
+            </Button>
+          )}
           {displayError && (
             <p className="text-sm text-destructive" role="alert">
               {displayError}
