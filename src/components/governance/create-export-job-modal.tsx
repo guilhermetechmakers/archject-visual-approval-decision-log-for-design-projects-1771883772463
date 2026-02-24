@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Download } from 'lucide-react'
+import { Download, Loader2 } from 'lucide-react'
 import { useCreateExportJob, useGovernanceWorkspaces } from '@/hooks/use-governance'
 
 export interface CreateExportJobModalProps {
@@ -129,14 +129,23 @@ export function CreateExportJobModal({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={createMutation.isPending}>
+          <Button
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={createMutation.isPending}
+            aria-label="Cancel and close dialog"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={!workspaceId || (!scope.decisions && !scope.logs && !scope.files) || createMutation.isPending}
+            aria-label={createMutation.isPending ? 'Creating export job' : 'Create export job'}
           >
-            {createMutation.isPending ? 'Creating...' : 'Create Export'}
+            {createMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+            ) : null}
+            {createMutation.isPending ? 'Creating…' : 'Create Export'}
           </Button>
         </DialogFooter>
       </DialogContent>

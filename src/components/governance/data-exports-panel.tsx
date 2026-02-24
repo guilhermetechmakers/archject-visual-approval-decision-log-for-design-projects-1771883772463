@@ -24,10 +24,14 @@ function ExportJobRow({
   job,
   onAbort,
   onRetry,
+  isAborting,
+  isRetrying,
 }: {
   job: DataExportJob
   onAbort: (id: string) => void
   onRetry: (id: string) => void
+  isAborting?: boolean
+  isRetrying?: boolean
 }) {
   const config = STATUS_CONFIG[job.status]
   const Icon = config.icon
@@ -36,9 +40,9 @@ function ExportJobRow({
     <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/30">
       <div className="flex items-center gap-3 min-w-0">
         {job.status === 'running' ? (
-          <Loader2 className="h-5 w-5 shrink-0 animate-spin text-primary" />
+          <Loader2 className="h-5 w-5 shrink-0 animate-spin text-primary" aria-hidden />
         ) : (
-          <Icon className={cn('h-5 w-5 shrink-0', job.status === 'completed' && 'text-success', job.status === 'failed' && 'text-destructive')} />
+          <Icon className={cn('h-5 w-5 shrink-0', job.status === 'completed' && 'text-success', job.status === 'failed' && 'text-destructive')} aria-hidden />
         )}
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">
@@ -56,22 +60,42 @@ function ExportJobRow({
         </Badge>
         {job.status === 'completed' && job.download_url && (
           <Button variant="outline" size="sm" asChild>
-            <a href={job.download_url} download>
-              <Download className="mr-1 h-4 w-4" />
+            <a href={job.download_url} download aria-label={`Download export ${job.workspace_id} ${job.format}`}>
+              <Download className="mr-1 h-4 w-4" aria-hidden />
               Download
             </a>
           </Button>
         )}
         {job.status === 'running' && (
-          <Button variant="outline" size="sm" onClick={() => onAbort(job.id)}>
-            <Square className="mr-1 h-4 w-4" />
-            Abort
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onAbort(job.id)}
+            disabled={isAborting}
+            aria-label={isAborting ? 'Aborting export' : `Abort export ${job.workspace_id}`}
+          >
+            {isAborting ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Square className="mr-1 h-4 w-4" aria-hidden />
+            )}
+            {isAborting ? 'Aborting…' : 'Abort'}
           </Button>
         )}
         {job.status === 'failed' && (
-          <Button variant="outline" size="sm" onClick={() => onRetry(job.id)}>
-            <RotateCw className="mr-1 h-4 w-4" />
-            Retry
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onRetry(job.id)}
+            disabled={isRetrying}
+            aria-label={isRetrying ? 'Retrying export' : `Retry export ${job.workspace_id}`}
+          >
+            {isRetrying ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <RotateCw className="mr-1 h-4 w-4" aria-hidden />
+            )}
+            {isRetrying ? 'Retrying…' : 'Retry'}
           </Button>
         )}
       </div>
@@ -98,7 +122,12 @@ export function DataExportsPanel({ workspaceId, className }: DataExportsPanelPro
             <FileArchive className="h-5 w-5 text-primary" />
             Data Exports
           </CardTitle>
-          <Button size="sm" className="rounded-full" onClick={() => setCreateModalOpen(true)}>
+          <Button
+            size="sm"
+            className="rounded-full"
+            onClick={() => setCreateModalOpen(true)}
+            aria-label="Create new export job"
+          >
             Create export
           </Button>
         </CardHeader>
@@ -113,7 +142,13 @@ export function DataExportsPanel({ workspaceId, className }: DataExportsPanelPro
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <FileArchive className="h-10 w-10 text-muted-foreground" />
               <p className="mt-2 text-sm text-muted-foreground">No export jobs yet</p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={() => setCreateModalOpen(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => setCreateModalOpen(true)}
+                aria-label="Create first export job"
+              >
                 Create first export
               </Button>
             </div>
@@ -125,6 +160,8 @@ export function DataExportsPanel({ workspaceId, className }: DataExportsPanelPro
                   job={job}
                   onAbort={(id) => abortMutation.mutate(id)}
                   onRetry={(id) => retryMutation.mutate(id)}
+                  isAborting={abortMutation.isPending && abortMutation.variables === job.id}
+                  isRetrying={retryMutation.isPending && retryMutation.variables === job.id}
                 />
               ))}
             </div>

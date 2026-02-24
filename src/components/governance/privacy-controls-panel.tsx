@@ -97,27 +97,42 @@ export function PrivacyControlsPanel({ workspaceId, className }: PrivacyControls
         )}
 
         <div>
-          <Label className="text-sm font-medium">Export scope</Label>
-          <Select
-            value={accessControls.export_scope ?? 'workspace'}
-            onValueChange={(v) =>
-              updateMutation.mutate({
-                workspaceId: effectiveWorkspaceId,
-                data: {
-                  access_controls: { ...accessControls, export_scope: v },
-                },
-              })
-            }
-          >
-            <SelectTrigger className="mt-2 w-[200px] rounded-lg bg-input">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="workspace">Workspace</SelectItem>
-              <SelectItem value="project">Project</SelectItem>
-              <SelectItem value="user">User</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label htmlFor="export-scope" className="text-sm font-medium">
+            Export scope
+          </Label>
+          <div className="mt-2 flex items-center gap-2">
+            <Select
+              value={accessControls.export_scope ?? 'workspace'}
+              onValueChange={(v) =>
+                updateMutation.mutate({
+                  workspaceId: effectiveWorkspaceId,
+                  data: {
+                    access_controls: { ...accessControls, export_scope: v },
+                  },
+                })
+              }
+              disabled={updateMutation.isPending}
+            >
+              <SelectTrigger
+                id="export-scope"
+                className="w-[200px] rounded-lg bg-input"
+                aria-label="Export scope - workspace, project, or user"
+                aria-busy={updateMutation.isPending}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="workspace">Workspace</SelectItem>
+                <SelectItem value="project">Project</SelectItem>
+                <SelectItem value="user">User</SelectItem>
+              </SelectContent>
+            </Select>
+            {updateMutation.isPending && (
+              <span className="text-xs text-muted-foreground" role="status" aria-live="polite">
+                Saving…
+              </span>
+            )}
+          </div>
         </div>
 
         {control?.last_applied_at && (

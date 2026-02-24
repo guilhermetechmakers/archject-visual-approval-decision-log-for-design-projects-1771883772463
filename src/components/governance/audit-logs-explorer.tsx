@@ -4,7 +4,7 @@
  */
 
 import * as React from 'react'
-import { History, Filter, Download, ChevronLeft, ChevronRight } from 'lucide-react'
+import { History, Filter, Download, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -92,9 +92,11 @@ export function AuditLogsExplorer({ workspaceId, projectId, className }: AuditLo
 
   const { data, isLoading } = useAuditLogs(filters)
 
+  const [isExporting, setIsExporting] = React.useState(false)
   const handleExport = () => {
-    // Export would trigger API call - placeholder
-    return
+    setIsExporting(true)
+    // Export would trigger API call - placeholder; simulate async for loading state
+    setTimeout(() => setIsExporting(false), 1500)
   }
 
   return (
@@ -105,9 +107,20 @@ export function AuditLogsExplorer({ workspaceId, projectId, className }: AuditLo
             <History className="h-5 w-5 text-primary" />
             Audit Logs Explorer
           </CardTitle>
-          <Button variant="outline" size="sm" className="rounded-full w-fit" onClick={handleExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-full w-fit"
+            onClick={handleExport}
+            disabled={isExporting}
+            aria-label={isExporting ? 'Exporting audit logs' : 'Export audit logs'}
+          >
+            {isExporting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Download className="mr-2 h-4 w-4" aria-hidden />
+            )}
+            {isExporting ? 'Exporting…' : 'Export'}
           </Button>
         </div>
       </CardHeader>
@@ -181,16 +194,18 @@ export function AuditLogsExplorer({ workspaceId, projectId, className }: AuditLo
                 size="sm"
                 disabled={offset === 0}
                 onClick={() => setOffset((o) => Math.max(0, o - limit))}
+                aria-label="Previous page"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" aria-hidden />
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={offset + limit >= data.total}
                 onClick={() => setOffset((o) => o + limit)}
+                aria-label="Next page"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" aria-hidden />
               </Button>
             </div>
           </div>

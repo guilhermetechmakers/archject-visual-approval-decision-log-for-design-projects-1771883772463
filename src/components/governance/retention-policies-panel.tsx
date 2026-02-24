@@ -3,7 +3,7 @@
  */
 
 import * as React from 'react'
-import { Database, Plus, Shield, Trash2, Pencil } from 'lucide-react'
+import { Database, Plus, Shield, Trash2, Pencil, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -162,11 +162,24 @@ function RetentionPolicyForm({
         <Label htmlFor="legal-hold" className="cursor-pointer">Legal hold</Label>
       </div>
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isLoading}
+          aria-label="Cancel and close form"
+        >
           Cancel
         </Button>
-        <Button type="submit" disabled={!policyName || !durationDays || isLoading}>
-          {isLoading ? 'Saving...' : policy ? 'Update' : 'Create'}
+        <Button
+          type="submit"
+          disabled={!policyName || !durationDays || isLoading}
+          aria-label={isLoading ? 'Saving retention policy' : policy ? 'Update retention policy' : 'Create retention policy'}
+        >
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+          ) : null}
+          {isLoading ? 'Saving…' : policy ? 'Update' : 'Create'}
         </Button>
       </DialogFooter>
     </form>
@@ -234,8 +247,13 @@ export function RetentionPoliciesPanel({ workspaceId, className }: RetentionPoli
             <Database className="h-5 w-5 text-primary" />
             Retention Policies
           </CardTitle>
-          <Button size="sm" className="rounded-full" onClick={() => { setEditingPolicy(null); setFormOpen(true) }}>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button
+            size="sm"
+            className="rounded-full"
+            onClick={() => { setEditingPolicy(null); setFormOpen(true) }}
+            aria-label="Add new retention policy"
+          >
+            <Plus className="mr-2 h-4 w-4" aria-hidden />
             Add policy
           </Button>
         </CardHeader>
@@ -250,7 +268,13 @@ export function RetentionPoliciesPanel({ workspaceId, className }: RetentionPoli
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Database className="h-10 w-10 text-muted-foreground" />
               <p className="mt-2 text-sm text-muted-foreground">No retention policies</p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={() => setFormOpen(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => setFormOpen(true)}
+                aria-label="Create first retention policy"
+              >
                 Create first policy
               </Button>
             </div>

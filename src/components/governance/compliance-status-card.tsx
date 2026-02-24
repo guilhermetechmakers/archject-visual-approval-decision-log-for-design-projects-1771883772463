@@ -51,7 +51,7 @@ export function ComplianceStatusCard() {
     <Card className="rounded-xl border border-border shadow-card transition-all duration-200 hover:shadow-card-hover">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Shield className="h-5 w-5 text-primary" />
+          <Shield className="h-5 w-5 text-primary" aria-hidden />
           Compliance Status
         </CardTitle>
         <p className="text-sm text-muted-foreground">
