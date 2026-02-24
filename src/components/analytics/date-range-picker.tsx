@@ -70,7 +70,7 @@ export function DateRangePicker({
             type="date"
             value={from}
             onChange={(e) => onChange({ from: e.target.value, to })}
-            className="rounded-lg bg-[#F5F6FA] border-border"
+            className="rounded-lg bg-input border-border"
             aria-label="Start date"
           />
         </div>
@@ -83,7 +83,7 @@ export function DateRangePicker({
             type="date"
             value={to}
             onChange={(e) => onChange({ from, to: e.target.value })}
-            className="rounded-lg bg-[#F5F6FA] border-border"
+            className="rounded-lg bg-input border-border"
             aria-label="End date"
           />
         </div>

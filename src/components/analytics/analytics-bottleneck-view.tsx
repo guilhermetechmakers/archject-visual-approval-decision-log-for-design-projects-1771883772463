@@ -8,11 +8,11 @@ import { cn } from '@/lib/utils'
 import type { BottleneckStage } from '@/types/analytics'
 
 const STAGE_COLORS = [
-  'rgb(255, 108, 108)', // destructive - high bottleneck
-  'rgb(255, 232, 163)', // warning
-  'rgb(255, 220, 168)', // muted warning
-  'rgb(123, 228, 149)', // success - low
-  'rgb(25, 92, 74)',   // primary
+  'rgb(var(--chart-destructive))',
+  'rgb(var(--chart-warning))',
+  'rgb(var(--chart-warning-muted))',
+  'rgb(var(--chart-success))',
+  'rgb(var(--chart-primary))',
 ]
 
 export interface AnalyticsBottleneckViewProps {
@@ -26,6 +26,7 @@ export function AnalyticsBottleneckView({
   onStageClick,
   className,
 }: AnalyticsBottleneckViewProps) {
+  const isEmpty = stages.length === 0
   const data = stages.map((s, i) => ({
     ...s,
     fill: STAGE_COLORS[Math.min(i, STAGE_COLORS.length - 1)],
@@ -40,6 +41,18 @@ export function AnalyticsBottleneckView({
         </p>
       </CardHeader>
       <CardContent>
+        {isEmpty ? (
+          <div
+            className="flex flex-col items-center justify-center py-16 text-center"
+            role="status"
+            aria-live="polite"
+          >
+            <p className="text-muted-foreground">No bottleneck data in this period</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Try selecting a different date range
+            </p>
+          </div>
+        ) : (
         <div className="h-[240px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -52,18 +65,18 @@ export function AnalyticsBottleneckView({
               }}
             >
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" strokeOpacity={0.5} horizontal={false} />
-              <XAxis type="number" className="text-xs" tick={{ fill: 'rgb(107, 114, 128)' }} />
+              <XAxis type="number" className="text-xs" tick={{ fill: 'rgb(var(--chart-muted))' }} />
               <YAxis
                 type="category"
                 dataKey="stage"
                 width={75}
-                tick={{ fill: 'rgb(35, 39, 47)', fontSize: 12 }}
+                tick={{ fill: 'rgb(var(--chart-foreground))', fontSize: 12 }}
                 tickFormatter={(v) => (v.length > 18 ? v.slice(0, 16) + '…' : v)}
               />
               <Tooltip
                 contentStyle={{
                   borderRadius: '8px',
-                  border: '1px solid rgb(230, 232, 240)',
+                  border: '1px solid rgb(var(--chart-border))',
                 }}
                 formatter={(value: unknown, _name: unknown, props: unknown) => [
                   `${Number(value ?? 0)} (${(props as { payload?: BottleneckStage })?.payload?.percentage ?? 0}%)`,
@@ -79,6 +92,7 @@ export function AnalyticsBottleneckView({
             </BarChart>
           </ResponsiveContainer>
         </div>
+        )}
       </CardContent>
     </Card>
   )

@@ -4,7 +4,9 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -23,6 +25,7 @@ import { useStudioAnalytics } from '@/hooks/use-analytics'
 import { useSegmentTrack } from '@/hooks/use-segment-track'
 import type { AnalyticsFilters } from '@/types/analytics'
 import type { TemplateSortField, TemplateSortOrder } from '@/components/analytics'
+import type { ApiError } from '@/lib/api'
 
 function getDefaultFilters(): AnalyticsFilters {
   const now = new Date()
@@ -51,7 +54,7 @@ export function AnalyticsDashboardPage() {
     sortOrder: 'asc' | 'desc'
   }>({ sortBy: 'responseRate', sortOrder: 'desc' })
 
-  const { data, isLoading, error } = useStudioAnalytics(filters)
+  const { data, isLoading, error, refetch, isFetching } = useStudioAnalytics(filters)
 
   const sortedClients = useMemo(() => {
     const list = data?.clientResponsiveness
@@ -106,13 +109,49 @@ export function AnalyticsDashboardPage() {
   }
 
   if (error) {
+    const apiError = error as ApiError & Error
+    const errorMessage =
+      apiError?.message ?? (error instanceof Error ? error.message : 'Failed to load analytics')
+    const statusHint = apiError?.status
+      ? apiError.status === 401
+        ? 'You may need to sign in again.'
+        : apiError.status >= 500
+          ? 'The server may be temporarily unavailable.'
+          : 'Please check your connection and try again.'
+      : 'Please check your connection and try again.'
+
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-muted-foreground">Failed to load analytics</p>
-        <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
-          Retry
-        </Button>
-      </div>
+      <Card className="rounded-2xl border-border shadow-card">
+        <CardContent className="flex flex-col items-center justify-center py-16 px-6">
+          <AlertCircle
+            className="h-12 w-12 text-destructive mb-4"
+            aria-hidden
+          />
+          <h2 className="text-lg font-semibold text-foreground mb-1">
+            Unable to load analytics
+          </h2>
+          <p className="text-muted-foreground text-center max-w-md mb-2">
+            {errorMessage}
+          </p>
+          <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
+            {statusHint}
+          </p>
+          <Button
+            variant="outline"
+            className="rounded-lg"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            aria-label={isFetching ? 'Retrying to load analytics' : 'Retry loading analytics'}
+          >
+            {isFetching ? (
+              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <RefreshCw className="h-4 w-4" aria-hidden />
+            )}
+            <span className="ml-2">{isFetching ? 'Retrying…' : 'Retry'}</span>
+          </Button>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -122,12 +161,20 @@ export function AnalyticsDashboardPage() {
         <h1 className="text-2xl font-bold text-foreground">Analytics & Reports</h1>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="rounded-xl bg-secondary p-1">
-          <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+      <Tabs defaultValue="overview" className="space-y-6" aria-label="Analytics sections">
+        <TabsList className="rounded-xl bg-secondary p-1" role="tablist">
+          <TabsTrigger
+            value="overview"
+            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            aria-label="Overview tab - view analytics overview"
+          >
             Overview
           </TabsTrigger>
-          <TabsTrigger value="custom" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger
+            value="custom"
+            className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            aria-label="Custom reports tab - create custom reports"
+          >
             Custom reports
           </TabsTrigger>
         </TabsList>
@@ -146,7 +193,35 @@ export function AnalyticsDashboardPage() {
         </div>
       ) : data ? (
         <>
-          <AnalyticsKpiCards kpis={data.kpis} onKpiClick={handleKpiClick} />
+          {(() => {
+            const hasTimeSeries = (data.timeSeries?.length ?? 0) > 0
+            const hasBottlenecks = (data.bottleneckStages?.length ?? 0) > 0
+            const hasTemplates = (data.templatePerformance?.length ?? 0) > 0
+            const hasClients = (data.clientResponsiveness?.length ?? 0) > 0
+            const isFullyEmpty = !hasTimeSeries && !hasBottlenecks && !hasTemplates && !hasClients
+
+            if (isFullyEmpty) {
+              return (
+                <Card className="rounded-2xl border-border shadow-card">
+                  <CardContent className="flex flex-col items-center justify-center py-24 px-6 text-center">
+                    <p className="text-lg font-medium text-foreground mb-1">
+                      No analytics data yet
+                    </p>
+                    <p className="text-muted-foreground max-w-md mb-6">
+                      There is no activity in the selected date range. Try adjusting your filters or
+                      wait for decisions to be created and approved.
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Selected range: {filters.from} – {filters.to}
+                    </p>
+                  </CardContent>
+                </Card>
+              )
+            }
+
+            return (
+              <>
+                <AnalyticsKpiCards kpis={data.kpis} onKpiClick={handleKpiClick} />
 
           <div className="grid gap-6 lg:grid-cols-2">
             <AnalyticsTrendChart data={data.timeSeries} />
@@ -191,6 +266,9 @@ export function AnalyticsDashboardPage() {
           </div>
 
           <AnalyticsExportPanel filters={filters} />
+              </>
+            )
+          })()}
         </>
       ) : null}
         </TabsContent>

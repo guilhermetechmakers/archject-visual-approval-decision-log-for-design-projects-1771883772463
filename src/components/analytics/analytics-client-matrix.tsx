@@ -33,9 +33,9 @@ function formatHours(hours: number): string {
 }
 
 function getRateVariant(rate: number): string {
-  if (rate >= 80) return 'text-[rgb(123,228,149)]'
-  if (rate >= 60) return 'text-[rgb(255,232,163)]'
-  return 'text-[rgb(255,108,108)]'
+  if (rate >= 80) return 'text-success'
+  if (rate >= 60) return 'text-warning'
+  return 'text-destructive'
 }
 
 function SortHeader({
@@ -58,6 +58,7 @@ function SortHeader({
       size="sm"
       className="-ml-2 h-8 font-medium"
       onClick={() => onSort(field)}
+      aria-label={`Sort by ${label} ${sortBy === field ? (sortOrder === 'asc' ? 'ascending' : 'descending') : ''}`}
     >
       {label}
       {sortBy === field ? (
@@ -90,8 +91,15 @@ export function AnalyticsClientMatrix({
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            No client data in this period
+          <div
+            className="flex flex-col items-center justify-center py-16 text-center"
+            role="status"
+            aria-live="polite"
+          >
+            <p className="text-muted-foreground">No client data in this period</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Try selecting a different date range
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-border">

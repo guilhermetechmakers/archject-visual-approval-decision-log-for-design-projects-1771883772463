@@ -58,6 +58,7 @@ export function AnalyticsTemplatesTable({
       type="button"
       onClick={() => onSort?.(field)}
       className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
+      aria-label={`Sort by ${label} ${sortBy === field ? (sortOrder === 'asc' ? 'ascending' : 'descending') : ''}`}
     >
       {label}
       <SortIcon field={field} />
@@ -96,8 +97,15 @@ export function AnalyticsTemplatesTable({
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div
+            className="flex flex-col items-center justify-center py-16 text-center"
+            role="status"
+            aria-live="polite"
+          >
             <p className="text-muted-foreground">No template data in this period</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Try selecting a different date range
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-border">

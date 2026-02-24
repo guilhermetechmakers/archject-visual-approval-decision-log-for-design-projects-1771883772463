@@ -29,8 +29,15 @@ export function AnalyticsClientGauges({ data, className }: AnalyticsClientGauges
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            No client data in this period
+          <div
+            className="flex flex-col items-center justify-center py-16 text-center"
+            role="status"
+            aria-live="polite"
+          >
+            <p className="text-muted-foreground">No client data in this period</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Try selecting a different date range
+            </p>
           </div>
         ) : (
           <div className="space-y-6">

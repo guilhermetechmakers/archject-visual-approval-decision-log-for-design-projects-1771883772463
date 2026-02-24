@@ -32,6 +32,16 @@ export default {
         warning: 'rgb(var(--warning) / <alpha-value>)',
         'warning-muted': 'rgb(var(--warning-muted) / <alpha-value>)',
         destructive: 'rgb(var(--destructive) / <alpha-value>)',
+        chart: {
+          primary: 'rgb(var(--chart-primary) / <alpha-value>)',
+          success: 'rgb(var(--chart-success) / <alpha-value>)',
+          warning: 'rgb(var(--chart-warning) / <alpha-value>)',
+          'warning-muted': 'rgb(var(--chart-warning-muted) / <alpha-value>)',
+          destructive: 'rgb(var(--chart-destructive) / <alpha-value>)',
+          muted: 'rgb(var(--chart-muted) / <alpha-value>)',
+          border: 'rgb(var(--chart-border) / <alpha-value>)',
+          foreground: 'rgb(var(--chart-foreground) / <alpha-value>)',
+        },
         muted: {
           DEFAULT: 'rgb(var(--muted) / <alpha-value>)',
           foreground: 'rgb(var(--muted-foreground) / <alpha-value>)',

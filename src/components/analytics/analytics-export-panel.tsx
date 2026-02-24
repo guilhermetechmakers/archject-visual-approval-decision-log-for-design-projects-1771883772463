@@ -112,13 +112,14 @@ export function AnalyticsExportPanel({
           onClick={() => handleExport('csv')}
           disabled={isExporting}
           className="rounded-lg"
+          aria-label={isExporting ? 'Exporting CSV report' : 'Export analytics as CSV'}
         >
           {isExporting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
           ) : (
-            <FileDown className="h-4 w-4" />
+            <FileDown className="h-4 w-4" aria-hidden />
           )}
-          Export CSV
+          <span className="ml-2">{isExporting ? 'Exporting…' : 'Export CSV'}</span>
         </Button>
         <Button
           variant="outline"
@@ -126,19 +127,20 @@ export function AnalyticsExportPanel({
           onClick={() => handleExport('pdf')}
           disabled={isExporting}
           className="rounded-lg"
+          aria-label={isExporting ? 'Exporting PDF report' : 'Export analytics as PDF'}
         >
           {isExporting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
           ) : (
-            <FileDown className="h-4 w-4" />
+            <FileDown className="h-4 w-4" aria-hidden />
           )}
-          Export PDF
+          <span className="ml-2">{isExporting ? 'Exporting…' : 'Export PDF'}</span>
         </Button>
 
         <Dialog open={scheduleOpen} onOpenChange={setScheduleOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="rounded-lg">
-              <CalendarClock className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="rounded-lg" aria-label="Schedule recurring report">
+              <CalendarClock className="h-4 w-4" aria-hidden />
               Schedule report
             </Button>
           </DialogTrigger>
@@ -191,9 +193,15 @@ export function AnalyticsExportPanel({
               <Button variant="outline" onClick={() => setScheduleOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSchedule} disabled={isScheduling}>
-                {isScheduling ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Schedule
+              <Button
+                onClick={handleSchedule}
+                disabled={isScheduling}
+                aria-label={isScheduling ? 'Scheduling report' : 'Confirm schedule'}
+              >
+                {isScheduling ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : null}
+                <span className={isScheduling ? 'ml-2' : ''}>{isScheduling ? 'Scheduling…' : 'Schedule'}</span>
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -37,6 +37,15 @@
     /* Skeleton / loading states - align with muted, border palette */
     --skeleton: 247 248 250;
     --skeleton-shimmer: 230 232 240;
+    /* Chart colors - use RGB for Recharts/SVG compatibility */
+    --chart-primary: 25 92 74;
+    --chart-success: 123 228 149;
+    --chart-warning: 255 232 163;
+    --chart-warning-muted: 255 220 168;
+    --chart-destructive: 255 108 108;
+    --chart-muted: 107 114 128;
+    --chart-border: 230 232 240;
+    --chart-foreground: 35 39 47;
   }
 
   * {

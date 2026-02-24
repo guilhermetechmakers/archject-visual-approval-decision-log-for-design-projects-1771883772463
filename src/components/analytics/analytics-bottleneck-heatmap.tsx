@@ -19,12 +19,12 @@ function formatHours(hours: number): string {
 }
 
 function getHeatColor(avgHours: number, maxHours: number): string {
-  if (maxHours <= 0) return 'rgb(123, 228, 149)'
+  if (maxHours <= 0) return 'rgb(var(--chart-success))'
   const ratio = avgHours / maxHours
-  if (ratio <= 0.25) return 'rgb(123, 228, 149)'
-  if (ratio <= 0.5) return 'rgb(255, 220, 168)'
-  if (ratio <= 0.75) return 'rgb(255, 232, 163)'
-  return 'rgb(255, 108, 108)'
+  if (ratio <= 0.25) return 'rgb(var(--chart-success))'
+  if (ratio <= 0.5) return 'rgb(var(--chart-warning-muted))'
+  if (ratio <= 0.75) return 'rgb(var(--chart-warning))'
+  return 'rgb(var(--chart-destructive))'
 }
 
 export function AnalyticsBottleneckHeatmap({
@@ -50,8 +50,15 @@ export function AnalyticsBottleneckHeatmap({
       </CardHeader>
       <CardContent>
         {stagesWithHours.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            No response time data available
+          <div
+            className="flex flex-col items-center justify-center py-16 text-center"
+            role="status"
+            aria-live="polite"
+          >
+            <p className="text-muted-foreground">No response time data available</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Try selecting a different date range
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
