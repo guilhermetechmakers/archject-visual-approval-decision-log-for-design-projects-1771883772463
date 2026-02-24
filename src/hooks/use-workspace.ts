@@ -298,6 +298,7 @@ export function useCreateClientLink(projectId: string) {
       decision_id?: string
       expires_at?: string
       otp_required?: boolean
+      max_usage?: number | null
     }) => {
       if (USE_MOCK) {
         return {
@@ -323,6 +324,65 @@ export function useCreateClientLink(projectId: string) {
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : 'Failed to create link')
+    },
+  })
+}
+
+export function useRevokeClientLink(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (linkId: string) => {
+      if (USE_MOCK) return
+      return workspaceApi.revokeClientLink(linkId)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', 'client-links', projectId] })
+      toast.success('Link revoked')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to revoke link')
+    },
+  })
+}
+
+export function useReissueClientLink(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (linkId: string) => {
+      if (USE_MOCK) {
+        const base = typeof window !== 'undefined' ? window.location?.origin ?? '' : ''
+        return { id: linkId, url: `${base}/portal/reissued-${Date.now()}`, project_id: projectId } as ClientLink
+      }
+      return workspaceApi.reissueClientLink(linkId)
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', 'client-links', projectId] })
+      if (data?.url) {
+        navigator.clipboard.writeText(data.url)
+        toast.success('New link generated and copied to clipboard')
+      } else {
+        toast.success('Link reissued')
+      }
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to reissue link')
+    },
+  })
+}
+
+export function useExtendClientLink(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ linkId, expiresAt }: { linkId: string; expiresAt: string }) => {
+      if (USE_MOCK) return { id: linkId, expires_at: expiresAt } as ClientLink
+      return workspaceApi.extendClientLink(linkId, expiresAt)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', 'client-links', projectId] })
+      toast.success('Link expiry extended')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to extend link')
     },
   })
 }

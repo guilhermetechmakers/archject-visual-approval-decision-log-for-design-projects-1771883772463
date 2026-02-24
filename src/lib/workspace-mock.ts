@@ -231,5 +231,7 @@ export const mockClientLinks: ClientLink[] = [
     created_at: '2025-02-17T11:00:00Z',
     used_at: null,
     is_active: true,
+    usage_count: 2,
+    max_usage: 10,
   },
 ]

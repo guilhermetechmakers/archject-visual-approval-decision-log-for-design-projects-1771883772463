@@ -10,7 +10,8 @@ import {
   TeamPanel,
   TemplatesLibrary,
   ActivitySidebar,
-  ClientPortalManager,
+  LinkManagementPanel,
+  TelemetryPanel,
   SearchFilterPanel,
   SettingsCompliancePanel,
   CreateDecisionModal,
@@ -23,7 +24,14 @@ import {
 } from '@/components/workspace'
 import { ShareLinkModal } from '@/components/dashboard'
 import { FilesLibraryView } from '@/components/files-library'
-import { useProjectWorkspace, useCreateClientLink, useCreateExport } from '@/hooks/use-workspace'
+import {
+  useProjectWorkspace,
+  useCreateClientLink,
+  useCreateExport,
+  useRevokeClientLink,
+  useReissueClientLink,
+  useExtendClientLink,
+} from '@/hooks/use-workspace'
 import { toast } from 'sonner'
 
 export function ProjectWorkspacePage() {
@@ -44,10 +52,14 @@ export function ProjectWorkspacePage() {
     clientLinks,
     isLoading,
     error,
+    refetch,
   } = useProjectWorkspace(projectId ?? '')
 
   const createLinkMutation = useCreateClientLink(projectId ?? '')
   const createExportMutation = useCreateExport(projectId ?? '')
+  const revokeLinkMutation = useRevokeClientLink(projectId ?? '')
+  const reissueLinkMutation = useReissueClientLink(projectId ?? '')
+  const extendLinkMutation = useExtendClientLink(projectId ?? '')
 
   const handleShareClientPortal = () => {
     setShareLinkOpen(true)
@@ -65,11 +77,13 @@ export function ProjectWorkspacePage() {
     decisionId?: string
     expiresAt?: string
     otpRequired?: boolean
+    maxUsage?: number | null
   }) => {
     createLinkMutation.mutate({
       decision_id: options?.decisionId,
       expires_at: options?.expiresAt,
       otp_required: options?.otpRequired,
+      max_usage: options?.maxUsage ?? undefined,
     })
   }
 
@@ -197,10 +211,25 @@ export function ProjectWorkspacePage() {
                   />
                 </div>
                 <div className="mt-6">
-                  <ClientPortalManager
+                  <LinkManagementPanel
                     links={clientLinks}
                     projectId={projectId}
                     onCreateLink={handleCreateClientLink}
+                    onRevokeLink={(id) => revokeLinkMutation.mutate(id)}
+                    onReissueLink={async (linkId) => {
+                      await reissueLinkMutation.mutateAsync(linkId)
+                    }}
+                    onExtendLink={async (linkId, expiresAt) => {
+                      await extendLinkMutation.mutateAsync({ linkId, expiresAt })
+                    }}
+                    onLinksChange={() => refetch()}
+                  />
+                </div>
+                <div className="mt-6">
+                  <TelemetryPanel
+                    decisions={decisions}
+                    activity={activity}
+                    projectId={projectId}
                   />
                 </div>
                 <div className="mt-6">

@@ -162,12 +162,24 @@ export async function createClientLink(data: {
   decision_id?: string
   expires_at?: string
   otp_required?: boolean
+  max_usage?: number | null
 }): Promise<ClientLink> {
   return api.post<ClientLink>('/client-links', data)
 }
 
 export async function revokeClientLink(linkId: string): Promise<void> {
   return api.delete(`/client-links/${linkId}`)
+}
+
+export async function reissueClientLink(linkId: string): Promise<ClientLink> {
+  return api.post<ClientLink>(`/client-links/${linkId}/reissue`, {})
+}
+
+export async function extendClientLink(
+  linkId: string,
+  expiresAt: string
+): Promise<ClientLink> {
+  return api.patch<ClientLink>(`/client-links/${linkId}`, { expires_at: expiresAt })
 }
 
 export async function fetchProjectClientLinks(

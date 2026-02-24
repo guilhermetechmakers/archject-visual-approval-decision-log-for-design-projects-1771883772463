@@ -9,6 +9,7 @@ import {
   CommentThread,
   NotificationTray,
   OperationSuccessModal,
+  ApprovalControls,
 } from '@/components/client-portal'
 import {
   VisualSideBySideViewer,
@@ -16,10 +17,7 @@ import {
   toComparisonAnnotationsFromClientPortal,
 } from '@/components/visual-comparison-viewer'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useClientPortalNoLogin } from '@/hooks/use-client-portal'
-import { cn } from '@/lib/utils'
 import type { ClientPortalAnnotation } from '@/types/client-portal'
 import type { AnnotationShape } from '@/types/visual-comparison'
 
@@ -301,47 +299,20 @@ export function ClientPortalPage() {
             </div>
           </section>
 
-          <section className="space-y-4">
-            <div className="rounded-xl border border-border bg-card p-6 shadow-card">
-              <Label htmlFor="client-name" className="text-sm font-medium">
-                Your name (optional, for the approval record)
-              </Label>
-              <Input
-                id="client-name"
-                type="text"
-                placeholder="John Smith"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                className="mt-2 max-w-xs"
-              />
-            </div>
-
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-end">
-              <Button
-                variant="outline"
-                onClick={handleRequestChanges}
-                disabled={isRequestingChanges}
-                className="transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
-              >
-                {isRequestingChanges ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                Request changes
-              </Button>
-              <Button
-                disabled={!selectedOptionId || isApproving}
-                onClick={handleApprove}
-                className={cn(
-                  'transition-all duration-200 hover:scale-[1.02] hover:shadow-md'
-                )}
-                style={{ backgroundColor: accentColor }}
-              >
-                {isApproving ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                Approve selection
-              </Button>
-            </div>
+          <section className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <ApprovalControls
+              status="pending"
+              selectedOptionId={selectedOptionId}
+              clientName={clientName}
+              onClientNameChange={setClientName}
+              onApprove={handleApprove}
+              onRequestChanges={handleRequestChanges}
+              isApproving={isApproving}
+              isRequestingChanges={isRequestingChanges}
+              requiresOtp={data.requiresOtp}
+              onOtpRequiredClick={() => setShowVerification(true)}
+              accentColor={accentColor}
+            />
           </section>
         </div>
       </main>

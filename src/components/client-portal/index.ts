@@ -1,6 +1,7 @@
 export { BrandedHeader } from './branded-header'
 export { ShareExportBar } from './share-export-bar'
 export { VerificationModal } from './verification-modal'
+export { ApprovalControls } from './approval-controls'
 export { VisualSideBySideViewer } from './visual-side-by-side-viewer'
 export { AnnotationsOverlay } from './annotations-overlay'
 export { OptionCard } from './option-card'

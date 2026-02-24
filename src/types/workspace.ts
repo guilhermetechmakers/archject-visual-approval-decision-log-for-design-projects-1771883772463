@@ -119,11 +119,14 @@ export interface ClientLink {
   project_id: string
   decision_id?: string | null
   url: string
+  token?: string
   expires_at?: string | null
   otp_required: boolean
   created_at: string
   used_at?: string | null
   is_active: boolean
+  usage_count?: number
+  max_usage?: number | null
 }
 
 export interface Webhook {
