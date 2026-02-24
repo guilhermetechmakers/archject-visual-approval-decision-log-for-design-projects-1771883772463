@@ -46,6 +46,9 @@ export const billingApi = {
   addPaymentMethod: (data: { payment_method_id: string }) =>
     api.post<{ success: boolean }>('/billing/payment-method', data),
 
+  createSetupIntent: () =>
+    api.post<{ clientSecret: string }>('/billing/setup-intent'),
+
   setDefaultPaymentMethod: (id: string) =>
     api.post<{ success: boolean }>(`/billing/payment-method/${id}/default`),
 
@@ -70,8 +73,8 @@ export const billingApi = {
   }) =>
     api.post<{ url: string; session_id: string }>('/checkout/session', data),
 
-  exportBilling: (format: 'pdf' | 'csv') =>
-    api.get<{ download_url: string }>(`/billing/export?format=${format}`),
+  exportBilling: (format: 'pdf' | 'csv' | 'json') =>
+    api.get<{ download_url?: string; data?: unknown }>(`/billing/export?format=${format}`),
 
   // Billing History / Transaction History
   getHistory: (params?: import('@/types/billing-history').BillingHistoryParams) => {
@@ -100,4 +103,45 @@ export const billingApi = {
     api.get<import('@/types/billing-history').SubscriptionTimelineResponse>(
       `/billing/subscription/${subscriptionId}/timeline`
     ),
+
+  getInvoice: (invoiceId: string) =>
+    api.get<BillingInvoice & { hosted_invoice_url?: string; pdf_url?: string }>(
+      `/billing/invoices/${invoiceId}`
+    ),
+
+  createCustomer: (data: { email: string; name?: string; metadata?: Record<string, string> }) =>
+    api.post<{ customer_id: string; email?: string }>('/billing/create-customer', data),
+
+  createSubscription: (data: {
+    customer_id: string
+    price_id: string
+    payment_method_id?: string
+    quantity?: number
+    metadata?: Record<string, string>
+  }) =>
+    api.post<{ subscription_id: string; client_secret?: string }>('/billing/create-subscription', data),
+
+  updateSubscription: (data: {
+    subscription_id: string
+    price_id?: string
+    quantity?: number
+    cancel_at_period_end?: boolean
+  }) =>
+    api.post<{ success: boolean }>('/billing/update-subscription', data),
+
+  refund: (data: {
+    charge_id?: string
+    payment_intent_id?: string
+    amount?: number
+    reason?: string
+  }) =>
+    api.post<{ refund_id: string; status: string; amount?: number }>('/billing/refund', data),
+
+  recordUsage: (data: {
+    subscription_item_id: string
+    quantity: number
+    timestamp?: string
+    action?: 'increment' | 'set'
+  }) =>
+    api.post<{ success: boolean }>('/billing/usage', data),
 }

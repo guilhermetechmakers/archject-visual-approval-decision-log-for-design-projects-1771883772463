@@ -1,7 +1,13 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   FiltersPanel,
   TransactionsTable,
@@ -13,6 +19,38 @@ import { useBillingHistory } from '@/hooks/use-billing-history'
 import { useBillingSubscription } from '@/hooks/use-billing'
 import type { BillingHistoryFilters } from '@/components/billing-history'
 import type { BillingHistoryItem } from '@/types/billing-history'
+
+function exportToCsv(items: BillingHistoryItem[]) {
+  const headers = ['Date', 'Type', 'Description', 'Amount', 'Currency', 'Status', 'Invoice ID']
+  const rows = items.map((i) => [
+    new Date(i.date).toLocaleDateString(),
+    i.type,
+    `"${(i.description ?? '').replace(/"/g, '""')}"`,
+    i.amount.toFixed(2),
+    i.currency,
+    i.status,
+    i.invoice_id ?? '',
+  ])
+  const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function exportToJson(items: BillingHistoryItem[]) {
+  const json = JSON.stringify(items, null, 2)
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `transactions-${new Date().toISOString().slice(0, 10)}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 function getDefaultFilters(): BillingHistoryFilters {
   const now = new Date()
@@ -155,6 +193,22 @@ export function BillingHistoryPage() {
             View payments, invoices, refunds, and subscription events
           </p>
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="rounded-lg">
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="rounded-xl">
+            <DropdownMenuItem onClick={() => exportToCsv(items)}>
+              Export as CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToJson(items)}>
+              Export as JSON
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <SummaryCards />

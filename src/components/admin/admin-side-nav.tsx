@@ -13,6 +13,7 @@ import {
   Settings,
   ToggleLeft,
   FileText,
+  CreditCard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -33,6 +34,7 @@ const SECTIONS: NavSection[] = [
     title: 'Operations',
     items: [
       { to: '/admin/tools', icon: Wrench, label: 'Tools & Moderation' },
+      { to: '/admin/billing', icon: CreditCard, label: 'Billing & Invoices' },
     ],
   },
   {

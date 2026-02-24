@@ -1,17 +1,7 @@
 import { useState } from 'react'
 import { CreditCard, Plus } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Tooltip,
@@ -19,96 +9,14 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from '@/components/ui/tooltip'
-import { useBillingSubscription, useAddPaymentMethod } from '@/hooks/use-billing'
+import { useBillingSubscription } from '@/hooks/use-billing'
+import { AddPaymentMethodDialog } from '@/components/billing/add-payment-method-dialog'
 import type { BillingPaymentMethod } from '@/types/billing'
-
-/**
- * Payment method form - placeholder for Stripe Elements integration.
- * When Stripe is configured, mount CardElement in the #stripe-card-element container.
- * For now shows a simulated form for UI demonstration.
- */
-function PaymentMethodForm({
-  onCancel,
-  onSubmit,
-  isSubmitting,
-}: {
-  onCancel: () => void
-  onSubmit: (paymentMethodId: string) => void
-  isSubmitting: boolean
-}) {
-  const [cardNumber, setCardNumber] = useState('')
-  const [expiry, setExpiry] = useState('')
-  const [cvc, setCvc] = useState('')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (cardNumber && expiry && cvc) {
-      onSubmit('pm_mock_' + Date.now())
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="card-number">Card number</Label>
-        <Input
-          id="card-number"
-          placeholder="4242 4242 4242 4242"
-          value={cardNumber}
-          onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, '').slice(0, 16))}
-          maxLength={19}
-          className="font-mono"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="expiry">Expiry (MM/YY)</Label>
-          <Input
-            id="expiry"
-            placeholder="12/26"
-            value={expiry}
-            onChange={(e) => setExpiry(e.target.value.replace(/\D/g, '').slice(0, 4))}
-            maxLength={4}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="cvc">CVC</Label>
-          <Input
-            id="cvc"
-            placeholder="123"
-            type="password"
-            value={cvc}
-            onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
-            maxLength={4}
-          />
-        </div>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        Card details are processed securely via Stripe. We never store full card numbers.
-      </p>
-      <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={!cardNumber || !expiry || !cvc || isSubmitting}>
-          {isSubmitting ? 'Adding…' : 'Add card'}
-        </Button>
-      </DialogFooter>
-    </form>
-  )
-}
 
 export function PaymentMethodSection() {
   const [addModalOpen, setAddModalOpen] = useState(false)
-  const { data, isLoading } = useBillingSubscription()
-  const addPaymentMethod = useAddPaymentMethod()
+  const { data, isLoading, refetch } = useBillingSubscription()
   const paymentMethod = data?.payment_method as BillingPaymentMethod | undefined
-
-  const handleAddCard = (paymentMethodId: string) => {
-    addPaymentMethod.mutate(paymentMethodId, {
-      onSuccess: () => setAddModalOpen(false),
-    })
-  }
 
   return (
     <TooltipProvider>
@@ -182,21 +90,11 @@ export function PaymentMethodSection() {
         </CardContent>
       </Card>
 
-      <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add payment method</DialogTitle>
-            <DialogDescription>
-              Enter your card details. Payment is processed securely via Stripe.
-            </DialogDescription>
-          </DialogHeader>
-          <PaymentMethodForm
-            onCancel={() => setAddModalOpen(false)}
-            onSubmit={handleAddCard}
-            isSubmitting={addPaymentMethod.isPending}
-          />
-        </DialogContent>
-      </Dialog>
+      <AddPaymentMethodDialog
+        open={addModalOpen}
+        onOpenChange={setAddModalOpen}
+        onSuccess={() => refetch()}
+      />
     </TooltipProvider>
   )
 }

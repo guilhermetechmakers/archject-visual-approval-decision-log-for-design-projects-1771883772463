@@ -87,6 +87,12 @@ export function useConfirmPlanChange() {
   })
 }
 
+export function useCreateSetupIntent() {
+  return useMutation({
+    mutationFn: () => billingApi.createSetupIntent(),
+  })
+}
+
 export function useAddPaymentMethod() {
   const qc = useQueryClient()
   return useMutation({
@@ -167,9 +173,28 @@ export function useApplyCoupon() {
 
 export function useExportBilling() {
   return useMutation({
-    mutationFn: (format: 'pdf' | 'csv') => billingApi.exportBilling(format),
+    mutationFn: (format: 'pdf' | 'csv' | 'json') => billingApi.exportBilling(format),
     onError: (err: { message?: string }) => {
       toast.error(err?.message ?? 'Export failed')
+    },
+  })
+}
+
+export function useBillingRefund() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: {
+      charge_id?: string
+      payment_intent_id?: string
+      amount?: number
+      reason?: string
+    }) => billingApi.refund(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [...BILLING_KEYS] })
+      toast.success('Refund initiated')
+    },
+    onError: (err: { message?: string }) => {
+      toast.error(err?.message ?? 'Refund failed')
     },
   })
 }

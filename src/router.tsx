@@ -58,6 +58,7 @@ import { AdminDashboardPage } from '@/pages/admin/admin-dashboard-page'
 import { AdminUsersPage } from '@/pages/admin/admin-users-page'
 import { AdminToolsPage } from '@/pages/admin/admin-tools-page'
 import { AdminSettingsPage } from '@/pages/admin/admin-settings-page'
+import { AdminBillingPage } from '@/pages/admin/admin-billing-page'
 
 export const router = createBrowserRouter([
   {
@@ -120,6 +121,7 @@ export const router = createBrowserRouter([
           { path: 'dashboard', element: <AdminDashboardPage /> },
           { path: 'users', element: <AdminUsersPage /> },
           { path: 'tools', element: <AdminToolsPage /> },
+          { path: 'billing', element: <AdminBillingPage /> },
           { path: 'settings', element: <AdminSettingsPage /> },
         ],
       },
