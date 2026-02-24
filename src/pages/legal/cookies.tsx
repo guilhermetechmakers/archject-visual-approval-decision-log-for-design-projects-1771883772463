@@ -1,4 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
+import {
+  Cookie,
+  LayoutGrid,
+  PieChart,
+  History,
+  Mail,
+  FileText,
+  Shield,
+} from 'lucide-react'
 import { HeaderNav } from '@/components/layout/header-nav'
 import {
   CategoryCard,
@@ -19,6 +28,9 @@ import {
 import type { ConsentState } from '@/types/cookie-consent'
 import { DEFAULT_CONSENT } from '@/types/cookie-consent'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const CATEGORY_CONFIG = [
   {
@@ -57,12 +69,15 @@ export function CookiesPage() {
     useState<ConsentState>(DEFAULT_CONSENT)
   const [history, setHistory] = useState<ReturnType<typeof loadHistory>>([])
   const [isSaving, setIsSaving] = useState(false)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     const loaded = loadConsent()
     setConsent(loaded)
     setLastSavedConsent(loaded)
     setHistory(loadHistory())
+    setIsInitialLoad(false)
   }, [])
 
   const hasChanges =
@@ -80,6 +95,7 @@ export function CookiesPage() {
   const handleSave = useCallback(() => {
     if (!hasChanges) return
     setIsSaving(true)
+    setSaveError(null)
     try {
       const entries = diffConsentToHistory(lastSavedConsent, consent)
       saveConsent(consent, entries)
@@ -87,7 +103,9 @@ export function CookiesPage() {
       setHistory(loadHistory())
       toast.success('Preferences saved successfully')
     } catch {
-      toast.error('Failed to save preferences. Please try again.')
+      const message = 'Failed to save preferences. Please try again.'
+      setSaveError(message)
+      toast.error(message)
     } finally {
       setIsSaving(false)
     }
@@ -103,13 +121,16 @@ export function CookiesPage() {
     setConsent(allOn)
     setLastSavedConsent(allOn)
     setIsSaving(true)
+    setSaveError(null)
     try {
       const entries = createAcceptAllEntries()
       saveConsent(allOn, entries)
       setHistory(loadHistory())
       toast.success('All cookies accepted')
     } catch {
-      toast.error('Failed to save. Please try again.')
+      const message = 'Failed to save. Please try again.'
+      setSaveError(message)
+      toast.error(message)
     } finally {
       setIsSaving(false)
     }
@@ -120,13 +141,16 @@ export function CookiesPage() {
     setConsent(defaults)
     setLastSavedConsent(defaults)
     setIsSaving(true)
+    setSaveError(null)
     try {
       const entries = createResetEntries(lastSavedConsent)
       saveConsent(defaults, entries)
       setHistory(loadHistory())
       toast.success('Preferences reset to defaults')
     } catch {
-      toast.error('Failed to reset. Please try again.')
+      const message = 'Failed to reset. Please try again.'
+      setSaveError(message)
+      toast.error(message)
     } finally {
       setIsSaving(false)
     }
@@ -137,6 +161,7 @@ export function CookiesPage() {
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground print:hidden"
+        aria-label="Skip to main content"
       >
         Skip to content
       </a>
@@ -148,40 +173,89 @@ export function CookiesPage() {
       >
         <div className="space-y-8 animate-fade-in">
           <header className="space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              Cookie Policy
-            </h1>
-            <p className="text-muted-foreground max-w-2xl">
+            <div className="flex items-center gap-3">
+              <Cookie
+                className="h-10 w-10 text-primary md:h-12 md:w-12"
+                aria-hidden
+              />
+              <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+                Cookie Policy
+              </h1>
+            </div>
+            <p className="max-w-2xl text-muted-foreground">
               Explain cookies used on this site and manage consent for marketing
               cookies. Toggle each category below and save your preferences.
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground" role="status">
               Last updated: {new Date().toLocaleDateString()}
             </p>
             <nav
-              aria-label="Quick navigation"
+              aria-label="Quick navigation to page sections"
               className="flex flex-wrap gap-2 pt-2"
             >
-              <a
-                href="#categories"
-                className="rounded-pill px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="rounded-pill text-muted-foreground hover:bg-secondary hover:text-foreground"
               >
-                Categories
-              </a>
-              <a
-                href="#summary"
-                className="rounded-pill px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                <a
+                  href="#categories"
+                  aria-label="Jump to cookie categories section"
+                >
+                  <LayoutGrid className="mr-2 h-4 w-4" aria-hidden />
+                  Categories
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="rounded-pill text-muted-foreground hover:bg-secondary hover:text-foreground"
               >
-                Summary
-              </a>
-              <a
-                href="#history"
-                className="rounded-pill px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                <a href="#summary" aria-label="Jump to consent summary section">
+                  <PieChart className="mr-2 h-4 w-4" aria-hidden />
+                  Summary
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="rounded-pill text-muted-foreground hover:bg-secondary hover:text-foreground"
               >
-                Change History
-              </a>
+                <a
+                  href="#history"
+                  aria-label="Jump to change history section"
+                >
+                  <History className="mr-2 h-4 w-4" aria-hidden />
+                  Change History
+                </a>
+              </Button>
             </nav>
           </header>
+
+          {saveError && (
+            <Alert variant="destructive" role="alert" aria-live="assertive">
+              <AlertDescription>{saveError}</AlertDescription>
+            </Alert>
+          )}
+
+          {isInitialLoad ? (
+            <div className="space-y-6">
+              <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton
+                    key={i}
+                    className="h-[140px] rounded-xl"
+                    aria-hidden
+                  />
+                ))}
+              </div>
+              <Skeleton className="h-20 rounded-xl" aria-hidden />
+              <Skeleton className="h-64 rounded-xl" aria-hidden />
+            </div>
+          ) : (
 
           <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
             <div className="space-y-6">
@@ -248,28 +322,35 @@ export function CookiesPage() {
               <SummaryPanel consent={consent} />
             </aside>
           </div>
+          )}
 
           <footer className="border-t border-border pt-8">
             <p className="text-sm text-muted-foreground">
               For questions about cookies, contact{' '}
               <a
                 href="mailto:privacy@archject.com"
-                className="text-primary underline-offset-4 hover:underline"
+                className="inline-flex items-center gap-1.5 text-primary underline-offset-4 hover:underline"
+                aria-label="Email privacy team at privacy@archject.com"
               >
+                <Mail className="h-4 w-4" aria-hidden />
                 privacy@archject.com
               </a>
             </p>
             <div className="mt-4 flex flex-wrap gap-4">
               <a
                 href="/terms"
-                className="text-sm text-primary hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                aria-label="View Terms of Service"
               >
+                <FileText className="h-4 w-4" aria-hidden />
                 Terms of Service
               </a>
               <a
                 href="/privacy"
-                className="text-sm text-primary hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                aria-label="View Privacy Policy"
               >
+                <Shield className="h-4 w-4" aria-hidden />
                 Privacy Policy
               </a>
             </div>
