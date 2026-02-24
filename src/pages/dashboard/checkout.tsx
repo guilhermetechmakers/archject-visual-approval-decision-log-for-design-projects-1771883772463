@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { ArrowLeft, CreditCard } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   OrderSummaryCard,
   BillingInfoForm,
@@ -112,6 +113,7 @@ export function CheckoutPage() {
     const valid = await billingFormRef.current?.validate()
 
     if (!valid || !billingInfo) {
+      billingFormRef.current?.scrollToFirstError()
       toast.error('Please fill in all required billing information')
       return
     }
@@ -184,9 +186,9 @@ export function CheckoutPage() {
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="ghost" size="sm" asChild aria-label="Return to billing page">
           <Link to="/dashboard/billing" className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to Billing
           </Link>
         </Button>
@@ -219,11 +221,14 @@ export function CheckoutPage() {
               discountAmount={appliedCoupon?.discountAmount}
               onRemove={handleRemoveCoupon}
               disabled={applyCoupon.isPending}
+              message={applyCoupon.data?.valid === false ? (applyCoupon.data?.message ?? 'Invalid or expired coupon code. Please try again.') : undefined}
             />
           </div>
 
-          <div className="space-y-4">
-            <p className="text-sm font-medium text-foreground">Payment method</p>
+          <div className="space-y-4" role="group" aria-labelledby="payment-method-label">
+            <p id="payment-method-label" className="text-sm font-medium text-foreground">
+              Payment method
+            </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Card
                 className={`cursor-pointer transition-all duration-200 ${
@@ -241,7 +246,7 @@ export function CheckoutPage() {
                   }
                 }}
                 aria-pressed={paymentMethod === 'card'}
-                aria-label="Pay with card"
+                aria-label="Pay with credit or debit card"
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-2">
@@ -263,11 +268,29 @@ export function CheckoutPage() {
           </div>
 
           {paymentMethod === 'card' && (
-            <PaymentMethodCard
-              clientSecret={clientSecret}
-              onCardComplete={setCardComplete}
-              disabled={confirmPayment.isPending}
-            />
+            createPaymentIntent.isPending ? (
+              <Card className="rounded-2xl border border-border bg-card p-6 shadow-card">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <Skeleton className="h-6 w-32" />
+                  </div>
+                  <div className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              <PaymentMethodCard
+                clientSecret={clientSecret}
+                onCardComplete={setCardComplete}
+                disabled={confirmPayment.isPending}
+              />
+            )
           )}
 
           <Card className="rounded-2xl border border-border bg-card p-6 shadow-card">
@@ -284,6 +307,12 @@ export function CheckoutPage() {
               onSecondaryClick={
                 paymentMethod === 'card' ? handleRequestInvoice : undefined
               }
+              primaryAriaLabel={
+                paymentMethod === 'card'
+                  ? 'Pay now with card'
+                  : 'Request invoice for payment'
+              }
+              loadingAriaLabel="Processing payment, please wait"
             />
           </Card>
         </div>

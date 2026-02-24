@@ -12,6 +12,8 @@ interface SummaryActionsProps {
   onSecondaryClick?: () => void
   secondaryDisabled?: boolean
   paymentMethod?: 'card' | 'invoice'
+  primaryAriaLabel?: string
+  loadingAriaLabel?: string
   className?: string
 }
 
@@ -25,6 +27,8 @@ export function SummaryActions({
   onSecondaryClick,
   secondaryDisabled = false,
   paymentMethod: _paymentMethod,
+  primaryAriaLabel,
+  loadingAriaLabel = 'Processing, please wait',
   className,
 }: SummaryActionsProps) {
   const handlePrimary = onPrimary ?? onPrimaryClick
@@ -41,6 +45,7 @@ export function SummaryActions({
         className="w-full transition-transform hover:scale-[1.02] active:scale-[0.98]"
         aria-busy={primaryLoading}
         aria-live="polite"
+        aria-label={primaryLoading ? loadingAriaLabel : (primaryAriaLabel ?? primaryLabel)}
       >
         {primaryLoading ? (
           <>
@@ -58,6 +63,7 @@ export function SummaryActions({
           onClick={onSecondaryClick}
           disabled={secondaryDisabled || primaryLoading}
           className="w-full transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          aria-label={secondaryLabel}
         >
           {secondaryLabel}
         </Button>

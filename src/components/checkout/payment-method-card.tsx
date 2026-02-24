@@ -36,10 +36,13 @@ function MockCardInput({
   }, [cardNumber, expiry, cvc, onComplete])
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="group" aria-label="Card payment details">
       <div className="space-y-2">
-        <label className="text-sm font-medium">Card number</label>
+        <label htmlFor="card-number" className="text-sm font-medium text-foreground">
+          Card number
+        </label>
         <Input
+          id="card-number"
           placeholder="4242 4242 4242 4242"
           value={cardNumber}
           onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, '').slice(0, 19))}
@@ -49,8 +52,11 @@ function MockCardInput({
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Expiry (MM/YY)</label>
+          <label htmlFor="card-expiry" className="text-sm font-medium text-foreground">
+            Expiry (MM/YY)
+          </label>
           <Input
+            id="card-expiry"
             placeholder="12/34"
             value={expiry}
             onChange={(e) => {
@@ -62,13 +68,17 @@ function MockCardInput({
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">CVC</label>
+          <label htmlFor="card-cvc" className="text-sm font-medium text-foreground">
+            CVC
+          </label>
           <Input
+            id="card-cvc"
             placeholder="123"
             type="password"
             value={cvc}
             onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
             disabled={disabled}
+            autoComplete="off"
           />
         </div>
       </div>

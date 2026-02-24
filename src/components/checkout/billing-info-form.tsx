@@ -30,6 +30,7 @@ export type BillingInfoFormValues = z.infer<typeof billingInfoSchema>
 export interface BillingInfoFormHandle {
   getValues: () => BillingInfoFormValues
   validate: () => Promise<boolean>
+  scrollToFirstError: () => void
 }
 
 interface BillingInfoFormProps {
@@ -40,6 +41,7 @@ interface BillingInfoFormProps {
 
 export const BillingInfoForm = React.forwardRef<BillingInfoFormHandle, BillingInfoFormProps>(
   function BillingInfoForm({ defaultValues, onSubmit, className }, ref) {
+  const cardRef = React.useRef<HTMLDivElement>(null)
   const form = useForm<BillingInfoFormValues>({
     resolver: zodResolver(billingInfoSchema),
     defaultValues: {
@@ -62,11 +64,15 @@ export const BillingInfoForm = React.forwardRef<BillingInfoFormHandle, BillingIn
   React.useImperativeHandle(ref, () => ({
     getValues: () => form.getValues(),
     validate: () => form.trigger(),
+    scrollToFirstError: () => {
+      cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    },
   }))
 
   return (
     <form onSubmit={onSubmit ? form.handleSubmit(onSubmit) : (e) => e.preventDefault()}>
       <Card
+        ref={cardRef}
         className={cn(
           'rounded-2xl border border-border bg-card shadow-card transition-all duration-200',
           className
@@ -112,12 +118,14 @@ export const BillingInfoForm = React.forwardRef<BillingInfoFormHandle, BillingIn
                 id="email"
                 type="email"
                 placeholder="billing@company.com"
-                className="pl-9"
+                className={cn('pl-9', form.formState.errors.email && 'border-destructive focus-visible:ring-destructive')}
+                aria-invalid={!!form.formState.errors.email}
+                aria-describedby={form.formState.errors.email ? 'email-error' : undefined}
                 {...form.register('email')}
               />
             </div>
             {form.formState.errors.email && (
-              <p className="text-sm text-destructive">
+              <p id="email-error" className="text-sm text-destructive" role="alert">
                 {form.formState.errors.email.message}
               </p>
             )}
@@ -131,10 +139,13 @@ export const BillingInfoForm = React.forwardRef<BillingInfoFormHandle, BillingIn
                 <Input
                   id="address.name"
                   placeholder="John Doe"
+                  className={cn(form.formState.errors.address?.name && 'border-destructive focus-visible:ring-destructive')}
+                  aria-invalid={!!form.formState.errors.address?.name}
+                  aria-describedby={form.formState.errors.address?.name ? 'address-name-error' : undefined}
                   {...form.register('address.name')}
                 />
                 {form.formState.errors.address?.name && (
-                  <p className="text-sm text-destructive">
+                  <p id="address-name-error" className="text-sm text-destructive" role="alert">
                     {form.formState.errors.address.name.message}
                   </p>
                 )}
@@ -144,10 +155,13 @@ export const BillingInfoForm = React.forwardRef<BillingInfoFormHandle, BillingIn
                 <Input
                   id="address.line1"
                   placeholder="123 Main St"
+                  className={cn(form.formState.errors.address?.line1 && 'border-destructive focus-visible:ring-destructive')}
+                  aria-invalid={!!form.formState.errors.address?.line1}
+                  aria-describedby={form.formState.errors.address?.line1 ? 'address-line1-error' : undefined}
                   {...form.register('address.line1')}
                 />
                 {form.formState.errors.address?.line1 && (
-                  <p className="text-sm text-destructive">
+                  <p id="address-line1-error" className="text-sm text-destructive" role="alert">
                     {form.formState.errors.address.line1.message}
                   </p>
                 )}
@@ -165,10 +179,13 @@ export const BillingInfoForm = React.forwardRef<BillingInfoFormHandle, BillingIn
                 <Input
                   id="address.city"
                   placeholder="San Francisco"
+                  className={cn(form.formState.errors.address?.city && 'border-destructive focus-visible:ring-destructive')}
+                  aria-invalid={!!form.formState.errors.address?.city}
+                  aria-describedby={form.formState.errors.address?.city ? 'address-city-error' : undefined}
                   {...form.register('address.city')}
                 />
                 {form.formState.errors.address?.city && (
-                  <p className="text-sm text-destructive">
+                  <p id="address-city-error" className="text-sm text-destructive" role="alert">
                     {form.formState.errors.address.city.message}
                   </p>
                 )}
@@ -186,10 +203,13 @@ export const BillingInfoForm = React.forwardRef<BillingInfoFormHandle, BillingIn
                 <Input
                   id="address.postal_code"
                   placeholder="94102"
+                  className={cn(form.formState.errors.address?.postal_code && 'border-destructive focus-visible:ring-destructive')}
+                  aria-invalid={!!form.formState.errors.address?.postal_code}
+                  aria-describedby={form.formState.errors.address?.postal_code ? 'address-postal_code-error' : undefined}
                   {...form.register('address.postal_code')}
                 />
                 {form.formState.errors.address?.postal_code && (
-                  <p className="text-sm text-destructive">
+                  <p id="address-postal_code-error" className="text-sm text-destructive" role="alert">
                     {form.formState.errors.address.postal_code.message}
                   </p>
                 )}
@@ -199,10 +219,13 @@ export const BillingInfoForm = React.forwardRef<BillingInfoFormHandle, BillingIn
                 <Input
                   id="address.country"
                   placeholder="United States"
+                  className={cn(form.formState.errors.address?.country && 'border-destructive focus-visible:ring-destructive')}
+                  aria-invalid={!!form.formState.errors.address?.country}
+                  aria-describedby={form.formState.errors.address?.country ? 'address-country-error' : undefined}
                   {...form.register('address.country')}
                 />
                 {form.formState.errors.address?.country && (
-                  <p className="text-sm text-destructive">
+                  <p id="address-country-error" className="text-sm text-destructive" role="alert">
                     {form.formState.errors.address.country.message}
                   </p>
                 )}
