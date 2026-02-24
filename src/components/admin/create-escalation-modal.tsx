@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Inbox } from 'lucide-react'
 import type { Escalation } from '@/types/admin'
 import type { Workspace } from '@/types/admin'
 
@@ -41,6 +41,7 @@ interface CreateEscalationModalProps {
     assigned_team?: string
   }) => void
   isLoading?: boolean
+  error?: string | null
 }
 
 const PRIORITIES: { value: Escalation['priority']; label: string }[] = [
@@ -60,6 +61,7 @@ export function CreateEscalationModal({
   defaultUserId,
   onConfirm,
   isLoading = false,
+  error = null,
 }: CreateEscalationModalProps) {
   const [workspaceId, setWorkspaceId] = React.useState(defaultWorkspaceId ?? '')
   const [userId, setUserId] = React.useState(defaultUserId ?? '')
@@ -100,25 +102,36 @@ export function CreateEscalationModal({
     onOpenChange(next)
   }
 
+  const hasWorkspaces = workspaces.length > 0
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg shadow-card border-border bg-card">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-primary" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <AlertCircle className="h-5 w-5 text-primary" aria-hidden />
             Create Escalation
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Create an escalation record for a workspace. This will be tracked in the support queue and
             audit log.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
+          {error && (
+            <div
+              role="alert"
+              className="flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+            >
+              <AlertCircle className="h-4 w-4 shrink-0" aria-hidden />
+              {error}
+            </div>
+          )}
           <div className="space-y-2">
-            <Label>Workspace</Label>
-            <Select value={workspaceId} onValueChange={setWorkspaceId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select workspace" />
+            <Label htmlFor="escalation-workspace">Workspace</Label>
+            <Select value={workspaceId} onValueChange={setWorkspaceId} disabled={!hasWorkspaces}>
+              <SelectTrigger id="escalation-workspace" aria-describedby={!hasWorkspaces ? 'workspace-empty-desc' : undefined}>
+                <SelectValue placeholder={hasWorkspaces ? 'Select workspace' : 'No workspaces available'} />
               </SelectTrigger>
               <SelectContent>
                 {workspaces.map((w) => (
@@ -128,6 +141,18 @@ export function CreateEscalationModal({
                 ))}
               </SelectContent>
             </Select>
+            {!hasWorkspaces && (
+              <div
+                id="workspace-empty-desc"
+                className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border bg-muted/50 px-4 py-6 text-center"
+              >
+                <Inbox className="h-10 w-10 text-muted-foreground" aria-hidden />
+                <p className="text-sm font-medium text-foreground">No workspaces available</p>
+                <p className="text-sm text-muted-foreground">
+                  Add a workspace first to create an escalation.
+                </p>
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="reason">Reason (required)</Label>
@@ -136,13 +161,15 @@ export function CreateEscalationModal({
               placeholder="e.g. Billing dispute, data export request"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
+              disabled={isLoading}
+              aria-required
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Priority</Label>
-              <Select value={priority} onValueChange={(v) => setPriority(v as Escalation['priority'])}>
-                <SelectTrigger>
+              <Label htmlFor="escalation-priority">Priority</Label>
+              <Select value={priority} onValueChange={(v) => setPriority(v as Escalation['priority'])} disabled={isLoading}>
+                <SelectTrigger id="escalation-priority">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -155,9 +182,9 @@ export function CreateEscalationModal({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Assigned Team</Label>
-              <Select value={assignedTeam} onValueChange={setAssignedTeam}>
-                <SelectTrigger>
+              <Label htmlFor="escalation-team">Assigned Team</Label>
+              <Select value={assignedTeam} onValueChange={setAssignedTeam} disabled={isLoading}>
+                <SelectTrigger id="escalation-team">
                   <SelectValue placeholder="Optional" />
                 </SelectTrigger>
                 <SelectContent>
@@ -178,14 +205,25 @@ export function CreateEscalationModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
+              disabled={isLoading}
+              className="resize-none"
             />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isLoading}>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={isLoading}
+            className="min-h-[44px] min-w-[44px] sm:min-w-0"
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={!reason.trim() || isLoading}>
+          <Button
+            onClick={handleConfirm}
+            disabled={!reason.trim() || !workspaceId || isLoading}
+            className="min-h-[44px] min-w-[44px] sm:min-w-0"
+          >
             {isLoading ? 'Creating...' : 'Create Escalation'}
           </Button>
         </DialogFooter>
