@@ -150,41 +150,6 @@ export interface Database {
           user_agent?: string | null
         }
       }
-      password_reset_tokens: {
-        Row: {
-          id: string
-          user_id: string
-          token_hash: string
-          expires_at: string
-          used_at: string | null
-          created_at: string
-          created_by_ip: string | null
-          device_info: string | null
-          user_agent: string | null
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          token_hash: string
-          expires_at: string
-          used_at?: string | null
-          created_at?: string
-          created_by_ip?: string | null
-          device_info?: string | null
-          user_agent?: string | null
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          token_hash?: string
-          expires_at?: string
-          used_at?: string | null
-          created_at?: string
-          created_by_ip?: string | null
-          device_info?: string | null
-          user_agent?: string | null
-        }
-      }
       audit_logs: {
         Row: {
           id: string
