@@ -20,10 +20,13 @@ import type {
 const ANALYTICS_KEY = ['analytics'] as const
 const DRILLDOWN_KEY = ['analytics', 'drilldown'] as const
 
-export function useStudioAnalytics(filters: AnalyticsFilters) {
+export function useStudioAnalytics(
+  filters: AnalyticsFilters,
+  workspaceId?: string | null
+) {
   return useQuery({
-    queryKey: [...ANALYTICS_KEY, 'studio', filters],
-    queryFn: () => fetchStudioAnalytics(filters),
+    queryKey: [...ANALYTICS_KEY, 'studio', filters, workspaceId ?? 'default'],
+    queryFn: () => fetchStudioAnalytics(filters, workspaceId),
     staleTime: 2 * 60 * 1000,
   })
 }

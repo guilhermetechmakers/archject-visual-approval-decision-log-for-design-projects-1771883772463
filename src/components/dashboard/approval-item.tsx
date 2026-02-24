@@ -30,6 +30,18 @@ function formatDueDate(iso: string): string {
   return `${Math.floor(days / 7)} week${Math.floor(days / 7) > 1 ? 's' : ''}`
 }
 
+function formatDaysSince(iso: string | null | undefined): string | null {
+  if (!iso) return null
+  const d = new Date(iso)
+  const now = new Date()
+  const diff = now.getTime() - d.getTime()
+  const days = Math.floor(diff / (24 * 60 * 60 * 1000))
+  if (days === 0) return 'Updated today'
+  if (days === 1) return '1 day since update'
+  if (days < 7) return `${days} days since update`
+  return `${Math.floor(days / 7)} week${Math.floor(days / 7) > 1 ? 's' : ''} since update`
+}
+
 function copyToClipboard(text: string, label: string) {
   navigator.clipboard.writeText(text).then(
     () => toast.success(`${label} copied to clipboard`),
@@ -43,6 +55,7 @@ export function ApprovalItem({
   className,
 }: ApprovalItemProps) {
   const dueLabel = formatDueDate(approval.due_date)
+  const daysSince = formatDaysSince(approval.last_updated_at)
   const shareLink = approval.share_link ?? `https://archject.app/portal/${approval.decision_id}`
 
   const handleCopyLink = () => {
@@ -67,10 +80,18 @@ export function ApprovalItem({
             {approval.project_name && (
               <span>{approval.project_name}</span>
             )}
-            {approval.client_email && (
+            {(approval.client_name ?? approval.client_email) && (
               <>
                 <span>•</span>
-                <span className="truncate">{approval.client_email}</span>
+                <span className="truncate">
+                  {approval.client_name ?? approval.client_email}
+                </span>
+              </>
+            )}
+            {daysSince && (
+              <>
+                <span>•</span>
+                <span title="Days since last update">{daysSince}</span>
               </>
             )}
           </div>

@@ -35,8 +35,11 @@ export interface AwaitingApproval {
   project_name?: string
   due_date: string
   client_email?: string | null
+  client_name?: string | null
   share_link?: string | null
   status: 'pending' | 'overdue'
+  /** ISO date string - when client last responded or decision was last updated */
+  last_updated_at?: string | null
 }
 
 export type ActivityType =
@@ -65,6 +68,31 @@ export interface UsageSnapshot {
   storage_quota: number
 }
 
+/** Dashboard KPI strip - key metrics for user-specific dashboard */
+export interface DashboardKpis {
+  activeProjects: number
+  decisionsAwaitingClient: number
+  averageDecisionDurationHours: number
+  templateAdoptionRate: number // 0-100
+  deltaActiveProjects?: number
+  deltaAwaitingClient?: number
+  deltaDecisionDuration?: number
+  deltaTemplateAdoption?: number
+}
+
+/** Trend data for 7/30/90-day views */
+export interface DashboardTrendPoint {
+  decisionsCreated: number
+  decisionsResponded: number
+  templatesUsed: number
+}
+
+export interface DashboardTrendData {
+  last7Days: DashboardTrendPoint
+  last30Days: DashboardTrendPoint
+  last90Days: DashboardTrendPoint
+}
+
 export interface DashboardPayload {
   user: DashboardUser
   workspace: DashboardWorkspace
@@ -72,6 +100,8 @@ export interface DashboardPayload {
   awaiting_approvals: AwaitingApproval[]
   recent_activity: RecentActivity[]
   usage: UsageSnapshot
+  kpis?: DashboardKpis
+  trendData?: DashboardTrendData
 }
 
 export interface WorkspaceOption {

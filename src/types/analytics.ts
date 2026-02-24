@@ -33,6 +33,8 @@ export interface BottleneckStage {
   stage: string
   count: number
   percentage: number
+  /** Average response time in hours for this stage */
+  avgResponseTimeHours?: number
 }
 
 export interface TemplatePerformance {

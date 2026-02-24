@@ -4,9 +4,45 @@
  * coordinates with API for PDF/scheduled delivery
  */
 
+import type { DashboardPayload } from '@/types/dashboard'
 import type { AnalyticsFilters, GroupByOption } from '@/types/analytics'
 import type { TemplatePerformance, ClientResponsiveness } from '@/types/analytics'
 import type { DrilldownDecision } from '@/types/analytics'
+
+export function generateCsvFromDashboard(
+  payload: DashboardPayload,
+  title: string
+): string {
+  const headers = [
+    'Project',
+    'Progress',
+    'Active Decisions',
+    'Last Activity',
+    'Awaiting Title',
+    'Due Date',
+    'Status',
+    'Client',
+  ]
+  const rows: string[][] = []
+  const projectMap = new Map(payload.projects.map((p) => [p.id, p]))
+  for (const a of payload.awaiting_approvals) {
+    const p = projectMap.get(a.project_id)
+    rows.push([
+      p?.name ?? a.project_name ?? '',
+      String(p?.progress ?? 0),
+      String(p?.active_decisions_count ?? 0),
+      p?.last_activity ?? '',
+      a.title,
+      a.due_date,
+      a.status,
+      String(a.client_name ?? a.client_email ?? ''),
+    ])
+  }
+  if (rows.length === 0) {
+    rows.push(['No decisions awaiting client', '', '', '', '', '', '', ''])
+  }
+  return buildCsv(headers, rows, title)
+}
 
 export function generateCsvFromTemplatePerformance(
   data: TemplatePerformance[],

@@ -2,7 +2,7 @@
  * Analytics & Reports - studio-facing analytics hub
  */
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -12,12 +12,15 @@ import {
   AnalyticsKpiCards,
   AnalyticsTrendChart,
   AnalyticsBottleneckView,
+  AnalyticsBottleneckHeatmap,
   AnalyticsTemplatesTable,
   AnalyticsClientGauges,
+  AnalyticsClientMatrix,
   AnalyticsExportPanel,
   CustomReportsPanel,
 } from '@/components/analytics'
 import { useStudioAnalytics } from '@/hooks/use-analytics'
+import { useSegmentTrack } from '@/hooks/use-segment-track'
 import type { AnalyticsFilters } from '@/types/analytics'
 import type { TemplateSortField, TemplateSortOrder } from '@/components/analytics'
 
@@ -33,13 +36,37 @@ function getDefaultFilters(): AnalyticsFilters {
 
 export function AnalyticsDashboardPage() {
   const navigate = useNavigate()
+  const { track } = useSegmentTrack()
   const [filters, setFilters] = useState<AnalyticsFilters>(getDefaultFilters)
+
+  useEffect(() => {
+    track({ event: 'analytics_viewed', properties: {} })
+  }, [track])
   const [templateSort, setTemplateSort] = useState<{
     sortBy: TemplateSortField
     sortOrder: TemplateSortOrder
   }>({ sortBy: 'usageCount', sortOrder: 'desc' })
+  const [clientSort, setClientSort] = useState<{
+    sortBy: 'avgResponseTimeHours' | 'responseRate'
+    sortOrder: 'asc' | 'desc'
+  }>({ sortBy: 'responseRate', sortOrder: 'desc' })
 
   const { data, isLoading, error } = useStudioAnalytics(filters)
+
+  const sortedClients = useMemo(() => {
+    if (!data?.clientResponsiveness) return []
+    const arr = [...data.clientResponsiveness]
+    const { sortBy, sortOrder } = clientSort
+    arr.sort((a, b) => {
+      const aVal = a[sortBy]
+      const bVal = b[sortBy]
+      const cmp = typeof aVal === 'number' && typeof bVal === 'number'
+        ? aVal - bVal
+        : 0
+      return sortOrder === 'asc' ? cmp : -cmp
+    })
+    return arr
+  }, [data?.clientResponsiveness, clientSort])
 
   const sortedTemplates = useMemo(() => {
     if (!data?.templatePerformance) return []
@@ -127,13 +154,30 @@ export function AnalyticsDashboardPage() {
             />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <AnalyticsTemplatesTable
+          <div className="grid gap-6 lg:grid-cols-2">
+            <AnalyticsBottleneckHeatmap
+              stages={data.bottleneckStages}
+              onStageClick={handleStageClick}
+            />
+            <AnalyticsClientMatrix
+              data={sortedClients}
+              sortBy={clientSort.sortBy}
+              sortOrder={clientSort.sortOrder}
+              onSort={(field) =>
+                setClientSort((s) => ({
+                  sortBy: field,
+                  sortOrder: s.sortBy === field && s.sortOrder === 'desc' ? 'asc' : 'desc',
+                }))
+              }
+            />
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <AnalyticsTemplatesTable
                 data={sortedTemplates}
                 sortBy={templateSort.sortBy}
                 sortOrder={templateSort.sortOrder}
-                onSort={(field) =>
+                onSort={(field: TemplateSortField) =>
                   setTemplateSort((s) => ({
                     sortBy: field,
                     sortOrder:
@@ -141,7 +185,6 @@ export function AnalyticsDashboardPage() {
                   }))
                 }
               />
-            </div>
             <AnalyticsClientGauges data={data.clientResponsiveness} />
           </div>
 

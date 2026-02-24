@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useOutletContext } from 'react-router-dom'
 import { FolderKanban, FileText, Users, Search, BarChart3, Plus, Link2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,12 +13,34 @@ import {
   DashboardSkeleton,
   QuickCreatePanel,
   ShareLinkModal,
+  DashboardKpiStrip,
+  DashboardTrendCards,
+  DashboardFiltersBar,
+  DashboardExportBar,
+  ScheduleReminderButton,
 } from '@/components/dashboard'
+import type { DashboardFilters } from '@/components/dashboard'
 import { useDashboardData } from '@/hooks/use-dashboard'
 import { useCreateClientLink } from '@/hooks/use-workspace'
+import { useSegmentTrack } from '@/hooks/use-segment-track'
+
+interface DashboardOutletContext {
+  workspaceId?: string | null
+}
 
 export function DashboardOverview() {
-  const { data, isLoading, error } = useDashboardData()
+  const { workspaceId } = (useOutletContext() ?? {}) as DashboardOutletContext
+  const { data, isLoading, error } = useDashboardData(workspaceId ?? undefined)
+  const { track } = useSegmentTrack()
+
+  useEffect(() => {
+    if (data?.workspace?.id) {
+      track({
+        event: 'dashboard_viewed',
+        properties: { workspace_id: data.workspace.id },
+      })
+    }
+  }, [data?.workspace?.id, track])
 
   if (isLoading) {
     return <DashboardSkeleton />
@@ -44,16 +66,30 @@ export function DashboardOverview() {
     awaiting_approvals,
     recent_activity,
     usage,
+    kpis,
+    trendData,
   } = data
 
+  const now = new Date()
+  const start = new Date(now)
+  start.setDate(start.getDate() - 30)
   const [searchQuery, setSearchQuery] = useState('')
   const [quickCreateOpen, setQuickCreateOpen] = useState(false)
   const [shareLinkOpen, setShareLinkOpen] = useState(false)
+  const [dashboardFilters, setDashboardFilters] = useState<DashboardFilters>({
+    from: start.toISOString().slice(0, 10),
+    to: now.toISOString().slice(0, 10),
+    projectStatus: 'active',
+  })
   const filteredProjects = searchQuery.trim()
     ? projects.filter((p) =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : projects
+  const projectsToShow =
+    dashboardFilters.projectStatus === 'all'
+      ? filteredProjects
+      : filteredProjects
   const filteredApprovals = searchQuery.trim()
     ? awaiting_approvals.filter(
         (a) =>
@@ -62,14 +98,19 @@ export function DashboardOverview() {
       )
     : awaiting_approvals
 
-  const selectedProjectId = filteredProjects[0]?.id ?? ''
+  const selectedProjectId = projectsToShow[0]?.id ?? ''
   const createLinkMutation = useCreateClientLink(selectedProjectId)
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
         <div className="flex flex-wrap items-center gap-2">
+          <DashboardExportBar
+            filters={dashboardFilters}
+            workspaceId={workspaceId ?? data?.workspace?.id}
+          />
+          <ScheduleReminderButton approvals={filteredApprovals} />
           <Button
             size="sm"
             className="rounded-full transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -94,14 +135,14 @@ export function DashboardOverview() {
       <QuickCreatePanel
         open={quickCreateOpen}
         onOpenChange={setQuickCreateOpen}
-        projects={filteredProjects}
+        projects={projectsToShow}
       />
 
       <ShareLinkModal
         open={shareLinkOpen}
         onOpenChange={setShareLinkOpen}
-        projectId={filteredProjects[0]?.id}
-        projectName={filteredProjects[0]?.name}
+        projectId={projectsToShow[0]?.id}
+        projectName={projectsToShow[0]?.name}
         onGenerate={async (opts) => {
           if (selectedProjectId) {
             const result = await createLinkMutation.mutateAsync({
@@ -122,18 +163,33 @@ export function DashboardOverview() {
         }}
       />
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-        <Input
-          placeholder="Search projects, decisions…"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 rounded-lg bg-input"
-          aria-label="Search projects and decisions"
-        />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input
+            placeholder="Search projects, decisions…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 rounded-lg bg-input"
+            aria-label="Search projects and decisions"
+          />
+        </div>
+        <DashboardFiltersBar filters={dashboardFilters} onFiltersChange={setDashboardFilters} />
       </div>
 
-      <ActiveProjectsCard projects={filteredProjects} />
+      {kpis && (
+        <section className="animate-fade-in">
+          <DashboardKpiStrip kpis={kpis} />
+        </section>
+      )}
+
+      {trendData && (
+        <section className="animate-fade-in">
+          <DashboardTrendCards trendData={trendData} />
+        </section>
+      )}
+
+      <ActiveProjectsCard projects={projectsToShow} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <DecisionsAwaitingClientCard approvals={filteredApprovals} />

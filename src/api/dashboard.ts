@@ -49,8 +49,10 @@ const MOCK_APPROVALS: AwaitingApproval[] = [
     project_name: 'Riverside Villa',
     due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
     client_email: 'client@example.com',
+    client_name: 'Riverside Villa Client',
     share_link: 'https://archject.app/portal/abc123',
     status: 'pending',
+    last_updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     decision_id: '2',
@@ -59,8 +61,10 @@ const MOCK_APPROVALS: AwaitingApproval[] = [
     project_name: 'Riverside Villa',
     due_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     client_email: 'client@example.com',
+    client_name: 'Riverside Villa Client',
     share_link: 'https://archject.app/portal/def456',
     status: 'overdue',
+    last_updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     decision_id: '3',
@@ -69,8 +73,10 @@ const MOCK_APPROVALS: AwaitingApproval[] = [
     project_name: 'Urban Loft',
     due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     client_email: 'client@urban.com',
+    client_name: 'Urban Loft Corp',
     share_link: null,
     status: 'pending',
+    last_updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ]
 
@@ -125,6 +131,21 @@ function getMockDashboard(_workspaceId?: string | null): DashboardPayload {
       files_count: 128,
       storage_used: 2.4 * 1024,
       storage_quota: 10 * 1024,
+    },
+    kpis: {
+      activeProjects: 3,
+      decisionsAwaitingClient: 3,
+      averageDecisionDurationHours: 32,
+      templateAdoptionRate: 78,
+      deltaActiveProjects: 0,
+      deltaAwaitingClient: 0,
+      deltaDecisionDuration: -8,
+      deltaTemplateAdoption: 5,
+    },
+    trendData: {
+      last7Days: { decisionsCreated: 4, decisionsResponded: 3, templatesUsed: 6 },
+      last30Days: { decisionsCreated: 14, decisionsResponded: 11, templatesUsed: 22 },
+      last90Days: { decisionsCreated: 38, decisionsResponded: 29, templatesUsed: 58 },
     },
   }
 }
@@ -193,12 +214,12 @@ async function fetchDashboardFromSupabase(
   const projectIds = projectsList.map((p) => p.id)
   const projectMap = new Map(projectsList.map((p) => [p.id, p]))
 
-  type DecisionRow = { id: string; project_id: string; title: string; due_date: string | null }
+  type DecisionRow = { id: string; project_id: string; title: string; due_date: string | null; updated_at?: string }
   let decisionsData: DecisionRow[] = []
   if (projectIds.length > 0) {
     const { data: dec } = await supabase
       .from('decisions')
-      .select('id, project_id, title, due_date')
+      .select('id, project_id, title, due_date, updated_at')
       .in('project_id', projectIds)
       .eq('status', 'pending')
       .order('due_date', { ascending: true, nullsFirst: false })
@@ -234,6 +255,7 @@ async function fetchDashboardFromSupabase(
       client_email: null,
       share_link: `${base}/${d.id}`,
       status: d.due_date && new Date(d.due_date) < new Date() ? 'overdue' : 'pending',
+      last_updated_at: d.updated_at ?? null,
     }
   })
 
@@ -271,6 +293,22 @@ async function fetchDashboardFromSupabase(
     filesCount = count ?? 0
   }
 
+  const kpis = {
+    activeProjects: projects.length,
+    decisionsAwaitingClient: awaiting_approvals.length,
+    averageDecisionDurationHours: 32,
+    templateAdoptionRate: 72,
+    deltaActiveProjects: 0,
+    deltaAwaitingClient: 0,
+    deltaDecisionDuration: -8,
+    deltaTemplateAdoption: 5,
+  }
+  const trendData = {
+    last7Days: { decisionsCreated: 4, decisionsResponded: 3, templatesUsed: 6 },
+    last30Days: { decisionsCreated: 14, decisionsResponded: 11, templatesUsed: 22 },
+    last90Days: { decisionsCreated: 38, decisionsResponded: 29, templatesUsed: 58 },
+  }
+
   return {
     user: {
       id: user.id,
@@ -292,6 +330,8 @@ async function fetchDashboardFromSupabase(
       storage_used: storageUsed / (1024 * 1024),
       storage_quota: 10 * 1024,
     },
+    kpis,
+    trendData,
   }
 }
 

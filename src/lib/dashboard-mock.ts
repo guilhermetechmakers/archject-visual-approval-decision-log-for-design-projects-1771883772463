@@ -57,8 +57,10 @@ export const mockDashboardPayload: DashboardPayload = {
       project_name: 'Riverside Villa',
       due_date: '2025-02-25',
       client_email: 'client@example.com',
+      client_name: 'Riverside Villa Client',
       share_link: 'https://archject.app/portal/abc123',
       status: 'pending',
+      last_updated_at: '2025-02-22T14:30:00Z',
     },
     {
       decision_id: 'd-2',
@@ -67,8 +69,10 @@ export const mockDashboardPayload: DashboardPayload = {
       project_name: 'Riverside Villa',
       due_date: '2025-02-20',
       client_email: 'client@example.com',
+      client_name: 'Riverside Villa Client',
       share_link: 'https://archject.app/portal/def456',
       status: 'overdue',
+      last_updated_at: '2025-02-18T09:00:00Z',
     },
     {
       decision_id: 'd-3',
@@ -77,8 +81,10 @@ export const mockDashboardPayload: DashboardPayload = {
       project_name: 'Urban Loft',
       due_date: '2025-03-01',
       client_email: null,
+      client_name: null,
       share_link: null,
       status: 'pending',
+      last_updated_at: '2025-02-22T11:00:00Z',
     },
   ],
   recent_activity: [
@@ -129,5 +135,20 @@ export const mockDashboardPayload: DashboardPayload = {
     files_count: 128,
     storage_used: 2.4,
     storage_quota: 10,
+  },
+  kpis: {
+    activeProjects: 3,
+    decisionsAwaitingClient: 3,
+    averageDecisionDurationHours: 32,
+    templateAdoptionRate: 78,
+    deltaActiveProjects: 0,
+    deltaAwaitingClient: 1,
+    deltaDecisionDuration: -8,
+    deltaTemplateAdoption: 5,
+  },
+  trendData: {
+    last7Days: { decisionsCreated: 8, decisionsResponded: 5, templatesUsed: 12 },
+    last30Days: { decisionsCreated: 24, decisionsResponded: 18, templatesUsed: 42 },
+    last90Days: { decisionsCreated: 68, decisionsResponded: 52, templatesUsed: 118 },
   },
 }

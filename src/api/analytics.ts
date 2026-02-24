@@ -32,18 +32,22 @@ function buildQuery(params: Record<string, string | string[] | undefined>): stri
 }
 
 export async function fetchStudioAnalytics(
-  filters: AnalyticsFilters
+  filters: AnalyticsFilters,
+  workspaceId?: string | null
 ): Promise<StudioAnalyticsResponse> {
   if (USE_MOCK) {
     await new Promise((r) => setTimeout(r, 400))
     return mockStudioAnalytics
   }
+  const base = workspaceId
+    ? `/workspaces/${workspaceId}/analytics/dashboard`
+    : '/analytics/studio'
   const query = buildQuery({
     from: filters.from,
     to: filters.to,
     groupBy: filters.groupBy,
   })
-  return api.get<StudioAnalyticsResponse>(`/analytics/studio${query}`)
+  return api.get<StudioAnalyticsResponse>(`${base}${query}`)
 }
 
 export async function fetchDrilldown(

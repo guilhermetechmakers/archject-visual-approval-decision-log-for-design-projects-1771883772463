@@ -34,11 +34,11 @@ export const mockStudioAnalytics: StudioAnalyticsResponse = {
   },
   timeSeries: generateTimeSeries(),
   bottleneckStages: [
-    { stage: 'Pending client review', count: 8, percentage: 42 },
-    { stage: 'Draft', count: 4, percentage: 21 },
-    { stage: 'Awaiting internal review', count: 3, percentage: 16 },
-    { stage: 'Revision requested', count: 2, percentage: 11 },
-    { stage: 'Approved', count: 2, percentage: 10 },
+    { stage: 'Pending client review', count: 8, percentage: 42, avgResponseTimeHours: 72 },
+    { stage: 'Draft', count: 4, percentage: 21, avgResponseTimeHours: 24 },
+    { stage: 'Awaiting internal review', count: 3, percentage: 16, avgResponseTimeHours: 48 },
+    { stage: 'Revision requested', count: 2, percentage: 11, avgResponseTimeHours: 96 },
+    { stage: 'Approved', count: 2, percentage: 10, avgResponseTimeHours: 12 },
   ],
   templatePerformance: [
     { id: 't1', name: 'Finishes selection', usageCount: 24, avgApprovalTimeHours: 28, successRate: 85 },
