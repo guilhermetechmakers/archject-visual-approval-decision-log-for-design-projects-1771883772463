@@ -1,17 +1,20 @@
 /**
  * CreateProjectPage - New project form with workspace selection, branding, quotas
  * Design: rounded inputs, soft backgrounds, pill buttons
+ * Uses design tokens (bg-input, text-destructive) for theming.
  */
 
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ChevronLeft, FolderKanban } from 'lucide-react'
+import { ChevronLeft, FolderKanban, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import {
   Select,
   SelectContent,
@@ -36,7 +39,7 @@ type FormData = z.infer<typeof schema>
 export function CreateProjectPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { data: workspaces = [] } = useQuery({
+  const { data: workspaces = [], isLoading: isWorkspacesLoading } = useQuery({
     queryKey: ['workspaces'],
     queryFn: () => fetchWorkspaces(),
   })
@@ -107,12 +110,16 @@ export function CreateProjectPage() {
     } as CreateProjectPayload)
   }
 
+  const inputBaseClasses = 'rounded-lg bg-input border-border'
+  const hasClientEmailError = !!errors.client_email
+  const hasNameError = !!errors.name
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="sm">
+        <Button asChild variant="ghost" size="sm" aria-label="Back to projects list">
           <Link to="/dashboard/projects">
-            <ChevronLeft className="mr-1 h-4 w-4" />
+            <ChevronLeft className="mr-1 h-4 w-4" aria-hidden />
             Projects
           </Link>
         </Button>
@@ -121,7 +128,7 @@ export function CreateProjectPage() {
       <Card className="rounded-2xl border border-border shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10" aria-hidden>
               <FolderKanban className="h-5 w-5 text-primary" />
             </div>
             New project
@@ -131,27 +138,41 @@ export function CreateProjectPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" aria-label="Create new project form">
             <div className="space-y-2">
               <Label htmlFor="workspace_id">Workspace</Label>
-              <Select
-                value={watch('workspace_id')}
-                onValueChange={(v) => setValue('workspace_id', v)}
-              >
-                <SelectTrigger
-                  id="workspace_id"
-                  className="rounded-lg bg-[#F5F6FA] border-border"
+              {isWorkspacesLoading ? (
+                <Skeleton className="h-10 w-full rounded-lg" aria-label="Loading workspaces" />
+              ) : workspaces.length === 0 ? (
+                <div
+                  className="flex min-h-[2.5rem] items-center rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
+                  role="status"
+                  aria-label="No workspaces available"
                 >
-                  <SelectValue placeholder="Select workspace" />
-                </SelectTrigger>
-                <SelectContent>
-                  {workspaces.map((w) => (
-                    <SelectItem key={w.id} value={w.id}>
-                      {w.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  No workspaces available. Create a workspace first.
+                </div>
+              ) : (
+                <Select
+                  value={watch('workspace_id')}
+                  onValueChange={(v) => setValue('workspace_id', v)}
+                  disabled={workspaces.length === 0}
+                >
+                  <SelectTrigger
+                    id="workspace_id"
+                    className={cn(inputBaseClasses)}
+                    aria-label="Select workspace"
+                  >
+                    <SelectValue placeholder="Select workspace" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {workspaces.map((w) => (
+                      <SelectItem key={w.id} value={w.id}>
+                        {w.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -159,11 +180,15 @@ export function CreateProjectPage() {
               <Input
                 id="name"
                 placeholder="e.g. Riverside Villa"
-                className="rounded-lg bg-[#F5F6FA] border-border"
+                className={cn(inputBaseClasses, hasNameError && 'border-destructive ring-destructive focus-visible:ring-destructive')}
+                aria-invalid={hasNameError}
+                aria-describedby={hasNameError ? 'name-error' : undefined}
                 {...register('name')}
               />
               {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
+                <p id="name-error" className="text-sm text-destructive" role="alert">
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
@@ -173,7 +198,8 @@ export function CreateProjectPage() {
                 <Input
                   id="client_name"
                   placeholder="Acme Construction"
-                  className="rounded-lg bg-[#F5F6FA] border-border"
+                  className={inputBaseClasses}
+                  aria-label="Client name"
                   {...register('client_name')}
                 />
               </div>
@@ -183,29 +209,37 @@ export function CreateProjectPage() {
                   id="client_email"
                   type="email"
                   placeholder="client@example.com"
-                  className="rounded-lg bg-[#F5F6FA] border-border"
+                  className={cn(inputBaseClasses, hasClientEmailError && 'border-destructive ring-destructive focus-visible:ring-destructive')}
+                  aria-invalid={hasClientEmailError}
+                  aria-describedby={hasClientEmailError ? 'client_email-error' : undefined}
+                  aria-label="Client email address"
                   {...register('client_email')}
                 />
                 {errors.client_email && (
-                  <p className="text-sm text-destructive">
+                  <p id="client_email-error" className="text-sm text-destructive" role="alert">
                     {errors.client_email.message}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4">
+            <div className="flex flex-col gap-2 pt-4 sm:flex-row sm:gap-2">
               <Button
                 type="submit"
-                disabled={createMutation.isPending}
+                disabled={createMutation.isPending || (workspaces.length === 0 && !isWorkspacesLoading)}
                 className="rounded-full transition-all hover:scale-[1.02] active:scale-[0.98]"
+                aria-label={createMutation.isPending ? 'Creating project' : 'Create project'}
               >
+                {createMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                )}
                 {createMutation.isPending ? 'Creating…' : 'Create project'}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 asChild
+                aria-label="Cancel and return to projects list"
               >
                 <Link to="/dashboard/projects">Cancel</Link>
               </Button>
