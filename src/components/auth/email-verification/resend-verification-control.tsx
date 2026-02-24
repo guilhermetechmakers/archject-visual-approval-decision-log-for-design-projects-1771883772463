@@ -8,6 +8,8 @@ export interface ResendVerificationControlProps {
   cooldownSeconds: number
   disabled?: boolean
   className?: string
+  /** When "submit", button submits parent form; use when inside a form with validation */
+  buttonType?: 'button' | 'submit'
 }
 
 /**
@@ -19,13 +21,14 @@ export function ResendVerificationControl({
   cooldownSeconds,
   disabled = false,
   className,
+  buttonType = 'button',
 }: ResendVerificationControlProps) {
   const isDisabled = disabled || isResending || cooldownSeconds > 0
 
   return (
     <Button
-      type="button"
-      onClick={onResend}
+      type={buttonType}
+      onClick={buttonType === 'button' ? onResend : undefined}
       disabled={isDisabled}
       className={cn(
         'w-full rounded-pill bg-primary text-primary-foreground hover:bg-primary/90',

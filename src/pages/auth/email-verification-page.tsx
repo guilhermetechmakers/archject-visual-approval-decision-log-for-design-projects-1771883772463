@@ -1,5 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link, useSearchParams, useLocation } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { AuthContainer } from '@/components/auth'
 import {
   StatusIcon,
@@ -14,8 +17,24 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent } from '@/components/ui/card'
 
 type VerificationStatus = 'idle' | 'verifying' | 'success' | 'error' | 'pending'
+
+const resendEmailSchema = z.object({
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
+})
+
+type ResendEmailFormData = z.infer<typeof resendEmailSchema>
+
+const STATUS_HEADINGS: Record<VerificationStatus, string> = {
+  idle: 'Email verification',
+  verifying: 'Verifying your email',
+  success: 'Your email is verified',
+  error: 'Verification link is invalid or expired',
+  pending: 'Check your email',
+}
 
 export function EmailVerificationPage() {
   const [searchParams] = useSearchParams()
@@ -27,7 +46,15 @@ export function EmailVerificationPage() {
   const [cooldownSeconds, setCooldownSeconds] = useState(0)
   const [isResending, setIsResending] = useState(false)
   const [token, setToken] = useState<string | null>(null)
-  const [resendEmail, setResendEmail] = useState(emailFromState ?? '')
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ResendEmailFormData>({
+    resolver: zodResolver(resendEmailSchema),
+    defaultValues: { email: '' },
+  })
 
   const parseAndValidateToken = useCallback(() => {
     const result = parseTokenFromSearchParams(searchParams)
@@ -87,11 +114,10 @@ export function EmailVerificationPage() {
     return () => clearInterval(timer)
   }, [cooldownSeconds])
 
-  const handleResend = async () => {
+  const handleResend = async (data?: ResendEmailFormData) => {
     if (cooldownSeconds > 0 || isResending) return
-    const emailToUse = resendEmail.trim() || emailFromState
-    if (!emailToUse && !token) {
-      toast.error('Please enter your email to resend the verification link.')
+    const emailToUse = data?.email?.trim() || emailFromState
+    if (!emailFromState && !emailToUse) {
       return
     }
     setIsResending(true)
@@ -123,6 +149,8 @@ export function EmailVerificationPage() {
     }
   }
 
+  const onResendSubmit = handleSubmit((data) => handleResend(data))
+
   const statusIconType =
     verificationStatus === 'verifying'
       ? 'verifying'
@@ -133,6 +161,8 @@ export function EmailVerificationPage() {
           : verificationStatus === 'pending'
             ? 'neutral'
             : 'neutral'
+
+  const statusHeading = STATUS_HEADINGS[verificationStatus]
 
   return (
     <AuthContainer
@@ -153,10 +183,10 @@ export function EmailVerificationPage() {
                 : 'Email verification'
         }
       >
-        {/* Status card */}
-        <div
+        {/* Status card - uses design tokens (border, bg, shadow) */}
+        <Card
           className={cn(
-            'rounded-2xl border p-6 shadow-card transition-shadow duration-200',
+            'rounded-2xl border shadow-card transition-all duration-200',
             verificationStatus === 'success' &&
               'border-success/30 bg-success/5 hover:shadow-card-hover',
             verificationStatus === 'error' &&
@@ -167,55 +197,45 @@ export function EmailVerificationPage() {
               'border-border bg-card'
           )}
         >
-          <div className="flex items-start gap-4">
-            <StatusIcon status={statusIconType} size="lg" />
-            <div className="flex-1 min-w-0">
-              {verificationStatus === 'verifying' && (
-                <>
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Verifying your email…
-                  </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Please wait while we confirm your email address.
-                  </p>
-                </>
-              )}
-              {verificationStatus === 'success' && (
-                <>
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Your email is verified.
-                  </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    You now have access to all workspace features. Create
-                    decisions, share client links, and export audit records.
-                  </p>
-                </>
-              )}
-              {verificationStatus === 'error' && (
-                <>
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Verification link is invalid or expired.
-                  </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {errorMessage}
-                  </p>
-                </>
-              )}
-              {verificationStatus === 'pending' && (
-                <>
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Check your email
-                  </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {emailFromState
-                      ? `We've sent a verification link to ${emailFromState}. Click the link to verify your account and unlock full workspace features.`
-                      : "We've sent a verification link to your email. Click the link to verify your account. If you didn't receive it, enter your email below to resend."}
-                  </p>
-                </>
-              )}
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <StatusIcon status={statusIconType} size="lg" />
+              <div className="flex-1 min-w-0">
+                {verificationStatus === 'verifying' ? (
+                  <>
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="mt-2 h-4 w-full max-w-sm" />
+                    <Skeleton className="mt-1 h-4 w-3/4 max-w-xs" />
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-lg font-semibold text-foreground">
+                      {statusHeading}
+                    </h2>
+                    {verificationStatus === 'success' && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        You now have access to all workspace features. Create
+                        decisions, share client links, and export audit records.
+                      </p>
+                    )}
+                    {verificationStatus === 'error' && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {errorMessage}
+                      </p>
+                    )}
+                    {verificationStatus === 'pending' && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {emailFromState
+                          ? `We've sent a verification link to ${emailFromState}. Click the link to verify your account and unlock full workspace features.`
+                          : "We've sent a verification link to your email. Click the link to verify your account. If you didn't receive it, enter your email below to resend."}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Next steps */}
         <div className="space-y-4">
@@ -225,34 +245,71 @@ export function EmailVerificationPage() {
 
           {(verificationStatus === 'pending' || verificationStatus === 'error') && (
             <>
-              {!emailFromState && (
-                <div className="space-y-2">
-                  <Label htmlFor="resend-email">Email address</Label>
-                  <Input
-                    id="resend-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={resendEmail}
-                    onChange={(e) => setResendEmail(e.target.value)}
-                    className="rounded-lg"
-                    aria-required="true"
+              {emailFromState ? (
+                <div className="space-y-4">
+                  <ResendVerificationControl
+                    onResend={() => handleResend()}
+                    isResending={isResending}
+                    cooldownSeconds={cooldownSeconds}
+                    buttonType="button"
                   />
+                  <div className="flex flex-col items-center gap-3">
+                    <SupportLink />
+                    <Link
+                      to="/auth/login"
+                      className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+                    >
+                      Back to login
+                    </Link>
+                  </div>
                 </div>
+              ) : (
+                <form onSubmit={onResendSubmit} className="space-y-4" noValidate>
+                  <div className="space-y-2">
+                    <Label htmlFor="resend-email">
+                      Email address <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="resend-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      className={cn(
+                        'rounded-lg bg-input border-border',
+                        errors.email && 'border-destructive focus-visible:ring-destructive'
+                      )}
+                      aria-required="true"
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? 'resend-email-error' : undefined}
+                      {...register('email')}
+                    />
+                    {errors.email && (
+                      <p
+                        id="resend-email-error"
+                        className="text-sm text-destructive"
+                        role="alert"
+                      >
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
+                  <ResendVerificationControl
+                    onResend={() => {}}
+                    isResending={isResending}
+                    cooldownSeconds={cooldownSeconds}
+                    buttonType="submit"
+                  />
+                  <div className="flex flex-col items-center gap-3">
+                    <SupportLink />
+                    <Link
+                      to="/auth/login"
+                      className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+                    >
+                      Back to login
+                    </Link>
+                  </div>
+                </form>
               )}
-              <ResendVerificationControl
-                onResend={handleResend}
-                isResending={isResending}
-                cooldownSeconds={cooldownSeconds}
-              />
-              <div className="flex flex-col items-center gap-3">
-                <SupportLink />
-                <Link
-                  to="/auth/login"
-                  className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
-                >
-                  Back to login
-                </Link>
-              </div>
             </>
           )}
         </div>
