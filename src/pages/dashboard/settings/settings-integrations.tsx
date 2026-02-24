@@ -1,4 +1,4 @@
-import { IntegrationsCard, NotificationIntegrationsCard } from '@/components/settings'
+import { IntegrationsCard, NotificationIntegrationsCard, WebhooksCard } from '@/components/settings'
 
 export function SettingsIntegrations() {
   return (
@@ -11,6 +11,7 @@ export function SettingsIntegrations() {
       </div>
       <NotificationIntegrationsCard />
       <IntegrationsCard />
+      <WebhooksCard />
     </div>
   )
 }

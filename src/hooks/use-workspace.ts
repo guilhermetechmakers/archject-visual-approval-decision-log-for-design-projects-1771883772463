@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import * as workspaceApi from '@/api/workspace'
 import { fetchProject } from '@/api/projects'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
-import type { Decision, ProjectFile, TeamMember, ActivityLog, ClientLink } from '@/types/workspace'
+import type { Decision, ProjectFile, TeamMember, ActivityLog, ClientLink, Task, Webhook } from '@/types/workspace'
 import {
   mockProject,
   mockDecisions,
@@ -17,6 +17,8 @@ import {
   mockTemplates,
   mockActivity,
   mockClientLinks,
+  mockTasks,
+  mockWebhooks,
 } from '@/lib/workspace-mock'
 
 const projectNames: Record<string, string> = {
@@ -216,6 +218,31 @@ function useActivityQuery(projectId: string) {
   })
 }
 
+function useTasksQuery(projectId: string, decisionId?: string) {
+  return useQuery({
+    queryKey: ['workspace', 'tasks', projectId, decisionId],
+    queryFn: async (): Promise<Task[]> => {
+      if (USE_MOCK) {
+        const tasks = mockTasks.map((t) => ({ ...t, project_id: projectId }))
+        return decisionId ? tasks.filter((t) => t.decision_id === decisionId || t.related_decision_id === decisionId) : tasks
+      }
+      return workspaceApi.fetchProjectTasks(projectId, decisionId ? { decisionId } : undefined)
+    },
+    enabled: !!projectId,
+  })
+}
+
+function useWebhooksQuery(projectId: string) {
+  return useQuery({
+    queryKey: ['workspace', 'webhooks', projectId],
+    queryFn: async (): Promise<Webhook[]> => {
+      if (USE_MOCK) return mockWebhooks.map((w) => ({ ...w, project_id: projectId }))
+      return workspaceApi.fetchProjectWebhooks(projectId)
+    },
+    enabled: !!projectId,
+  })
+}
+
 function useClientLinksQuery(projectId: string) {
   return useQuery({
     queryKey: ['workspace', 'client-links', projectId],
@@ -257,6 +284,8 @@ export function useProjectWorkspace(projectId: string) {
   const templates = useMockTemplates()
   const activity = useActivityQuery(projectId)
   const clientLinks = useClientLinksQuery(projectId)
+  const tasks = useTasksQuery(projectId)
+  const webhooks = useWebhooksQuery(projectId)
 
   const isLoading =
     project.isLoading ||
@@ -265,7 +294,9 @@ export function useProjectWorkspace(projectId: string) {
     team.isLoading ||
     templates.isLoading ||
     activity.isLoading ||
-    clientLinks.isLoading
+    clientLinks.isLoading ||
+    tasks.isLoading ||
+    webhooks.isLoading
 
   const error = project.error || decisions.error || files.error || team.error
 
@@ -277,6 +308,8 @@ export function useProjectWorkspace(projectId: string) {
     templates: templates.data ?? [],
     activity: activity.data ?? [],
     clientLinks: clientLinks.data ?? [],
+    tasks: tasks.data ?? [],
+    webhooks: webhooks.data ?? [],
     isLoading,
     error,
     refetch: () => {
@@ -287,6 +320,8 @@ export function useProjectWorkspace(projectId: string) {
       templates.refetch()
       activity.refetch()
       clientLinks.refetch()
+      tasks.refetch()
+      webhooks.refetch()
     },
   }
 }
@@ -383,6 +418,169 @@ export function useExtendClientLink(projectId: string) {
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : 'Failed to extend link')
+    },
+  })
+}
+
+export function useProjectTasks(projectId: string, decisionId?: string) {
+  return useTasksQuery(projectId, decisionId)
+}
+
+export function useProjectWebhooks(projectId: string) {
+  return useWebhooksQuery(projectId)
+}
+
+export function useCreateTask(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: {
+      decision_id?: string
+      description: string
+      assignee_id?: string
+      due_date?: string
+      priority?: 'low' | 'med' | 'high'
+      notes?: string
+    }) => {
+      if (USE_MOCK) {
+        return {
+          id: `task-${Date.now()}`,
+          project_id: projectId,
+          decision_id: data.decision_id ?? null,
+          related_decision_id: data.decision_id ?? null,
+          description: data.description,
+          status: 'pending' as const,
+          priority: (data.priority ?? 'med') as Task['priority'],
+          notes: data.notes ?? null,
+          due_at: data.due_date ?? null,
+          assigned_to: data.assignee_id ?? null,
+          assignee_id: data.assignee_id ?? null,
+          created_by: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as Task
+      }
+      return workspaceApi.createTask(projectId, data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', 'tasks', projectId] })
+      toast.success('Task created')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to create task')
+    },
+  })
+}
+
+export function useUpdateTask(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: { taskId: string; status?: Task['status']; assignee_id?: string; due_date?: string; priority?: Task['priority']; notes?: string }) => {
+      const { taskId, ...rest } = data
+      if (USE_MOCK) return mockTasks[0] as Task
+      return workspaceApi.updateTask(projectId, taskId, rest)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', 'tasks', projectId] })
+      toast.success('Task updated')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to update task')
+    },
+  })
+}
+
+export function useDeleteTask(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      if (USE_MOCK) return
+      return workspaceApi.deleteTask(projectId, taskId)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', 'tasks', projectId] })
+      toast.success('Task removed')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to remove task')
+    },
+  })
+}
+
+export function useCreateWebhook(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: { url: string; events?: string[]; signing_secret?: string }) => {
+      if (USE_MOCK) {
+        return {
+          id: `wh-${Date.now()}`,
+          project_id: projectId,
+          target_url: data.url,
+          url: data.url,
+          events: data.events ?? ['approval.completed', 'decision.created'],
+          enabled: true,
+          status: 'active' as const,
+          last_trigger_at: null,
+          attempts: 0,
+        }
+      }
+      return workspaceApi.createWebhook(projectId, data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', 'webhooks', projectId] })
+      toast.success('Webhook added')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to add webhook')
+    },
+  })
+}
+
+export function useUpdateWebhook(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: { webhookId: string; url?: string; events?: string[]; enabled?: boolean }) => {
+      if (USE_MOCK) return mockWebhooks[0] as Webhook
+      return workspaceApi.updateWebhook(projectId, data.webhookId, data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', 'webhooks', projectId] })
+      toast.success('Webhook updated')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to update webhook')
+    },
+  })
+}
+
+export function useDeleteWebhook(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (webhookId: string) => {
+      if (USE_MOCK) return
+      return workspaceApi.deleteWebhook(projectId, webhookId)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', 'webhooks', projectId] })
+      toast.success('Webhook removed')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to remove webhook')
+    },
+  })
+}
+
+export function useTestWebhook(projectId: string) {
+  return useMutation({
+    mutationFn: async (webhookId: string) => {
+      if (USE_MOCK) return { success: true }
+      return workspaceApi.testWebhook(projectId, webhookId)
+    },
+    onSuccess: (data) => {
+      if (data?.success) toast.success('Test payload sent')
+      else toast.error(data?.message ?? 'Test failed')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Test failed')
     },
   })
 }

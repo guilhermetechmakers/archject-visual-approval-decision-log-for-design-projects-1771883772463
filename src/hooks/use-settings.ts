@@ -128,8 +128,32 @@ export function useSettingsWebhooks() {
 export function useCreateWebhook() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: settingsApi.createWebhook,
+    mutationFn: (data: { url: string; events: string[]; signingSecret?: string }) =>
+      settingsApi.createWebhook(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'webhooks'] }),
+  })
+}
+
+export function useUpdateWebhook() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { url?: string; events?: string[]; enabled?: boolean } }) =>
+      settingsApi.updateWebhook(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'webhooks'] }),
+  })
+}
+
+export function useDeleteWebhook() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: settingsApi.deleteWebhook,
+    onSuccess: () => qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'webhooks'] }),
+  })
+}
+
+export function useTestWebhook() {
+  return useMutation({
+    mutationFn: settingsApi.testWebhook,
   })
 }
 
@@ -197,7 +221,8 @@ export function useSettingsDataExports() {
 export function useCreateDataExport() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: settingsApi.createDataExport,
+    mutationFn: (options?: { format?: 'JSON' | 'CSV' | 'JSONL' }) =>
+      settingsApi.createDataExport(options),
     onSuccess: () => qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'data-exports'] }),
   })
 }

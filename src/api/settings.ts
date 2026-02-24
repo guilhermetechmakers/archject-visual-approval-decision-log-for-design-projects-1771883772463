@@ -73,10 +73,17 @@ export const settingsApi = {
     api.delete<void>(`/settings/integrations/${id}`),
 
   getWebhooks: () => api.get<Webhook[]>('/settings/webhooks'),
-  createWebhook: (data: { url: string; events: string[] }) =>
+  createWebhook: (data: { url: string; events: string[]; signingSecret?: string }) =>
     api.post<Webhook>('/settings/webhooks', data),
+  updateWebhook: (id: string, data: { url?: string; events?: string[]; enabled?: boolean }) =>
+    api.put<Webhook>(`/settings/webhooks/${id}`, data),
+  deleteWebhook: (id: string) =>
+    api.delete<void>(`/settings/webhooks/${id}`),
   testWebhook: (id: string) =>
-    api.post<{ success: boolean }>('/settings/webhooks/test', { id }),
+    api.post<{ success: boolean; status_code?: number; message?: string }>(
+      `/settings/webhooks/${id}/test`,
+      {}
+    ),
 
   getApiKeys: () => api.get<ApiKey[]>('/settings/api-keys'),
   createApiKey: (data: { name: string; scopes: string[]; expiresInDays?: number }) =>
@@ -87,7 +94,8 @@ export const settingsApi = {
     api.delete<void>(`/settings/api-keys/${id}`),
 
   getDataExports: () => api.get<DataExport[]>('/settings/data-exports'),
-  createDataExport: () => api.post<DataExport>('/settings/data-exports'),
+  createDataExport: (options?: { format?: 'JSON' | 'CSV' | 'JSONL' }) =>
+    api.post<DataExport>('/settings/data-exports', options ?? {}),
   getRetention: () => api.get<RetentionPolicy[]>('/settings/retention'),
   updateRetention: (data: RetentionPolicy) =>
     api.put<RetentionPolicy[]>('/settings/retention', data),

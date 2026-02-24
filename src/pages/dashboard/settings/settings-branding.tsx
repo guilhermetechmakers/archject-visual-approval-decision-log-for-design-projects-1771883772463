@@ -1,4 +1,4 @@
-import { BrandingCard, WebhooksCard } from '@/components/settings'
+import { BrandingCard } from '@/components/settings'
 
 export function SettingsBranding() {
   return (
@@ -11,7 +11,6 @@ export function SettingsBranding() {
       </div>
       <div className="space-y-6">
         <BrandingCard />
-        <WebhooksCard />
       </div>
     </div>
   )

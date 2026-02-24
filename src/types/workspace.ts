@@ -146,23 +146,39 @@ export interface ClientLink {
 export interface Webhook {
   id: string
   project_id: string
-  event_type: string
+  workspace_id?: string | null
+  event_type?: string
   target_url: string
+  url?: string
+  events?: string[]
+  enabled?: boolean
   last_trigger_at?: string | null
-  attempts: number
+  lastTest?: string | null
+  attempts?: number
   status: 'active' | 'paused' | 'failed'
+  signing_secret?: string | null
 }
+
+export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'overdue'
+export type TaskPriority = 'low' | 'med' | 'high'
 
 export interface Task {
   id: string
   project_id: string
+  decision_id?: string | null
   related_decision_id?: string | null
   description: string
-  status: 'pending' | 'in_progress' | 'completed'
+  status: TaskStatus
+  priority?: TaskPriority
+  notes?: string | null
   due_at?: string | null
+  dueDate?: string | null
   created_by?: string | null
   assigned_to?: string | null
+  assignee_id?: string | null
+  assignee_name?: string | null
   created_at: string
+  updated_at?: string | null
   completed_at?: string | null
 }
 

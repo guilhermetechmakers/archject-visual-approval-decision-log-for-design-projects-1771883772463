@@ -10,6 +10,8 @@ import type {
   Template,
   ActivityLog,
   ClientLink,
+  Task,
+  Webhook,
 } from '@/types/workspace'
 
 export const mockProject: Project = {
@@ -251,5 +253,56 @@ export const mockClientLinks: ClientLink[] = [
     is_active: true,
     usage_count: 2,
     max_usage: 10,
+  },
+]
+
+export const mockTasks: Task[] = [
+  {
+    id: 'task-1',
+    project_id: 'proj-1',
+    decision_id: 'dec-1',
+    related_decision_id: 'dec-1',
+    description: 'Follow up on Kitchen Finishes approval',
+    status: 'pending',
+    priority: 'med',
+    notes: 'Schedule client meeting after approval',
+    due_at: '2025-03-05T17:00:00Z',
+    assigned_to: 'user-2',
+    assignee_id: 'user-2',
+    assignee_name: 'Sarah Chen',
+    created_by: 'user-1',
+    created_at: '2025-02-18T10:00:00Z',
+    updated_at: '2025-02-18T10:00:00Z',
+  },
+  {
+    id: 'task-2',
+    project_id: 'proj-1',
+    decision_id: 'dec-2',
+    related_decision_id: 'dec-2',
+    description: 'Order exterior paint - approved color',
+    status: 'in_progress',
+    priority: 'high',
+    due_at: '2025-02-25T12:00:00Z',
+    assigned_to: 'user-2',
+    assignee_id: 'user-2',
+    assignee_name: 'Sarah Chen',
+    created_by: 'user-1',
+    created_at: '2025-02-14T16:30:00Z',
+    updated_at: '2025-02-20T09:00:00Z',
+  },
+]
+
+export const mockWebhooks: Webhook[] = [
+  {
+    id: 'wh-1',
+    project_id: 'proj-1',
+    target_url: 'https://hooks.zapier.com/hooks/catch/archject/abc123',
+    url: 'https://hooks.zapier.com/hooks/catch/archject/abc123',
+    events: ['approval.completed', 'decision.created'],
+    enabled: true,
+    status: 'active',
+    last_trigger_at: '2025-02-20T14:00:00Z',
+    lastTest: '2025-02-20T14:00:00Z',
+    attempts: 12,
   },
 ]

@@ -21,13 +21,14 @@ export function DataExportCard() {
   const { data: exports, isLoading } = useSettingsDataExports()
   const createMutation = useCreateDataExport()
   const notificationExportMutation = useRequestNotificationExport()
+  const [exportFormat, setExportFormat] = useState<'JSON' | 'CSV' | 'JSONL'>('JSON')
   const [notifFormat, setNotifFormat] = useState<'json' | 'csv'>('json')
   const [notifDateFrom, setNotifDateFrom] = useState('')
   const [notifDateTo, setNotifDateTo] = useState('')
 
   const handleRequestExport = async () => {
     try {
-      await createMutation.mutateAsync()
+      await createMutation.mutateAsync({ format: exportFormat })
       toast.success('Export requested. You will be notified when it is ready.')
     } catch {
       toast.error('Failed to request export')
@@ -70,7 +71,25 @@ export function DataExportCard() {
           </CardDescription>
         </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="export-format" className="whitespace-nowrap">
+              Format
+            </Label>
+            <Select
+              value={exportFormat}
+              onValueChange={(v) => setExportFormat(v as 'JSON' | 'CSV' | 'JSONL')}
+            >
+              <SelectTrigger id="export-format" className="w-32 rounded-lg bg-input">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="JSON">JSON</SelectItem>
+                <SelectItem value="CSV">CSV</SelectItem>
+                <SelectItem value="JSONL">JSONL</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             onClick={handleRequestExport}
             disabled={createMutation.isPending}
@@ -78,9 +97,9 @@ export function DataExportCard() {
           >
             {createMutation.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <FileArchive className="mr-2 h-4 w-4" />
-          )}
+            ) : (
+              <FileArchive className="mr-2 h-4 w-4" />
+            )}
             Request data export
           </Button>
         </div>
