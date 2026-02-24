@@ -28,8 +28,6 @@ export async function computeFileHashStreaming(file: File): Promise<string | nul
   try {
     const stream = file.stream()
     const reader = stream.getReader()
-    const encoder = new TextEncoder()
-    let hashState: CryptoKey | null = null
 
     // For SHA-256 we need to hash the full buffer; streaming isn't directly supported.
     // Fall back to chunked read + concat for large files to avoid OOM.

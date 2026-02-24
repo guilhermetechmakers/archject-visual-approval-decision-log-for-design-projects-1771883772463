@@ -80,7 +80,8 @@ export function FilesLibraryView({
       const hashes: Record<string, string> = {}
       try {
         for (let i = 0; i < fileList.length; i++) {
-          hashes[fileList[i].name] = await computeFileHash(fileList[i])
+          const h = await computeFileHash(fileList[i])
+          if (h) hashes[fileList[i].name] = h
         }
       } catch {
         // Hash optional; continue without

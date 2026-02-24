@@ -40,7 +40,12 @@ export function PreviewModal({
   const [rotation, setRotation] = useState(0)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPanning, setIsPanning] = useState(false)
-  const panStartRef = useRef({ x: 0, y: 0 })
+  const panStartRef = useRef<{ clientX: number; clientY: number; panX: number; panY: number }>({
+    clientX: 0,
+    clientY: 0,
+    panX: 0,
+    panY: 0,
+  })
 
   const currentFile = file ?? (files.length ? files[currentIndex] : null)
   const hasMultiple = files.length > 1
@@ -59,6 +64,7 @@ export function PreviewModal({
     if (canPrev) {
       setCurrentIndex((i) => i - 1)
       setZoom(1)
+      setPan({ x: 0, y: 0 })
       setRotation(0)
     }
   }, [canPrev])
@@ -67,6 +73,7 @@ export function PreviewModal({
     if (canNext) {
       setCurrentIndex((i) => i + 1)
       setZoom(1)
+      setPan({ x: 0, y: 0 })
       setRotation(0)
     }
   }, [canNext])
@@ -74,6 +81,41 @@ export function PreviewModal({
   const handleZoomIn = useCallback(() => setZoom((z) => Math.min(z + 0.25, 3)), [])
   const handleZoomOut = useCallback(() => setZoom((z) => Math.max(z - 0.25, 0.5)), [])
   const handleRotate = useCallback(() => setRotation((r) => (r + 90) % 360), [])
+
+  const handlePanStart = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      if (!isImage && !isPdf) return
+      setIsPanning(true)
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      panStartRef.current = { clientX, clientY, panX: pan.x, panY: pan.y }
+    },
+    [isImage, isPdf, pan]
+  )
+
+  const handlePanMove = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      if (!isPanning) return
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      const { clientX: x0, clientY: y0, panX, panY } = panStartRef.current
+      setPan({
+        x: panX + (clientX - x0),
+        y: panY + (clientY - y0),
+      })
+    },
+    [isPanning]
+  )
+
+  const handlePanEnd = useCallback(() => {
+    setIsPanning(false)
+  }, [])
+
+  const handleResetView = useCallback(() => {
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
+    setRotation(0)
+  }, [])
 
   if (!currentFile) return null
 
@@ -100,7 +142,7 @@ export function PreviewModal({
                   >
                     <ZoomOut className="h-4 w-4" />
                   </Button>
-                  <span className="text-sm text-muted-foreground min-w-[3rem] text-center">
+                  <span className="min-w-[3rem] text-center text-sm text-muted-foreground">
                     {Math.round(zoom * 100)}%
                   </span>
                   <Button
@@ -118,6 +160,14 @@ export function PreviewModal({
                     aria-label="Rotate"
                   >
                     <RotateCw className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={handleResetView}
+                    aria-label="Reset view"
+                  >
+                    Reset
                   </Button>
                 </>
               )}
@@ -172,7 +222,17 @@ export function PreviewModal({
             </div>
           )}
 
-          <div className="flex-1 overflow-auto p-6 flex items-center justify-center bg-muted/30">
+          <div
+            className="flex flex-1 items-center justify-center overflow-auto bg-muted/30 p-6"
+            onMouseDown={handlePanStart}
+            onMouseMove={handlePanMove}
+            onMouseUp={handlePanEnd}
+            onMouseLeave={handlePanEnd}
+            onTouchStart={handlePanStart}
+            onTouchMove={handlePanMove}
+            onTouchEnd={handlePanEnd}
+            style={{ cursor: isPanning ? 'grabbing' : zoom > 1 ? 'grab' : undefined }}
+          >
             {isBim ? (
               <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-card p-12 text-center max-w-md">
                 <ExternalLink className="h-16 w-16 text-muted-foreground mx-auto" />
@@ -203,10 +263,11 @@ export function PreviewModal({
               <img
                 src={currentFile.previewUrl}
                 alt={currentFile.name}
-                className="max-w-full max-h-[70vh] object-contain transition-transform duration-200"
+                className="max-h-[70vh] max-w-full select-none object-contain transition-transform duration-200"
                 style={{
-                  transform: `scale(${zoom}) rotate(${rotation}deg)`,
+                  transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom}) rotate(${rotation}deg)`,
                 }}
+                draggable={false}
               />
             ) : isPdf && currentFile.cdnUrl ? (
               <iframe

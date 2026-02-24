@@ -10,7 +10,6 @@ import {
   mockLibraryFiles,
   mockFileVersions,
 } from '@/lib/files-library-mock'
-import { computeFileHash } from '@/lib/file-hash'
 import type {
   LibraryFile,
   FileFilters,
@@ -273,20 +272,6 @@ export function useDeleteFile(projectId: string) {
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : 'Delete failed')
-    },
-  })
-}
-
-export function useDeleteFile(projectId: string) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (fileId: string) => filesApi.deleteFile(projectId, fileId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['files-library', projectId] })
-      toast.success('File removed')
-    },
-    onError: (err) => {
-      toast.error(err instanceof Error ? err.message : 'Failed to remove file')
     },
   })
 }

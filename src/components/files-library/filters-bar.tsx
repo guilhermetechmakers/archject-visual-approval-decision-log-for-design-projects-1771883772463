@@ -166,6 +166,42 @@ export function FiltersBar({
           </SelectContent>
         </Select>
 
+        <Select
+          value={filters.previewStatus?.[0] ?? 'all'}
+          onValueChange={handlePreviewStatusChange}
+        >
+          <SelectTrigger className="w-[140px]" aria-label="Filter by preview status">
+            <SelectValue placeholder="Preview status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            {PREVIEW_STATUSES.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden />
+          <Input
+            type="date"
+            value={filters.dateFrom ?? ''}
+            onChange={handleDateFromChange}
+            className="w-[140px]"
+            aria-label="Date from"
+          />
+          <span className="text-muted-foreground">–</span>
+          <Input
+            type="date"
+            value={filters.dateTo ?? ''}
+            onChange={handleDateToChange}
+            className="w-[140px]"
+            aria-label="Date to"
+          />
+        </div>
+
         {hasActiveFilters && (
           <Button
             variant="ghost"
