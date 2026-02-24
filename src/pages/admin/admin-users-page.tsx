@@ -3,7 +3,16 @@
  */
 
 import * as React from 'react'
-import { UserCog, Download, AlertCircle, Eye, Building2, Users } from 'lucide-react'
+import {
+  UserCog,
+  Download,
+  AlertCircle,
+  Eye,
+  Building2,
+  Users,
+  AlertTriangle,
+  RefreshCw,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -95,6 +104,44 @@ function toUserApiFilters(f: UserFilters): AdminUsersFilters {
   }
 }
 
+function DataErrorState({
+  title,
+  message,
+  onRetry,
+}: {
+  title: string
+  message?: string
+  onRetry?: () => void
+}) {
+  return (
+    <div
+      className="flex flex-col items-center justify-center rounded-xl border border-dashed border-destructive/30 bg-destructive/5 px-6 py-16 text-center"
+      role="alert"
+      aria-label={title}
+    >
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-destructive/10">
+        <AlertTriangle className="h-7 w-7 text-destructive" aria-hidden />
+      </div>
+      <p className="mt-6 text-lg font-semibold text-foreground">{title}</p>
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        {message ?? 'Something went wrong. Please try again.'}
+      </p>
+      {onRetry && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-6 rounded-full"
+          onClick={onRetry}
+          aria-label="Retry loading"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" aria-hidden />
+          Try again
+        </Button>
+      )}
+    </div>
+  )
+}
+
 export function AdminUsersPage() {
   const [filters, setFilters] = React.useState<WorkspaceFilters>(defaultFilters)
   const [userFilters, setUserFilters] = React.useState<UserFilters>(defaultUserFilters)
@@ -107,8 +154,20 @@ export function AdminUsersPage() {
   const [escalationModalOpen, setEscalationModalOpen] = React.useState(false)
   const [escalationWorkspace, setEscalationWorkspace] = React.useState<Workspace | null>(null)
 
-  const { data: workspaces, isLoading } = useAdminWorkspaces(toApiFilters(filters))
-  const { data: users, isLoading: usersLoading } = useAdminUsers(toUserApiFilters(userFilters))
+  const {
+    data: workspaces,
+    isLoading,
+    isError: workspacesError,
+    error: workspacesErrorDetail,
+    refetch: refetchWorkspaces,
+  } = useAdminWorkspaces(toApiFilters(filters))
+  const {
+    data: users,
+    isLoading: usersLoading,
+    isError: usersError,
+    error: usersErrorDetail,
+    refetch: refetchUsers,
+  } = useAdminUsers(toUserApiFilters(userFilters))
   const { startSession } = useImpersonation()
   const impersonateMutation = useWorkspaceImpersonate()
   const disableMutation = useWorkspaceDisable()
@@ -220,45 +279,45 @@ export function AdminUsersPage() {
       id: 'actions',
       header: '',
       accessor: (row) => (
-        <div className="flex gap-1">
+        <div className="flex gap-1" role="group" aria-label={`Actions for workspace ${row.name}`}>
           <Button
             variant="ghost"
             size="icon-sm"
-            title="View details"
-            aria-label="View details"
+            title="View workspace details"
+            aria-label={`View details for ${row.name}`}
             onClick={() => {
               setSelectedWorkspace(row)
               setDetailDrawerOpen(true)
             }}
           >
-            <Eye className="h-4 w-4" />
+            <Eye className="h-4 w-4" aria-hidden />
           </Button>
           <Button
             variant="ghost"
             size="icon-sm"
-            title="Impersonate"
-            aria-label="Impersonate"
+            title="Impersonate workspace"
+            aria-label={`Impersonate ${row.name}`}
             onClick={() => setImpersonateWorkspace(row)}
           >
-            <UserCog className="h-4 w-4" />
+            <UserCog className="h-4 w-4" aria-hidden />
           </Button>
           <Button
             variant="ghost"
             size="icon-sm"
             title="Create escalation"
-            aria-label="Create escalation"
+            aria-label={`Create escalation for ${row.name}`}
             onClick={() => handleEscalateWorkspace(row)}
           >
-            <AlertCircle className="h-4 w-4" />
+            <AlertCircle className="h-4 w-4" aria-hidden />
           </Button>
           <Button
             variant="ghost"
             size="icon-sm"
-            title="Export"
-            aria-label="Export"
+            title="Export workspace data"
+            aria-label={`Export ${row.name}`}
             onClick={() => setExportWorkspace(row)}
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-4 w-4" aria-hidden />
           </Button>
         </div>
       ),
@@ -309,13 +368,16 @@ export function AdminUsersPage() {
       </div>
 
       <Tabs defaultValue="workspaces" className="space-y-6">
-        <TabsList className="flex flex-wrap h-auto gap-1 p-1 rounded-full bg-secondary">
-          <TabsTrigger value="workspaces" className="rounded-full">
-            <Building2 className="mr-2 h-4 w-4" />
+        <TabsList
+          className="flex flex-wrap h-auto gap-1 p-1 rounded-full bg-secondary"
+          aria-label="Workspaces and Users tabs"
+        >
+          <TabsTrigger value="workspaces" className="rounded-full" aria-label="View workspaces list">
+            <Building2 className="mr-2 h-4 w-4" aria-hidden />
             Workspaces
           </TabsTrigger>
-          <TabsTrigger value="users" className="rounded-full">
-            <Users className="mr-2 h-4 w-4" />
+          <TabsTrigger value="users" className="rounded-full" aria-label="View users list">
+            <Users className="mr-2 h-4 w-4" aria-hidden />
             Users
           </TabsTrigger>
         </TabsList>
@@ -340,13 +402,27 @@ export function AdminUsersPage() {
                   />
                 </CardHeader>
                 <CardContent>
-                  <AdminDataTable<Workspace>
-                    columns={columns}
-                    data={workspaces ?? []}
-                    isLoading={isLoading}
-                    emptyMessage="No workspaces found"
-                    getRowId={(row) => row.id}
-                  />
+                  {workspacesError ? (
+                    <DataErrorState
+                      title="Failed to load workspaces"
+                      message={
+                        workspacesErrorDetail instanceof Error
+                          ? workspacesErrorDetail.message
+                          : undefined
+                      }
+                      onRetry={() => refetchWorkspaces()}
+                    />
+                  ) : (
+                    <AdminDataTable<Workspace>
+                      columns={columns}
+                      data={workspaces ?? []}
+                      isLoading={isLoading}
+                      emptyMessage="No workspaces found"
+                      emptyDescription="No workspaces match your filters. Try adjusting search, status, or plan filters."
+                      emptyIcon={Building2}
+                      getRowId={(row) => row.id}
+                    />
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -376,13 +452,25 @@ export function AdminUsersPage() {
                   />
                 </CardHeader>
                 <CardContent>
-                  <AdminDataTable<AdminUser>
-                    columns={userColumns}
-                    data={users ?? []}
-                    isLoading={usersLoading}
-                    emptyMessage="No users found"
-                    getRowId={(row) => row.id}
-                  />
+                  {usersError ? (
+                    <DataErrorState
+                      title="Failed to load users"
+                      message={
+                        usersErrorDetail instanceof Error ? usersErrorDetail.message : undefined
+                      }
+                      onRetry={() => refetchUsers()}
+                    />
+                  ) : (
+                    <AdminDataTable<AdminUser>
+                      columns={userColumns}
+                      data={users ?? []}
+                      isLoading={usersLoading}
+                      emptyMessage="No users found"
+                      emptyDescription="No users match your filters. Try adjusting search, status, or role filters."
+                      emptyIcon={Users}
+                      getRowId={(row) => row.id}
+                    />
+                  )}
                 </CardContent>
               </Card>
             </div>
