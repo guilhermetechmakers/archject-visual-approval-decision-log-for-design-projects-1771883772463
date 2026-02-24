@@ -1,67 +1,146 @@
 /**
- * Branding context - propagates branding tokens to client-facing views.
- * Single source of truth for theming; used by Client Portal, Project Workspace, No-Login Portal.
+ * BrandingContext - Centralized theming state (branding tokens) propagated
+ * to client portal, project workspace, and all client-facing views.
  */
 
-import * as React from 'react'
-import { useSettingsWorkspace } from '@/hooks/use-settings'
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  type ReactNode,
+} from 'react'
+import type { BrandingTokens, ColorTokens } from '@/types/branding'
 import type { WorkspaceBranding } from '@/types/settings'
 
-export interface BrandingContextValue {
-  branding: WorkspaceBranding | null
+export interface BrandingState {
+  tokens: Partial<BrandingTokens>
   accentColor: string
+  primaryColor: string
   logoUrl: string | null
-  headerText: string
-  footerText: string
-  clientPortalUrl: string
-  isLoading: boolean
+  headerText: string | null
+  footerText: string | null
 }
 
-const defaultBranding: WorkspaceBranding = {
-  accentColor: '#195C4A',
-  primaryColor: '#195C4A',
-  secondaryColor: '#7BE495',
-  headerText: 'Design Approval Portal',
-  footerText: 'Powered by Archject',
+const DEFAULT_ACCENT = '#195C4A'
+const DEFAULT_PRIMARY = '#195C4A'
+
+const defaultState: BrandingState = {
+  tokens: {},
+  accentColor: DEFAULT_ACCENT,
+  primaryColor: DEFAULT_PRIMARY,
+  logoUrl: null,
+  headerText: null,
+  footerText: null,
 }
 
-const BrandingContext = React.createContext<BrandingContextValue | null>(null)
+interface BrandingContextValue extends BrandingState {
+  setTokens: (tokens: Partial<BrandingTokens>) => void
+  updateColorTokens: (colors: Partial<ColorTokens>) => void
+}
 
-export function BrandingProvider({ children }: { children: React.ReactNode }) {
-  const { data: workspace, isLoading } = useSettingsWorkspace()
-  const branding = workspace?.branding ?? defaultBranding
+const BrandingContext = createContext<BrandingContextValue | null>(null)
 
-  const value: BrandingContextValue = React.useMemo(
+export function workspaceBrandingToTokens(b: Partial<WorkspaceBranding>): Partial<BrandingTokens> {
+  return {
+    logoUrl: b.logoUrl,
+    accentColor: b.accentColor,
+    colorTokens: {
+      primary: b.primaryColor ?? b.accentColor,
+      accent: b.accentColor,
+      secondary: b.secondaryColor,
+    },
+    headerText: b.headerText,
+    footerText: b.footerText,
+    customCss: b.customCss,
+  }
+}
+
+function tokensToState(tokens: Partial<BrandingTokens>): BrandingState {
+  const accent =
+    tokens.colorTokens?.accent ??
+    tokens.accentColor ??
+    DEFAULT_ACCENT
+  const primary =
+    tokens.colorTokens?.primary ??
+    tokens.accentColor ??
+    DEFAULT_PRIMARY
+  return {
+    tokens,
+    accentColor: accent,
+    primaryColor: primary,
+    logoUrl: tokens.logoUrl ?? null,
+    headerText: tokens.headerText ?? null,
+    footerText: tokens.footerText ?? null,
+  }
+}
+
+export function BrandingProvider({
+  children,
+  initialTokens,
+  workspaceBranding,
+}: {
+  children: ReactNode
+  initialTokens?: Partial<BrandingTokens>
+  workspaceBranding?: Partial<WorkspaceBranding> | null
+}) {
+  const tokensFromWorkspace = useMemo(
+    () => (workspaceBranding ? workspaceBrandingToTokens(workspaceBranding) : null),
+    [workspaceBranding]
+  )
+  const effectiveInitial = initialTokens ?? tokensFromWorkspace ?? {}
+
+  const [state, setState] = useState<BrandingState>(() =>
+    Object.keys(effectiveInitial).length > 0
+      ? tokensToState(effectiveInitial)
+      : defaultState
+  )
+
+  useEffect(() => {
+    if (tokensFromWorkspace && Object.keys(tokensFromWorkspace).length > 0) {
+      setState(tokensToState(tokensFromWorkspace))
+    }
+  }, [tokensFromWorkspace])
+
+  const setTokens = useCallback((tokens: Partial<BrandingTokens>) => {
+    setState(tokensToState(tokens))
+  }, [])
+
+  const updateColorTokens = useCallback((colors: Partial<ColorTokens>) => {
+    setState((prev) => {
+      const nextTokens = {
+        ...prev.tokens,
+        colorTokens: { ...prev.tokens.colorTokens, ...colors },
+      }
+      return tokensToState(nextTokens)
+    })
+  }, [])
+
+  const value = useMemo<BrandingContextValue>(
     () => ({
-      branding: branding ?? defaultBranding,
-      accentColor: branding?.accentColor ?? '#195C4A',
-      logoUrl: branding?.logoUrl ?? null,
-      headerText: branding?.headerText ?? 'Design Approval Portal',
-      footerText: branding?.footerText ?? 'Powered by Archject',
-      clientPortalUrl:
-        branding?.clientPortalUrl ??
-        `https://clients.archject.app/${branding?.domainPrefix ?? 'your-studio'}`,
-      isLoading,
+      ...state,
+      setTokens,
+      updateColorTokens,
     }),
-    [branding, isLoading]
+    [state, setTokens, updateColorTokens]
   )
 
   return (
-    <BrandingContext.Provider value={value}>{children}</BrandingContext.Provider>
+    <BrandingContext.Provider value={value}>
+      {children}
+    </BrandingContext.Provider>
   )
 }
 
 export function useBranding(): BrandingContextValue {
-  const ctx = React.useContext(BrandingContext)
+  const ctx = useContext(BrandingContext)
   if (!ctx) {
     return {
-      branding: defaultBranding,
-      accentColor: '#195C4A',
-      logoUrl: null,
-      headerText: 'Design Approval Portal',
-      footerText: 'Powered by Archject',
-      clientPortalUrl: 'https://clients.archject.app/your-studio',
-      isLoading: false,
+      ...defaultState,
+      setTokens: () => {},
+      updateColorTokens: () => {},
     }
   }
   return ctx

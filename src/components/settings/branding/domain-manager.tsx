@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { Globe, Shield, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { Globe, Shield, Loader2, CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'

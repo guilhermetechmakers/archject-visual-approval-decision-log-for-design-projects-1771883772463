@@ -30,6 +30,8 @@ export interface BrandingTokens {
   workspaceId?: string
   logoUrl?: string | null
   logoAssetType?: 'svg' | 'png' | 'jpeg'
+  /** @deprecated Use colorTokens.accent */
+  accentColor?: string
   colorTokens?: ColorTokens
   fontSettings?: FontSettings
   domainConfig?: DomainConfig

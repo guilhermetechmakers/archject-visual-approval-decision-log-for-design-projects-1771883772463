@@ -94,7 +94,7 @@ export const settingsApi = {
     api.delete<void>(`/settings/api-keys/${id}`),
 
   getDataExports: () => api.get<DataExport[]>('/settings/data-exports'),
-  createDataExport: (options?: { format?: 'JSON' | 'CSV' | 'JSONL' }) =>
+  createDataExport: (options?: { format?: 'JSON' | 'CSV' | 'JSONL' | 'PDF' }) =>
     api.post<DataExport>('/settings/data-exports', options ?? {}),
   getRetention: () => api.get<RetentionPolicy[]>('/settings/retention'),
   updateRetention: (data: RetentionPolicy) =>

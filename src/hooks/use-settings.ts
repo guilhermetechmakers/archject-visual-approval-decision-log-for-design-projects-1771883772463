@@ -221,7 +221,7 @@ export function useSettingsDataExports() {
 export function useCreateDataExport() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (options?: { format?: 'JSON' | 'CSV' | 'JSONL' }) =>
+    mutationFn: (options?: { format?: 'JSON' | 'CSV' | 'JSONL' | 'PDF' }) =>
       settingsApi.createDataExport(options),
     onSuccess: () => qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'data-exports'] }),
   })

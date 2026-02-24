@@ -74,8 +74,6 @@ export function ColorTokenEditor({
     const rgb = hexToRgb(hex)
     if (!rgb) return null
     const lum = luminance(rgb.r, rgb.g, rgb.b)
-    const whiteLum = lum
-    const blackLum = lum
     const onWhite = contrastRatio(lum, 1)
     const onBlack = contrastRatio(lum, 0)
     const ratio = Math.max(onWhite, onBlack)
@@ -90,9 +88,6 @@ export function ColorTokenEditor({
       if (result) setContrastResults((r) => ({ ...r, [key]: result }))
     }
   }
-
-  const defaultPrimary = tokens.primary ?? '#195C4A'
-  const defaultAccent = tokens.accent ?? '#7BE495'
 
   return (
     <Card

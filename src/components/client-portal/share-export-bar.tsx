@@ -1,5 +1,6 @@
-import { Download, Printer, Share2, Clock } from 'lucide-react'
+import { Download, Printer, Share2, Clock, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 export interface ShareExportBarProps {
@@ -10,6 +11,16 @@ export interface ShareExportBarProps {
   onShare?: () => void
   isExporting?: boolean
   className?: string
+}
+
+const EXPIRING_SOON_DAYS = 7
+
+function isExpiringSoon(expiresAt: string | null | undefined): boolean {
+  if (!expiresAt) return false
+  const exp = new Date(expiresAt).getTime()
+  const now = Date.now()
+  const daysLeft = (exp - now) / (1000 * 60 * 60 * 24)
+  return daysLeft > 0 && daysLeft <= EXPIRING_SOON_DAYS
 }
 
 export function ShareExportBar({
@@ -29,6 +40,8 @@ export function ShareExportBar({
       })}`
     : null
 
+  const expiringSoon = isExpiringSoon(linkExpiresAt)
+
   const handlePrint = () => {
     if (onPrint) {
       onPrint()
@@ -46,10 +59,17 @@ export function ShareExportBar({
     >
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         {linkExpiresAt && (
-          <span className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4" />
+          <Badge
+            variant={expiringSoon ? 'warning' : 'secondary'}
+            className="gap-1.5 font-normal"
+          >
+            {expiringSoon ? (
+              <AlertTriangle className="h-3.5 w-3.5" />
+            ) : (
+              <Clock className="h-3.5 w-3.5" />
+            )}
             {expiryText}
-          </span>
+          </Badge>
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2">

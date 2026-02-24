@@ -6,7 +6,7 @@
 import { useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { BrandingTokens, ColorTokens } from '@/types/branding'
+import type { BrandingTokens } from '@/types/branding'
 
 export interface PreviewPaneProps {
   tokens: Partial<BrandingTokens>

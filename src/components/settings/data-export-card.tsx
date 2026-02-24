@@ -21,7 +21,7 @@ export function DataExportCard() {
   const { data: exports, isLoading } = useSettingsDataExports()
   const createMutation = useCreateDataExport()
   const notificationExportMutation = useRequestNotificationExport()
-  const [exportFormat, setExportFormat] = useState<'JSON' | 'CSV' | 'JSONL'>('JSON')
+  const [exportFormat, setExportFormat] = useState<'JSON' | 'CSV' | 'JSONL' | 'PDF'>('JSON')
   const [notifFormat, setNotifFormat] = useState<'json' | 'csv'>('json')
   const [notifDateFrom, setNotifDateFrom] = useState('')
   const [notifDateTo, setNotifDateTo] = useState('')
@@ -78,7 +78,7 @@ export function DataExportCard() {
             </Label>
             <Select
               value={exportFormat}
-              onValueChange={(v) => setExportFormat(v as 'JSON' | 'CSV' | 'JSONL')}
+              onValueChange={(v) => setExportFormat(v as 'JSON' | 'CSV' | 'JSONL' | 'PDF')}
             >
               <SelectTrigger id="export-format" className="w-32 rounded-lg bg-input">
                 <SelectValue />
@@ -87,6 +87,7 @@ export function DataExportCard() {
                 <SelectItem value="JSON">JSON</SelectItem>
                 <SelectItem value="CSV">CSV</SelectItem>
                 <SelectItem value="JSONL">JSONL</SelectItem>
+                <SelectItem value="PDF">PDF</SelectItem>
               </SelectContent>
             </Select>
           </div>

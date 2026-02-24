@@ -44,7 +44,7 @@ export interface ColorTokens {
 
 export interface WorkspaceBranding {
   logoUrl?: string | null
-  logoAssetType?: 'svg' | 'png' | 'jpg' | null
+  logoAssetType?: 'svg' | 'png' | 'jpeg' | null
   primaryColor?: string
   secondaryColor?: string
   accentColor: string
@@ -173,6 +173,7 @@ export interface DataExport {
   initiatedAt: string
   completedAt?: string | null
   downloadUrl?: string | null
+  format?: 'JSON' | 'CSV' | 'JSONL' | 'PDF'
 }
 
 export interface RetentionPolicy {

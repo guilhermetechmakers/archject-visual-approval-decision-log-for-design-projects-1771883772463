@@ -1,9 +1,11 @@
 /**
  * Branding API - assets, tokens, domain, validation
+ * Uses Supabase Edge Functions when configured
  */
 
 import { api } from '@/lib/api'
 import { getAccessTokenSync } from '@/lib/auth-service'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import type {
   WorkspaceBranding,
   DomainConfig,
@@ -11,6 +13,7 @@ import type {
 } from '@/types/settings'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api'
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? ''
 
 export const brandingApi = {
   /** Get current workspace branding tokens */
@@ -20,15 +23,21 @@ export const brandingApi = {
   updateBranding: (data: Partial<WorkspaceBranding>) =>
     api.put<WorkspaceBranding>('/branding', data),
 
-  /** Upload branding asset (logo, favicon) - uses FormData */
+  /** Upload branding asset (logo, favicon) - uses FormData; Supabase Edge Function when configured */
   uploadAsset: async (assetType: 'logo' | 'favicon', file: File): Promise<{ url: string }> => {
     const formData = new FormData()
     formData.append('assetType', assetType)
     formData.append('file', file)
     const token = getAccessTokenSync()
+
+    const uploadUrl = isSupabaseConfigured && SUPABASE_URL
+      ? `${SUPABASE_URL}/functions/v1/branding-upload-asset`
+      : `${API_BASE}/branding/assets`
+
     const headers: Record<string, string> = {}
     if (token) headers['Authorization'] = `Bearer ${token}`
-    const res = await fetch(`${API_BASE}/branding/assets`, {
+
+    const res = await fetch(uploadUrl, {
       method: 'POST',
       body: formData,
       headers,
