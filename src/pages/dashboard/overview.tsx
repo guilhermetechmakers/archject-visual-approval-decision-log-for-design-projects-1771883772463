@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FolderKanban, FileText, Users, Search, BarChart3 } from 'lucide-react'
+import { FolderKanban, FileText, Users, Search, BarChart3, Plus, Link2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -11,6 +11,8 @@ import {
   UsageSnapshotCard,
   AnalyticsWidget,
   DashboardSkeleton,
+  QuickCreatePanel,
+  ShareLinkModal,
 } from '@/components/dashboard'
 import { useDashboardData } from '@/hooks/use-dashboard'
 
@@ -44,6 +46,8 @@ export function DashboardOverview() {
   } = data
 
   const [searchQuery, setSearchQuery] = useState('')
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false)
+  const [shareLinkOpen, setShareLinkOpen] = useState(false)
   const filteredProjects = searchQuery.trim()
     ? projects.filter((p) =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -61,8 +65,49 @@ export function DashboardOverview() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <QuickActionsBar />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            className="rounded-full transition-all hover:scale-[1.02] active:scale-[0.98]"
+            onClick={() => setQuickCreateOpen(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Quick create
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="rounded-full transition-all hover:scale-[1.02] active:scale-[0.98]"
+            onClick={() => setShareLinkOpen(true)}
+          >
+            <Link2 className="mr-2 h-4 w-4" />
+            Share client link
+          </Button>
+          <QuickActionsBar />
+        </div>
       </div>
+
+      <QuickCreatePanel
+        open={quickCreateOpen}
+        onOpenChange={setQuickCreateOpen}
+        projects={filteredProjects}
+        workspaceId={data.workspace?.id}
+      />
+
+      <ShareLinkModal
+        open={shareLinkOpen}
+        onOpenChange={setShareLinkOpen}
+        projectId={filteredProjects[0]?.id}
+        projectName={filteredProjects[0]?.name}
+        onGenerate={async (opts) => {
+          const base = `${window.location.origin}/portal`
+          const token = `mock-${Date.now().toString(36)}`
+          return {
+            url: `${base}/${token}`,
+            expiresAt: opts.expiresAt ?? null,
+          }
+        }}
+      />
 
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />

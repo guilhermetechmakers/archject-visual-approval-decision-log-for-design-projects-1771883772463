@@ -1,6 +1,8 @@
 export { DashboardTopbar } from './dashboard-topbar'
 export { ActionQuickBar } from './action-quick-bar'
 export { QuickActionsBar } from './quick-actions-bar'
+export { QuickCreatePanel } from './quick-create-panel'
+export { ShareLinkModal } from './share-link-modal'
 export { ProjectCard } from './project-card'
 export { ApprovalItem } from './approval-item'
 export { ActivityItem } from './activity-item'

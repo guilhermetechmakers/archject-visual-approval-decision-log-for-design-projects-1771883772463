@@ -24,6 +24,7 @@ export type ActivityType =
 export interface Project {
   id: string
   name: string
+  workspace_id?: string
   client_id?: string | null
   client_name?: string | null
   branding_logo_url?: string | null

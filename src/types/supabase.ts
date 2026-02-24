@@ -301,6 +301,199 @@ export interface Database {
           user_agent?: string | null
         }
       }
+      projects: {
+        Row: {
+          id: string
+          workspace_id: string
+          name: string
+          client_info: Json
+          branding: Json
+          template_id: string | null
+          quota: Json
+          usage: Json
+          status: 'active' | 'archived' | 'on_hold'
+          created_at: string
+          updated_at: string
+          archived_at: string | null
+        }
+        Insert: {
+          id?: string
+          workspace_id: string
+          name: string
+          client_info?: Json
+          branding?: Json
+          template_id?: string | null
+          quota?: Json
+          usage?: Json
+          status?: 'active' | 'archived' | 'on_hold'
+          created_at?: string
+          updated_at?: string
+          archived_at?: string | null
+        }
+        Update: {
+          id?: string
+          workspace_id?: string
+          name?: string
+          client_info?: Json
+          branding?: Json
+          template_id?: string | null
+          quota?: Json
+          usage?: Json
+          status?: 'active' | 'archived' | 'on_hold'
+          created_at?: string
+          updated_at?: string
+          archived_at?: string | null
+        }
+      }
+      decisions: {
+        Row: {
+          id: string
+          project_id: string
+          title: string
+          options: Json
+          chosen_option_id: string | null
+          status: 'draft' | 'pending' | 'accepted' | 'rejected'
+          comments: Json
+          due_date: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+          approved_at: string | null
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          title: string
+          options?: Json
+          chosen_option_id?: string | null
+          status?: 'draft' | 'pending' | 'accepted' | 'rejected'
+          comments?: Json
+          due_date?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+          approved_at?: string | null
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          title?: string
+          options?: Json
+          chosen_option_id?: string | null
+          status?: 'draft' | 'pending' | 'accepted' | 'rejected'
+          comments?: Json
+          due_date?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+          approved_at?: string | null
+        }
+      }
+      project_files: {
+        Row: {
+          id: string
+          project_id: string
+          filename: string
+          size: number
+          mime_type: string | null
+          storage_path: string
+          uploaded_by: string | null
+          version: number
+          uploaded_at: string
+          associated_decision_id: string | null
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          filename: string
+          size?: number
+          mime_type?: string | null
+          storage_path: string
+          uploaded_by?: string | null
+          version?: number
+          uploaded_at?: string
+          associated_decision_id?: string | null
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          filename?: string
+          size?: number
+          mime_type?: string | null
+          storage_path?: string
+          uploaded_by?: string | null
+          version?: number
+          uploaded_at?: string
+          associated_decision_id?: string | null
+        }
+      }
+      project_invitations: {
+        Row: {
+          id: string
+          project_id: string
+          email: string
+          role: 'owner' | 'admin' | 'editor' | 'viewer' | 'client'
+          token: string
+          expires_at: string
+          status: 'pending' | 'accepted' | 'expired'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          email: string
+          role?: 'owner' | 'admin' | 'editor' | 'viewer' | 'client'
+          token: string
+          expires_at: string
+          status?: 'pending' | 'accepted' | 'expired'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          email?: string
+          role?: 'owner' | 'admin' | 'editor' | 'viewer' | 'client'
+          token?: string
+          expires_at?: string
+          status?: 'pending' | 'accepted' | 'expired'
+          created_at?: string
+        }
+      }
+      client_links: {
+        Row: {
+          id: string
+          project_id: string
+          decision_id: string | null
+          token: string
+          expires_at: string | null
+          otp_required: boolean
+          created_at: string
+          used_at: string | null
+          is_active: boolean
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          decision_id?: string | null
+          token: string
+          expires_at?: string | null
+          otp_required?: boolean
+          created_at?: string
+          used_at?: string | null
+          is_active?: boolean
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          decision_id?: string | null
+          token?: string
+          expires_at?: string | null
+          otp_required?: boolean
+          created_at?: string
+          used_at?: string | null
+          is_active?: boolean
+        }
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
