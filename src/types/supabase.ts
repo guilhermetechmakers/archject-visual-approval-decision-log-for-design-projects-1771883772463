@@ -23,6 +23,7 @@ export interface Database {
           is_email_confirmed: boolean
           two_fa_enabled: boolean
           last_login: string | null
+          last_verification_requested_at: string | null
           created_at: string
           updated_at: string
         }
@@ -34,6 +35,7 @@ export interface Database {
           is_email_confirmed?: boolean
           two_fa_enabled?: boolean
           last_login?: string | null
+          last_verification_requested_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -45,6 +47,7 @@ export interface Database {
           is_email_confirmed?: boolean
           two_fa_enabled?: boolean
           last_login?: string | null
+          last_verification_requested_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -174,6 +177,41 @@ export interface Database {
           target_id?: string | null
           timestamp?: string
           details?: Json | null
+        }
+      }
+      verification_tokens: {
+        Row: {
+          id: string
+          user_id: string
+          token_hash: string
+          token_jti: string
+          expires_at: string
+          used_at: string | null
+          created_at: string
+          created_by_ip: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          token_hash: string
+          token_jti: string
+          expires_at: string
+          used_at?: string | null
+          created_at?: string
+          created_by_ip?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          token_hash?: string
+          token_jti?: string
+          expires_at?: string
+          used_at?: string | null
+          created_at?: string
+          created_by_ip?: string | null
+          user_agent?: string | null
         }
       }
     }
