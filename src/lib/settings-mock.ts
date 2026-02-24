@@ -23,6 +23,9 @@ export const MOCK_PROFILE: UserProfile = {
   name: 'Jane Smith',
   avatar: null,
   twoFactorEnabled: false,
+  role: 'editor',
+  timeZone: 'America/New_York',
+  locale: 'en-US',
 }
 
 export const MOCK_WORKSPACE: Workspace = {

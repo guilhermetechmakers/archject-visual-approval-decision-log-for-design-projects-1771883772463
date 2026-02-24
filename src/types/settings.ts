@@ -8,6 +8,12 @@ export interface UserProfile {
   name: string
   avatar?: string | null
   twoFactorEnabled: boolean
+  /** User role (e.g. admin, editor, viewer) */
+  role?: string
+  /** IANA time zone (e.g. America/New_York) */
+  timeZone?: string
+  /** BCP 47 locale (e.g. en-US) */
+  locale?: string
 }
 
 export interface WorkspaceBranding {
@@ -15,6 +21,9 @@ export interface WorkspaceBranding {
   accentColor: string
   domainPrefix?: string | null
   clientPortalUrl?: string | null
+  headerText?: string | null
+  footerText?: string | null
+  customCss?: string | null
 }
 
 export interface Workspace {

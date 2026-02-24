@@ -21,7 +21,7 @@ import type {
 
 export const settingsApi = {
   getProfile: () => api.get<UserProfile>('/settings'),
-  updateProfile: (data: Partial<Pick<UserProfile, 'name' | 'avatar'>>) =>
+  updateProfile: (data: Partial<Pick<UserProfile, 'name' | 'avatar' | 'timeZone' | 'locale' | 'role'>>) =>
     api.put<UserProfile>('/settings/profile', data),
 
   getWorkspace: () => api.get<Workspace>('/settings/workspace'),
