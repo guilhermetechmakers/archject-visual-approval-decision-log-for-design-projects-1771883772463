@@ -14,6 +14,10 @@ import {
   ToggleLeft,
   FileText,
   CreditCard,
+  History,
+  FileArchive,
+  FileClock,
+  Shield,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -40,9 +44,14 @@ const SECTIONS: NavSection[] = [
   {
     title: 'Compliance',
     items: [
+      { to: '/admin/governance', icon: Shield, label: 'Governance' },
+      { to: '/admin/audit-logs', icon: History, label: 'Audit Logs' },
+      { to: '/admin/data-exports', icon: FileArchive, label: 'Data Exports' },
+      { to: '/admin/retention-policies', icon: FileClock, label: 'Retention Policies' },
+      { to: '/admin/privacy-controls', icon: Shield, label: 'Privacy Controls' },
       { to: '/admin/settings', icon: Settings, label: 'Settings' },
       { to: '/admin/settings', icon: ToggleLeft, label: 'Feature Toggles' },
-      { to: '/admin/settings', icon: FileText, label: 'Audit Logs' },
+      { to: '/admin/settings', icon: FileText, label: 'Docs' },
     ],
   },
 ]
@@ -92,7 +101,12 @@ export function AdminSideNav({ collapsed, onToggle, onNavigate, className }: Adm
             )}
             <ul className="space-y-1">
               {section.items.map((item) => {
-                const isActive = location.pathname === item.to || (item.to === '/admin/settings' && location.pathname.startsWith('/admin/settings'))
+                const isActive =
+                  location.pathname === item.to ||
+                  (item.to === '/admin/governance' && location.pathname.startsWith('/admin/governance')) ||
+                  (item.to === '/admin/settings' &&
+                    location.pathname.startsWith('/admin/settings') &&
+                    !['/admin/audit-logs', '/admin/data-exports', '/admin/retention-policies', '/admin/privacy-controls', '/admin/governance'].includes(location.pathname))
                 const Icon = item.icon
                 return (
                   <li key={`${item.to}-${item.label}`}>

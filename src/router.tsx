@@ -37,6 +37,8 @@ import { SettingsApiKeys } from '@/pages/dashboard/settings/settings-api-keys'
 import { SettingsDataExport } from '@/pages/dashboard/settings/settings-data-export'
 import { SettingsSessions } from '@/pages/dashboard/settings/settings-sessions'
 import { SettingsSecurity } from '@/pages/dashboard/settings/settings-security'
+import { SettingsRetentionPolicy } from '@/pages/dashboard/settings/settings-retention-policy'
+import { SettingsPrivacyControls } from '@/pages/dashboard/settings/settings-privacy-controls'
 import { SettingsTeam } from '@/pages/dashboard/settings/settings-team'
 import { SettingsBilling } from '@/pages/dashboard/settings/settings-billing'
 import { BillingPage } from '@/pages/dashboard/billing'
@@ -59,6 +61,11 @@ import { AdminUsersPage } from '@/pages/admin/admin-users-page'
 import { AdminToolsPage } from '@/pages/admin/admin-tools-page'
 import { AdminSettingsPage } from '@/pages/admin/admin-settings-page'
 import { AdminBillingPage } from '@/pages/admin/admin-billing-page'
+import { AdminGovernancePage } from '@/pages/admin/admin-governance-page'
+import { AdminAuditLogsPage } from '@/pages/admin/admin-audit-logs-page'
+import { AdminDataExportsPage } from '@/pages/admin/admin-data-exports-page'
+import { AdminRetentionPoliciesPage } from '@/pages/admin/admin-retention-policies-page'
+import { AdminPrivacyControlsPage } from '@/pages/admin/admin-privacy-controls-page'
 
 export const router = createBrowserRouter([
   {
@@ -122,6 +129,11 @@ export const router = createBrowserRouter([
           { path: 'users', element: <AdminUsersPage /> },
           { path: 'tools', element: <AdminToolsPage /> },
           { path: 'billing', element: <AdminBillingPage /> },
+          { path: 'governance', element: <AdminGovernancePage /> },
+          { path: 'audit-logs', element: <AdminAuditLogsPage /> },
+          { path: 'data-exports', element: <AdminDataExportsPage /> },
+          { path: 'retention-policies', element: <AdminRetentionPoliciesPage /> },
+          { path: 'privacy-controls', element: <AdminPrivacyControlsPage /> },
           { path: 'settings', element: <AdminSettingsPage /> },
         ],
       },
@@ -173,6 +185,8 @@ export const router = createBrowserRouter([
               { path: 'integrations', element: <SettingsIntegrations /> },
               { path: 'api-keys', element: <SettingsApiKeys /> },
               { path: 'data-export', element: <SettingsDataExport /> },
+              { path: 'retention-policy', element: <SettingsRetentionPolicy /> },
+              { path: 'privacy-controls', element: <SettingsPrivacyControls /> },
               { path: 'sessions', element: <SettingsSessions /> },
               { path: 'security', element: <SettingsSecurity /> },
               { path: 'team', element: <SettingsTeam /> },

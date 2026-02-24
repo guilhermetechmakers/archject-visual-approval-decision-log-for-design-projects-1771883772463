@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Shield, FileDown, History, Lock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -36,10 +37,22 @@ export function SettingsCompliancePanel({
               variant="outline"
               size="sm"
               className="mt-4"
-              onClick={onExportAuditLogs}
+              asChild
             >
-              Export audit logs
+              <Link to="/dashboard/settings/data-export">
+                Export audit logs
+              </Link>
             </Button>
+            {onExportAuditLogs && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2 ml-2"
+                onClick={onExportAuditLogs}
+              >
+                Quick export
+              </Button>
+            )}
           </CardContent>
         </Card>
 
@@ -58,10 +71,20 @@ export function SettingsCompliancePanel({
               variant="outline"
               size="sm"
               className="mt-4"
-              onClick={onViewRetentionPolicies}
+              asChild
             >
-              View policies
+              <Link to="/dashboard/settings/retention-policy">View policies</Link>
             </Button>
+            {onViewRetentionPolicies && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2"
+                onClick={onViewRetentionPolicies}
+              >
+                Quick view
+              </Button>
+            )}
           </CardContent>
         </Card>
 
@@ -78,14 +101,14 @@ export function SettingsCompliancePanel({
               decisions, options, comments, approvals, and file references.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button variant="outline" size="sm">
-                Export PDF
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/dashboard/settings/data-export">Export PDF</Link>
               </Button>
-              <Button variant="outline" size="sm">
-                Export CSV
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/dashboard/settings/data-export">Export CSV</Link>
               </Button>
-              <Button variant="outline" size="sm">
-                Export JSON
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/dashboard/settings/data-export">Export JSON</Link>
               </Button>
             </div>
           </CardContent>
@@ -103,6 +126,9 @@ export function SettingsCompliancePanel({
               Manage access controls, data visibility, and enterprise privacy
               settings.
             </p>
+            <Button variant="outline" size="sm" className="mt-4" asChild>
+              <Link to="/dashboard/settings/privacy-controls">Configure privacy</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>

@@ -11,6 +11,8 @@ import {
   Monitor,
   Shield,
   Users,
+  FileClock,
+  Lock,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -22,6 +24,8 @@ const QUICK_LINKS = [
   { to: '/dashboard/settings/integrations', icon: Plug, label: 'Integrations', desc: 'Calendar, Forge, Zapier' },
   { to: '/dashboard/settings/api-keys', icon: Key, label: 'API Keys', desc: 'Keys & scoped permissions' },
   { to: '/dashboard/settings/data-export', icon: Download, label: 'Data Export', desc: 'Export & retention' },
+  { to: '/dashboard/settings/retention-policy', icon: FileClock, label: 'Retention Policy', desc: 'Data retention & legal hold' },
+  { to: '/dashboard/settings/privacy-controls', icon: Lock, label: 'Privacy Controls', desc: 'Masking & access controls' },
   { to: '/dashboard/settings/sessions', icon: Monitor, label: 'Sessions', desc: 'Active devices & sign out' },
   { to: '/dashboard/settings/security', icon: Shield, label: 'Security', desc: '2FA & compliance' },
   { to: '/dashboard/settings/team', icon: Users, label: 'Team', desc: 'Members & roles' },

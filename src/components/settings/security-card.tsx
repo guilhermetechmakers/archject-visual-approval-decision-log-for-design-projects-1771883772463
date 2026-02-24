@@ -68,9 +68,11 @@ export function SecurityCard() {
               ))}
             </div>
           )}
-          <Button variant="outline" size="sm" className="mt-2">
-            <Download className="mr-2 h-4 w-4" />
-            Export audit logs
+          <Button variant="outline" size="sm" className="mt-2" asChild>
+            <Link to="/dashboard/settings/data-export">
+              <Download className="mr-2 h-4 w-4" />
+              Export audit logs
+            </Link>
           </Button>
         </div>
       </CardContent>

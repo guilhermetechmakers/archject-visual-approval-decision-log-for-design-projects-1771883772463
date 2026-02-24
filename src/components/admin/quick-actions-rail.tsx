@@ -12,6 +12,8 @@ import {
   Download,
   Wrench,
   CreditCard,
+  FileArchive,
+  Database,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -48,6 +50,18 @@ export function QuickActionsRail({ className }: QuickActionsRailProps) {
         >
           <Download className="mr-2 h-4 w-4" />
           Export data
+        </Button>
+        <Button variant="outline" size="sm" asChild className="rounded-full">
+          <Link to="/admin/data-exports">
+            <FileArchive className="mr-2 h-4 w-4" />
+            Create export job
+          </Link>
+        </Button>
+        <Button variant="outline" size="sm" asChild className="rounded-full">
+          <Link to="/admin/retention-policies">
+            <Database className="mr-2 h-4 w-4" />
+            Configure retention
+          </Link>
         </Button>
         <Button
           variant="outline"

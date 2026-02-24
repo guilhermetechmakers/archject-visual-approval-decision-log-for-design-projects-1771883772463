@@ -11,6 +11,8 @@ import {
   Shield,
   Users,
   CreditCard,
+  FileClock,
+  Lock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { SettingsSection } from '@/types/settings'
@@ -23,6 +25,8 @@ const NAV_ITEMS: { to: string; section: SettingsSection; icon: React.ElementType
   { to: '/dashboard/settings/integrations', section: 'integrations', icon: Plug, label: 'Integrations' },
   { to: '/dashboard/settings/api-keys', section: 'api-keys', icon: Key, label: 'API Keys' },
   { to: '/dashboard/settings/data-export', section: 'data-export', icon: Download, label: 'Data Export' },
+  { to: '/dashboard/settings/retention-policy', section: 'retention', icon: FileClock, label: 'Retention Policy' },
+  { to: '/dashboard/settings/privacy-controls', section: 'privacy', icon: Lock, label: 'Privacy Controls' },
   { to: '/dashboard/settings/sessions', section: 'sessions', icon: Monitor, label: 'Sessions' },
   { to: '/dashboard/settings/security', section: 'security', icon: Shield, label: 'Security & Compliance' },
   { to: '/dashboard/settings/team', section: 'team', icon: Users, label: 'Team & Users' },
