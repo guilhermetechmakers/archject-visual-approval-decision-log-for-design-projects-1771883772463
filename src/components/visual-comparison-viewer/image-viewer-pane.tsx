@@ -345,6 +345,49 @@ export function ImageViewerPane({
                     const pct = toPercent(ann.coordinates, imgW, imgH)
                     const isPoint = ann.shape === 'point'
                     const isFreehand = ann.shape === 'freehand'
+                    const isPolygon = (ann.shape === 'polygon' || ann.shape === 'area') && ann.points && ann.points.length >= 3
+
+                    if (isPolygon) {
+                      const pathD = (ann.points ?? [])
+                        .map((p, i) =>
+                          i === 0
+                            ? `M ${(p[0] / imgW) * 100} ${(p[1] / imgH) * 100}`
+                            : `L ${(p[0] / imgW) * 100} ${(p[1] / imgH) * 100}`
+                        )
+                        .join(' ') + ' Z'
+                      return (
+                        <div key={ann.id} className="absolute inset-0 group/poly">
+                          <svg
+                            className="h-full w-full"
+                            viewBox="0 0 100 100"
+                            preserveAspectRatio="none"
+                            style={{ overflow: 'visible' }}
+                          >
+                            <path
+                              d={pathD}
+                              fill={ann.color ? `${ann.color}20` : 'rgba(25,92,74,0.2)'}
+                              stroke={ann.color ?? accentColor}
+                              strokeWidth={1.5}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          {annotationMode && onDeleteAnnotation && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                onDeleteAnnotation(ann.id)
+                              }}
+                              className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-0 transition-opacity group-hover/poly:opacity-100 focus:opacity-100"
+                              aria-label="Remove annotation"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      )
+                    }
 
                     if (isFreehand && ann.points && ann.points.length >= 2) {
                       const pathD = ann.points

@@ -3,7 +3,7 @@
  * Works with both DecisionOption (internal) and ClientPortalOption (client portal)
  */
 
-export type AnnotationShape = 'point' | 'rectangle' | 'area' | 'freehand'
+export type AnnotationShape = 'point' | 'rectangle' | 'area' | 'polygon' | 'freehand'
 
 export interface ComparisonMediaAsset {
   id: string

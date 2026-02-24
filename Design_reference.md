@@ -326,38 +326,262 @@ All dashboard pages should be nested inside the dashboard layout, not separate r
 
 ## User Design Requirements
 
-- Ensure all skeletons use the same color families and shimmer treatment as other components.
-- Maintain glassy, calm aesthetics with soft shadows, rounded corners, and ample white space.
-- Use the accent colors for progress/status cues only when appropriate within skeletons (e.g., a fake progress bar color might reflect the in-progress yellow/orange palette).
-- Keep interactions subtle; avoid distracting animations beyond the shimmer.
+Client Portal and Internal Decision Detail.
+  - Card-based, grid layouts, accessible components, responsive behavior (mobile-first).
+  - Inline media annotation tools with zoom/pan, scrubber for media timeline (if applicable).
+  - Rich text input with mention suggestions, emoji support optional.
 
 ---
 
-## Visual Style (Recap)
+## Implementation Requirements
 
-Color Palette:
-- Primary: #FFFFFF
-- Secondary: #F5F6FA, #F7F8FA
-- Accent: #195C4A (deep green), #7BE495 (bright green), #FFE8A3 (soft yellow), #FFDCA8 (muted orange), #FF6C6C (light red)
-- Text: #23272F (dark gray), #6B7280 (medium gray)
-- Subtle shadows/borders: #E6E8F0, #D1D5DB
+### Frontend
+- Build a cohesive design system-aligned UI:
+  - Reusable React/Vue/Svelte components (Card, Button, Input, Tag, Tabs, MediaViewer, AnnotationOverlay, CommentThread).
+  - MediaAnnotationOverlay component capable of rendering shapes, showing metadata, and allowing edits by authorized users.
+  - CommentThread component with nested replies, edit/delete windows, mention highlighting, and inline actions (edit, delete, resolve).
+  - Side-by-side OptionComparison component: responsive grid that adapts to viewport; shows media, specs, cost, and decision notes per option.
+  - Real-time update indicators (typing, new comments, annotation changes).
 
-Typography & Layout:
-- Font: Inter / SF Pro / Manrope family
-- Weights: 400, 500, 600
-- Layout: 24-32px container padding, 16-24px gaps, 8px increments
-- Card Design: White background, shadows, 12-16px radius, generous internal padding (≥24px)
+- Pages:
+  - Client Portal (No-login Link):
+    - Route: /client-portal/:decisionToken
+    - Features: authentication via token, side-by-side comparison, comment composer with mentions, annotation-capable media, approve/change-request actions, optional OTP flow.
+  - Decision Detail (Internal):
+    - Route: /internal/decisions/:decisionId
+    - Features: full decision data, option-by-option annotations, audit trail, export controls, moderation tools, admin actions.
 
-Key Design Elements:
-- Card, Navigation, Data Visualization, Interactive Elements, Micro-interactions
-- Focus on clarity, accessibility, mobile-first, and trust-building visuals
+- Accessibility:
+  - ARIA roles, keyboard navigable, proper focus management, readable contrast (WCAG 2.1 AA).
+
+- Internationalization:
+  - Prepare for i18n (text keys, date/number localization) if needed.
+
+- Performance:
+  - Lazy loading of options/media, pagination for comments, efficient annotation rendering for large media.
+  - Debounced input for comment typing, optimistic UI updates.
+
+- Mobile-first considerations:
+  - Stacked layout with collapsible sections, touch-friendly controls, and large tap targets.
+
+- Testing:
+  - Unit tests for models and services, integration tests for end-to-end comment flow, WebSocket events, and export generation.
+
+### Backend
+- Data Models (SQL/NoSQL as appropriate):
+  - User: id, name, email, role, preferences.
+  - Project: id, name, branding tokens, default settings.
+  - Decision: id, project_id, title, status (pending/approved/revoked/needs_changes), created_at, updated_at, approved_by, approved_at, revoked_at.
+  - Option: id, decision_id, title, description, media_ids, specs, price, comparison_rank.
+  - Media: id, asset_url, type (image/pdf/3d), media_metadata, linked_annotations (array of annotation_ids).
+  - Annotation: id, media_id, option_id (nullable), shape_type (point/rect/polygon), coordinates (JSON), created_by, created_at, updated_by, updated_at, note.
+  - Comment: id, decision_id, option_id (nullable), parent_id (nullable for threading), author_id, text, mentions (array of user_ids), created_at, updated_at, edited_by, edited_at, status (active/edited/deleted).
+  - Notification: id, user_id, type (mention/comment/approval), reference_id, read_at, created_at.
+  - ApprovalHistory: id, decision_id, user_id, action (created/approved/rejected/edited), timestamp, details (JSON).
+  - Export: id, decision_id, type (pdf/json/csv), generated_at, url.
+
+- APIs (REST or GraphQL):
+  - Decisions
+    - GET /api/decisions/{id}
+    - POST /api/decisions
+    - PUT /api/decisions/{id}
+    - POST /api/decisions/{id}/approve
+    - POST /api/decisions/{id}/revoke
+    - GET /api/decisions/{id}/export
+  - Options
+    - GET /api/decisions/{id}/options
+    - POST /api/decisions/{id}/options
+  - Media-Annotations
+    - POST /api/media/{media_id}/annotations
+    - PUT /api/annotations/{id}
+    - DELETE /api/annotations/{id}
+    - GET /api/media/{media_id}/annotations
+  - Comments
+    - GET /api/decisions/{id}/comments
+    - POST /api/decisions/{id}/comments
+    - PUT /api/comments/{id}
+    - DELETE /api/comments/{id}
+  - Mentions & Notifications
+    - POST /api/notifications/mention
+    - GET /api/notifications?user_id=...
+  - Real-time
+    - WebSocket channel endpoints for /ws/decisions/{decisionId}
+  - Exports
+    - GET /api/exports/{export_id}
+  - Auth
+    - OAuth2 / JWT-based authentication; token validation; role checks.
+
+- Database indexing and constraints:
+  - Index on decision_id for comments, annotations; index on media_id; composite indexes for option and decision lookups.
+  - Foreign keys: decision -> project; option -> decision; annotation -> media/option; comment -> decision/option/parent; notification -> user.
+
+- Real-time & Messaging:
+  - WebSocket channels per decision for comments and annotation updates.
+  - Fallback to long-polling if WebSockets unavailable.
+  - Debounce rapid comment streams; ensure at-least-once delivery semantics.
+
+- Security:
+  - No-login access tokens for client portal with expiration; token rotation.
+  - Server-side validation for all inputs; server-side enforcement of business rules (e.g., cannot approve after revoke).
+  - Rate limiting on comment POSTs and OTP validation; detect and mitigate abuse.
+
+- Data Integrity & Auditing:
+  - Immutable audit entries for approvals and edits; versioning for comments and annotations (with delta diffs if feasible).
+  - Export exports reproduce exact state snapshots with timestamps.
+
+### Integration
+- Client Portal and Internal Decision Detail both consume the same backend APIs:
+  - Shared data models for decisions, options, media, comments, and annotations.
+  - Client Portal uses a token-based access path with read/write scoped permissions; Limited comment actions, no admin controls.
+  - Internal view uses full permissions (create/edit/delete, export, revoke).
+
+- Branding & Theming:
+  - Centralized design tokens for colors, font sizes, spacing, radii.
+  - Components should adapt to the brand’s palette and be override-ready for client-specific branding.
+
+- Error Handling:
+  - Consistent error payload structure; user-friendly messages; telemetry hooks for errors.
 
 ---
 
-Generate the complete, detailed prompt now:
-- Provide structured sections as above.
-- Include explicit prop definitions, example usage snippets, and recommended test cases.
-- Include implementation notes that a developer can directly translate into code or a tool-driven build.
+## User Experience Flow
+
+1) Client Portal (No-login Link)
+- Client opens a shareable link to a decision with side-by-side options.
+- Client views media and option details; annotations are visible and can be added by authorized clients if permitted.
+- Client adds a comment, optionally mentioning internal team members. Comment appears in real-time or near real-time.
+- Client annotates media coordinates to indicate preferences or concerns (where allowed).
+- Client can approve or request changes, optionally leaving a short note; action triggers a notification to internal stakeholders.
+- If OTP/verification is enabled:
+  - Client enters email (if captured) or phone to receive an OTP.
+  - Client enters OTP to validate before submitting approval or comments beyond a basic level.
+- Notifications: when a new comment or mention appears, the client gets a notification via the chosen channel.
+
+2) Internal Decision Detail (Admin)
+- Internal user logs in to /internal/decisions/{decisionId}.
+- See the decision overview with status, timestamps, and approval history.
+- Open each option to view side-by-side comparisons, related media, and inline annotations.
+- View and reply to comments; edit or delete comments within allowed windows; resolve comments if applicable.
+- Add annotations to media; modify existing annotations or create new ones; link annotations to specific options if needed.
+- Admin actions:
+  - Edit decision details, revise option data, or adjust approvals.
+  - Revoke approvals with rationale; log revoke reason in ApprovalHistory.
+  - Export decision logs to PDF/JSON/CSV; download or share export URL.
+- Real-time updates ensure parallel editors see changes instantly.
+
+3) Notifications & Mentions
+- Mentions trigger in-app notifications; mention recipients are auto-tagged and alerted.
+- Clients and internal users receive notifications about:
+  - New comments, replies, or annotations.
+  - Status changes (approved, changes requested, revoked).
+  - Mentions and upcoming deadlines/reminders.
+
+4) Moderation
+- Moderators can edit/delete inappropriate content within allowed windows.
+- Moderation logs captured with user and timestamp.
+
+---
+
+## Technical Specifications
+
+- Data Models: (schemas summarized)
+  - User: id, name, email, role (client/internal/admin), preferences.
+  - Project: id, name, brandingTokens.
+  - Decision: id, project_id, title, status enum, created_at, updated_at, approved_by_id, approved_at, revocation_reason.
+  - Option: id, decision_id, title, description, specs, media_ids, price, rank.
+  - Media: id, asset_url, type, metadata JSON, linked_annotation_ids.
+  - Annotation: id, media_id, option_id (nullable), shape_type (enum: point/rect/polygon), coordinates JSON, note, created_by_id, created_at, updated_by_id, updated_at.
+  - Comment: id, decision_id, option_id, parent_id, author_id, text, mentions JSON, created_at, updated_at, status (active/edited/deleted).
+  - Notification: id, user_id, type (mention/comment/approval), reference_id, read_at, created_at.
+  - ApprovalHistory: id, decision_id, user_id, action (created/approved/rejected/revoked/edited), timestamp, details JSON.
+  - Export: id, decision_id, type (pdf/json/csv), generated_at, url.
+
+- API Endpoints (examples; use your tech preference):
+  - GET /api/decisions/{decisionId}
+  - POST /api/decisions
+  - PUT /api/decisions/{decisionId}
+  - POST /api/decisions/{decisionId}/approve
+  - POST /api/decisions/{decisionId}/revoke
+  - GET /api/decisions/{decisionId}/export
+  - GET /api/decisions/{decisionId}/options
+  - POST /api/decisions/{decisionId}/options
+  - GET /api/decisions/{decisionId}/comments
+  - POST /api/decisions/{decisionId}/comments
+  - PUT /api/comments/{commentId}
+  - DELETE /api/comments/{commentId}
+  - POST /api/media/{mediaId}/annotations
+  - PUT /api/annotations/{annotationId}
+  - GET /api/media/{mediaId}/annotations
+  - GET /ws/decisions/{decisionId} for real-time events (WebSocket)
+
+- Security:
+  - JWT/OAuth2 for internal endpoints; tokenized, single-use or time-limited access tokens for client portal.
+  - Scopes: client:view, client:comment, client:annotate, internal:admin, internal:comment, internal:export.
+  - Input validation, CSRF protection for REST routes; rate-limiting on comment posting and OTP requests.
+  - Data encryption at rest for sensitive fields (e.g., revocation reasons, notes).
+
+- Validation:
+  - Mandatory fields: decision title, option title, at least one media reference for annotation, non-empty comment text (trimmed).
+  - Annotations: coordinates must be valid JSON per shape_type; coordinates within media bounds.
+  - OTP flow: OTP length, expiry, retry limits, and verification result handling.
+
+- Real-time & Offline:
+  - Implement WebSocket-based updates with reconnection logic; fallback to long-polling if necessary.
+  - Optimistic UI updates for new comments and annotations with reconciliation on server ack.
+
+- Data Ownership & Export:
+  - Exports must contain versioned data snapshots; include audit trail and asset references; respect data retention policies.
+
+---
+
+## Acceptance Criteria
+- [ ] Real-time comments and annotations propagate to all connected clients/viewers within 1-2 seconds of creation.
+- [ ] Threaded comments support multi-level replies; edit/delete is available within defined time window; moderation actions are auditable.
+- [ ] Annotations render accurately on all media types (image, PDF page, etc.) with correct coordinate mapping; shapes are editable by authorized users and persist correctly.
+- [ ] Client Portal link functions without login, with OTP verification if enabled; OTP flow is secure, rate-limited, and expires.
+- [ ] Internal Decision Detail shows side-by-side comparison with the ability to annotate, comment, view approval history, and perform export actions.
+- [ ] Exports (PDF/JSON/CSV) accurately reflect current decision state, including annotations and media references.
+- [ ] Security: unauthorized access is prevented; client portal links cannot be abused to access other decisions; all endpoints enforce proper scopes.
+- [ ] Accessibility and responsive behavior tested across desktop and mobile.
+
+---
+
+## UI/UX Guidelines
+
+Apply Archject’s design system and branding:
+- Cards with white background, soft shadows, rounded corners, and generous padding.
+- Navigation: top bar with pill-shaped tabs; active state in #195C4A; white text on active tabs.
+- Layout: wide, airy grid; 8px spacing increments; 24-32px container padding; left-aligned content with strong vertical rhythm.
+- Data Visuals: clean charts with subtle grids; status badges in green/yellow/red; tooltips on hover.
+- Interactive Elements: pill-shaped buttons; primary actions in deep green (#195C4A); hover states with subtle shadows; inputs with light background (#F5F6FA) and clear focus rings.
+- Typography: Inter/Manrope/SF Pro family; weights 400 (body), 500 (labels/navigation), 600 (headings/actions).
+- Mobile-first: touch targets, collapsible sections, responsive side-by-side to stacked flows.
+
+Visual references:
+- Card elevation: 0 4px 16px rgba(34, 42, 89, 0.05)
+- Backgrounds: #FFFFFF (cards), #F5F6FA/#F7F8FA (surfaces)
+- Text: #23272F (primary), #6B7280 (secondary)
+
+---
+
+## Final Deliverables
+
+- Fully wired frontend (Client Portal and Internal Decision Detail) with reusable components and theming hooks.
+- Backend services with models, APIs, WebSocket channels, and database migrations.
+- Documentation:
+  - API docs with endpoints, request/response schemas, and sample payloads.
+  - Data model diagrams (ERD) and flowcharts for comment/annotation lifecycle.
+  - Developer guide for extending annotations, workflows, and export formats.
+- Test suite:
+  - Unit tests for models and services.
+  - Integration tests for critical flows: commenting, threading, annotations, real-time updates, OTP verification, and export.
+- Deployment guidance:
+  - Environment variables, secrets management, and migration strategies.
+  - Observability: logging, metrics, and alerting setup for real-time events.
+
+---
+
+If you want, I can tailor this prompt further to your tech stack (e.g., Node.js + NestJS vs. Django, React vs. Vue, PostgreSQL vs. MongoDB) or provide a concrete API contract with JSON schemas and example payloads.
 
 ## Implementation Notes
 

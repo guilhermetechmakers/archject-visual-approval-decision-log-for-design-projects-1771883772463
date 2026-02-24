@@ -32,7 +32,7 @@ export interface CommentThreadProps {
   optionId: string
   optionTitle?: string
   comments: ClientPortalComment[]
-  onAddComment?: (text: string, mentions?: string[]) => void
+  onAddComment?: (text: string, mentions?: string[], threadId?: string | null) => void
   notifyStudio?: boolean
   onNotifyStudioChange?: (value: boolean) => void
   isLoading?: boolean
@@ -65,7 +65,7 @@ export function CommentThread({
     setIsSubmitting(true)
     try {
       const mentions = text.match(/@(\w+)/g)?.map((m) => m.slice(1)) ?? []
-      await onAddComment(text, mentions)
+      await onAddComment(text, mentions, replyingTo)
       setNewComment('')
       setReplyingTo(null)
     } finally {
@@ -125,6 +125,7 @@ export function CommentThread({
                   key={comment.id}
                   comment={comment}
                   replies={getReplies(comment.id)}
+                  onReply={() => setReplyingTo(comment.id)}
                 />
               ))}
             </div>
@@ -163,14 +164,15 @@ export function CommentThread({
 interface CommentItemProps {
   comment: ClientPortalComment
   replies: ClientPortalComment[]
+  onReply?: () => void
 }
 
-function CommentItem({ comment, replies }: CommentItemProps) {
+function CommentItem({ comment, replies, onReply }: CommentItemProps) {
   const authorName = comment.authorName ?? comment.authorId
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-3 rounded-lg border border-border bg-secondary/20 p-3">
+      <div className="flex gap-3 rounded-lg border border-border bg-secondary/20 p-3 transition-all duration-200 hover:border-border/80">
         <Avatar className="h-8 w-8 shrink-0">
           <AvatarFallback className="bg-primary/10 text-xs text-primary">
             {getInitials(authorName)}
@@ -198,6 +200,15 @@ function CommentItem({ comment, replies }: CommentItemProps) {
                 </span>
               ))}
             </div>
+          )}
+          {onReply && (
+            <button
+              type="button"
+              onClick={onReply}
+              className="mt-2 text-xs font-medium text-primary hover:underline"
+            >
+              Reply
+            </button>
           )}
         </div>
       </div>

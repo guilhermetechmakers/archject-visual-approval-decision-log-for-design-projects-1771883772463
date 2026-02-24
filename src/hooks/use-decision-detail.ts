@@ -74,6 +74,7 @@ export function useCreateComment(decisionId: string) {
     mutationFn: async (payload: {
       content: string
       parentCommentId?: string | null
+      optionId?: string | null
       mentions?: string[]
     }) => {
       if (USE_MOCK) {
@@ -96,6 +97,42 @@ export function useCreateComment(decisionId: string) {
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : 'Failed to add comment')
+    },
+  })
+}
+
+export function useUpdateComment(decisionId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ commentId, content }: { commentId: string; content: string }) => {
+      if (USE_MOCK) return { id: commentId, content }
+      return decisionDetailApi.updateComment(decisionId, commentId, { content })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['decision-detail', decisionId] })
+      toast.success('Comment updated')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to update comment')
+    },
+  })
+}
+
+export function useDeleteComment(decisionId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (commentId: string) => {
+      if (USE_MOCK) return
+      return decisionDetailApi.deleteComment(decisionId, commentId)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['decision-detail', decisionId] })
+      toast.success('Comment removed')
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to remove comment')
     },
   })
 }

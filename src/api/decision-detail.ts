@@ -1,8 +1,16 @@
 /**
  * Decision Detail API - Options, Comments, Approvals, Files, Share Link, Export
+ * Uses Supabase when configured, REST API fallback
  */
 
 import { api } from '@/lib/api'
+import { isSupabaseConfigured } from '@/lib/supabase'
+import { supabaseFetchDecisionDetail } from '@/lib/supabase-decision-detail'
+import {
+  supabaseCreateComment,
+  supabaseUpdateComment,
+  supabaseDeleteComment,
+} from '@/lib/supabase-comments'
 import type {
   DecisionDetailFull,
   DecisionOption,
@@ -26,6 +34,10 @@ export interface ShareLinkResponse {
 export async function fetchDecisionDetail(
   decisionId: string
 ): Promise<DecisionDetailFull> {
+  if (isSupabaseConfigured) {
+    const detail = await supabaseFetchDecisionDetail(decisionId)
+    if (detail) return detail
+  }
   return api.get<DecisionDetailFull>(`/decisions/${decisionId}/detail`)
 }
 
@@ -48,9 +60,41 @@ export async function updateOptionRecommended(
 
 export async function createComment(
   decisionId: string,
-  payload: { content: string; parentCommentId?: string | null; mentions?: string[] }
+  payload: { content: string; parentCommentId?: string | null; optionId?: string | null; mentions?: string[] }
 ): Promise<DecisionComment> {
+  if (isSupabaseConfigured) {
+    return supabaseCreateComment(decisionId, {
+      content: payload.content,
+      parentCommentId: payload.parentCommentId,
+      optionId: payload.optionId,
+      mentions: payload.mentions,
+    })
+  }
   return api.post<DecisionComment>(`/decisions/${decisionId}/comments`, payload)
+}
+
+export async function updateComment(
+  decisionId: string,
+  commentId: string,
+  payload: { content: string; mentions?: string[] }
+): Promise<DecisionComment> {
+  if (isSupabaseConfigured) {
+    return supabaseUpdateComment(decisionId, commentId, payload)
+  }
+  return api.patch<DecisionComment>(
+    `/decisions/${decisionId}/comments/${commentId}`,
+    payload
+  )
+}
+
+export async function deleteComment(
+  decisionId: string,
+  commentId: string
+): Promise<void> {
+  if (isSupabaseConfigured) {
+    return supabaseDeleteComment(decisionId, commentId)
+  }
+  return api.delete(`/decisions/${decisionId}/comments/${commentId}`)
 }
 
 export async function fetchDecisionComments(

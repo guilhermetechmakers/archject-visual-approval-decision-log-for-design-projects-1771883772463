@@ -36,6 +36,7 @@ export function useClientPortalNoLogin(token: string) {
       }
     },
     enabled: !!token,
+    refetchInterval: 15000, // Poll every 15s for near real-time comment/annotation updates
   })
 
   const approveMutation = useMutation({

@@ -1,7 +1,13 @@
+/**
+ * Internal Decision Detail Page - /internal/decisions/:decisionId
+ * Full admin view with annotations, comments, export, moderation.
+ * Fetches by decisionId; projectId comes from decision data.
+ */
+
 import { useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { useAuthOptional } from '@/contexts/auth-context'
 import { toast } from 'sonner'
+import { useAuthOptional } from '@/contexts/auth-context'
 import {
   DecisionHeader,
   OptionCard,
@@ -17,6 +23,7 @@ import {
   toComparisonAnnotations,
 } from '@/components/visual-comparison-viewer'
 import { useDecisionDetail } from '@/hooks/use-decision-detail'
+import { useDecisionRealtime } from '@/hooks/use-decision-realtime'
 import {
   useAnnotations,
   useCreateAnnotation,
@@ -26,33 +33,35 @@ import {
   useCreateShareLink,
   useRevokeApproval,
   useCreateComment,
+  useUpdateOptionRecommended,
   useUpdateComment,
   useDeleteComment,
-  useUpdateOptionRecommended,
 } from '@/hooks/use-decision-detail'
 import { useProjectWorkspace } from '@/hooks/use-workspace'
-import { useDecisionRealtime } from '@/hooks/use-decision-realtime'
 import {
   exportDecisionAsJSON,
   exportDecisionAsCSV,
   exportDecisionAsPDF,
   downloadBlob,
 } from '@/lib/export-decision'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { DecisionOption } from '@/types/decision-detail'
+import type { AnnotationShape } from '@/types/visual-comparison'
 
-export function DecisionDetailInternalPage() {
-  const { projectId, decisionId } = useParams<{ projectId: string; decisionId: string }>()
-  const { data: detail, isLoading } = useDecisionDetail(decisionId)
-  const { project } = useProjectWorkspace(projectId ?? '')
-
+export function InternalDecisionPage() {
+  const { decisionId } = useParams<{ decisionId: string }>()
   const auth = useAuthOptional()
+  const { data: detail, isLoading } = useDecisionDetail(decisionId)
+  useDecisionRealtime(decisionId ?? undefined)
+  const projectId = detail?.decision?.projectId ?? ''
+  const { project } = useProjectWorkspace(projectId)
+
   const createShareLink = useCreateShareLink(decisionId ?? '')
   const revokeApproval = useRevokeApproval(decisionId ?? '')
   const createComment = useCreateComment(decisionId ?? '')
   const updateComment = useUpdateComment(decisionId ?? '')
   const deleteComment = useDeleteComment(decisionId ?? '')
   const updateOptionRecommended = useUpdateOptionRecommended(decisionId ?? '')
-  useDecisionRealtime(decisionId ?? undefined)
   const { data: annotationsData } = useAnnotations(decisionId ?? undefined)
   const createAnnotation = useCreateAnnotation(decisionId ?? '')
   const deleteAnnotation = useDeleteAnnotation(decisionId ?? '')
@@ -137,11 +146,7 @@ export function DecisionDetailInternalPage() {
 
   const handleAddComment = useCallback(
     (content: string, parentId?: string | null, mentions?: string[]) => {
-      createComment.mutate({
-        content,
-        parentCommentId: parentId ?? null,
-        mentions: mentions ?? [],
-      })
+      createComment.mutate({ content, parentCommentId: parentId ?? null, mentions })
     },
     [createComment]
   )
@@ -165,7 +170,7 @@ export function DecisionDetailInternalPage() {
       optionId: string,
       mediaId: string,
       data: {
-        shape: 'point' | 'rectangle' | 'area' | 'freehand' | 'polygon'
+        shape: AnnotationShape
         coordinates: { x: number; y: number; width?: number; height?: number }
         points?: [number, number][]
         note?: string
@@ -193,16 +198,24 @@ export function DecisionDetailInternalPage() {
     [deleteAnnotation]
   )
 
-  if (!projectId || !decisionId) {
+  if (!decisionId) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-muted-foreground">Project or decision not found</p>
+        <p className="text-muted-foreground">Decision not found</p>
       </div>
     )
   }
 
   if (isLoading || !decision) {
     return <DecisionDetailSkeleton />
+  }
+
+  if (!projectId) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <p className="text-muted-foreground">Decision has no project</p>
+      </div>
+    )
   }
 
   return (
@@ -320,22 +333,24 @@ function OptionCardWithMutation({
 
 function DecisionDetailSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
-      <div className="h-8 w-48 rounded bg-secondary" />
+    <div className="space-y-6">
+      <div className="h-8 w-48">
+        <Skeleton className="h-full w-full rounded-lg" />
+      </div>
       <div className="flex gap-2">
-        <div className="h-9 w-24 rounded-lg bg-secondary" />
-        <div className="h-9 w-24 rounded-lg bg-secondary" />
-        <div className="h-9 w-24 rounded-lg bg-secondary" />
+        <Skeleton className="h-9 w-24 rounded-lg" />
+        <Skeleton className="h-9 w-24 rounded-lg" />
+        <Skeleton className="h-9 w-24 rounded-lg" />
       </div>
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <div className="h-80 rounded-xl bg-secondary" />
-          <div className="h-64 rounded-xl bg-secondary" />
+          <Skeleton className="h-80 rounded-xl" />
+          <Skeleton className="h-64 rounded-xl" />
         </div>
         <div className="space-y-6">
-          <div className="h-32 rounded-xl bg-secondary" />
-          <div className="h-40 rounded-xl bg-secondary" />
-          <div className="h-48 rounded-xl bg-secondary" />
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-48 rounded-xl" />
         </div>
       </div>
     </div>

@@ -44,6 +44,7 @@ import { OperationSuccessPage } from '@/pages/operation-success-page'
 import { AnalyticsDashboardPage } from '@/pages/dashboard/analytics-dashboard-page'
 import { AnalyticsDrilldownPage } from '@/pages/dashboard/analytics-drilldown-page'
 import { ClientPortalPage } from '@/pages/client-portal'
+import { InternalDecisionPage } from '@/pages/internal/internal-decision-page'
 import { PrivacyPage } from '@/pages/legal/privacy'
 import { TermsPage } from '@/pages/legal/terms'
 import { CookiesPage } from '@/pages/legal/cookies'
@@ -102,6 +103,7 @@ export const router = createBrowserRouter([
       { path: '/legal/cookies', element: <CookiesPage /> },
       { path: '/cookie-policy', element: <CookiesPage /> },
       { path: '/portal/:token', element: <ClientPortalPage /> },
+      { path: '/client-portal/:decisionToken', element: <ClientPortalPage /> },
       {
         path: '/admin',
         element: (
@@ -117,6 +119,17 @@ export const router = createBrowserRouter([
           { path: 'users', element: <AdminUsersPage /> },
           { path: 'tools', element: <AdminToolsPage /> },
           { path: 'settings', element: <AdminSettingsPage /> },
+        ],
+      },
+      {
+        path: '/internal',
+        element: (
+          <VerifiedRoute>
+            <DashboardLayout />
+          </VerifiedRoute>
+        ),
+        children: [
+          { path: 'decisions/:decisionId', element: <InternalDecisionPage /> },
         ],
       },
       {

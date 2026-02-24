@@ -35,15 +35,21 @@ export interface DecisionOption {
   mediaPreviewIds: string[]
 }
 
+export type CommentStatus = 'active' | 'edited' | 'deleted'
+
 export interface DecisionComment {
   id: string
   decisionId: string
   parentCommentId: string | null
+  optionId?: string | null
   authorId: string
   authorName?: string
   authorAvatarUrl?: string | null
   content: string
   createdAt: string
+  editedAt?: string | null
+  editedBy?: string | null
+  status?: CommentStatus
   mentions: string[]
   annotationIds?: string[]
 }

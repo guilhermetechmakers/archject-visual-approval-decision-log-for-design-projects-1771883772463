@@ -21,9 +21,11 @@ import { Label } from '@/components/ui/label'
 import { useClientPortalNoLogin } from '@/hooks/use-client-portal'
 import { cn } from '@/lib/utils'
 import type { ClientPortalAnnotation } from '@/types/client-portal'
+import type { AnnotationShape } from '@/types/visual-comparison'
 
 export function ClientPortalPage() {
-  const { token } = useParams<{ token: string }>()
+  const { token, decisionToken } = useParams<{ token?: string; decisionToken?: string }>()
+  const portalToken = token ?? decisionToken ?? ''
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
   const [clientName, setClientName] = useState('')
   const [showVerification, setShowVerification] = useState(false)
@@ -50,7 +52,7 @@ export function ClientPortalPage() {
     isExporting,
     isApproving,
     isRequestingChanges,
-  } = useClientPortalNoLogin(token ?? '')
+  } = useClientPortalNoLogin(portalToken)
 
   const accentColor = data?.branding?.accentColor ?? 'rgb(var(--primary))'
 
@@ -94,8 +96,13 @@ export function ClientPortalPage() {
   }, [data, clientName, requestChanges])
 
   const handleAddComment = useCallback(
-    async (optionId: string, text: string, mentions?: string[]) => {
-      await addComment({ optionId, text, mentions })
+    async (
+      optionId: string,
+      text: string,
+      mentions?: string[],
+      threadId?: string | null
+    ) => {
+      await addComment({ optionId, text, mentions, threadId })
     },
     [addComment]
   )
@@ -105,15 +112,17 @@ export function ClientPortalPage() {
       optionId: string,
       mediaId: string,
       annotationData: {
-        shape: 'point' | 'rectangle' | 'area' | 'freehand'
+        shape: AnnotationShape
         coordinates: { x: number; y: number; width?: number; height?: number }
         points?: [number, number][]
         note?: string
         color?: string
       }
     ) => {
+      const shape = annotationData.shape === 'polygon' ? 'area' : annotationData.shape
+      const normalized = { ...annotationData, shape }
       try {
-        await addAnnotation({ optionId, mediaId, annotationData })
+        await addAnnotation({ optionId, mediaId, annotationData: normalized })
       } catch {
         setLocalAnnotations((prev) => [
           ...prev,
@@ -121,7 +130,7 @@ export function ClientPortalPage() {
             id: `local-${Date.now()}`,
             optionId,
             mediaId,
-            shape: annotationData.shape,
+            shape: normalized.shape,
             coordinates: annotationData.coordinates,
             note: annotationData.note,
             color: annotationData.color,
@@ -133,7 +142,7 @@ export function ClientPortalPage() {
     [addAnnotation]
   )
 
-  if (!token) {
+  if (!portalToken) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <p className="text-muted-foreground">Invalid or missing link.</p>
@@ -277,11 +286,12 @@ export function ClientPortalPage() {
                 comments={commentsForOption(
                   activeCommentOptionId ?? data.options[0]?.id ?? ''
                 )}
-                onAddComment={(text, mentions) =>
+                onAddComment={(text, mentions, threadId) =>
                   handleAddComment(
                     activeCommentOptionId ?? data.options[0]?.id ?? '',
                     text,
-                    mentions
+                    mentions,
+                    threadId
                   )
                 }
                 notifyStudio={notifyStudio}

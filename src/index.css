@@ -6,19 +6,22 @@
 
 @layer base {
   :root {
-    /* Archject Design System - Primary palette */
+    /* Archject Design System - Design Reference */
+    /* Backgrounds: #FFFFFF (cards), #F5F6FA/#F7F8FA (surfaces) */
+    /* Text: #23272F (primary), #6B7280 (secondary) */
+    /* Primary actions: #195C4A (deep green) */
     --background: 255 255 255;
-    --foreground: 35 39 47;
+    --foreground: 35 39 47; /* #23272F */
     --card: 255 255 255;
     --card-foreground: 35 39 47;
-    --primary: 25 92 74;
+    --primary: 25 92 74; /* #195C4A */
     --primary-foreground: 255 255 255;
-    --secondary: 245 246 250;
+    --secondary: 245 246 250; /* #F5F6FA */
     --secondary-foreground: 35 39 47;
     --accent: 123 228 149;
     --accent-foreground: 25 92 74;
-    --muted: 247 248 250;
-    --muted-foreground: 107 114 128;
+    --muted: 247 248 250; /* #F7F8FA */
+    --muted-foreground: 107 114 128; /* #6B7280 */
     --border: 230 232 240;
     --input: 245 246 250;
     --ring: 25 92 74;

@@ -23,6 +23,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/auth-context'
 import { useDashboardData, useWorkspaces } from '@/hooks/use-dashboard'
+import { useNotifications, useMarkNotificationRead } from '@/hooks/use-notifications'
 import type { DashboardWorkspace, DashboardUser } from '@/types/dashboard'
 
 interface DashboardTopbarProps {
@@ -31,11 +32,35 @@ interface DashboardTopbarProps {
   className?: string
 }
 
-const MOCK_NOTIFICATIONS = [
+const MOCK_NOTIFICATIONS: {
+  id: string
+  title: string
+  time: string
+  read: boolean
+  payload?: Record<string, unknown>
+  decisionId?: string
+}[] = [
   { id: 'n1', title: 'Client approved Kitchen finish options', time: '2h ago', read: false },
   { id: 'n2', title: 'Bathroom tile selection is overdue', time: '1d ago', read: true },
   { id: 'n3', title: 'New comment on Exterior color palette', time: '2d ago', read: true },
 ]
+
+function formatNotificationTitle(type: string): string {
+  switch (type) {
+    case 'mention':
+      return 'You were mentioned'
+    case 'comment':
+      return 'New comment'
+    case 'approval':
+      return 'Approval received'
+    case 'changes_requested':
+      return 'Changes requested'
+    case 'reminder':
+      return 'Reminder'
+    default:
+      return 'Notification'
+  }
+}
 
 export function DashboardTopbar({
   workspaceId,
@@ -48,9 +73,39 @@ export function DashboardTopbar({
   const [searchValue, setSearchValue] = React.useState('')
   const [notificationsOpen, setNotificationsOpen] = React.useState(false)
 
+  const userId = data?.user?.id
+  const { data: notifications = [] } = useNotifications(userId)
+  const markRead = useMarkNotificationRead()
+
   const user = data?.user
   const workspace = data?.workspace
   const currentWorkspaceId = workspaceId ?? workspace?.id
+
+  const displayNotifications: {
+    id: string
+    title: string
+    time: string
+    read: boolean
+    payload?: Record<string, unknown>
+    decisionId?: string
+  }[] =
+    notifications.length > 0
+      ? notifications.map((n) => ({
+          id: n.id,
+          title: formatNotificationTitle(n.type),
+          time: new Date(n.createdAt).toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          read: !!n.readAt,
+          payload: n.payload,
+          decisionId: n.decisionId,
+        }))
+      : MOCK_NOTIFICATIONS
+
+  const unreadCount = displayNotifications.filter((n) => !n.read).length
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -97,10 +152,14 @@ export function DashboardTopbar({
               variant="ghost"
               size="icon"
               className="relative"
-              aria-label="Notifications"
+              aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
             >
               <Bell className="h-5 w-5" />
-              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
+              {unreadCount > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
@@ -108,16 +167,42 @@ export function DashboardTopbar({
             <DropdownMenuSeparator />
             <ScrollArea className="h-[240px]">
               <div className="space-y-1 p-1">
-                {MOCK_NOTIFICATIONS.map((n) => (
+                {displayNotifications.map((n) => (
                   <div
                     key={n.id}
+                    role="button"
+                    tabIndex={0}
                     className={cn(
-                      'rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer',
+                      'rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer hover:bg-muted/50',
                       !n.read && 'bg-primary/5'
                     )}
+                    onClick={() => {
+                      if (!n.read && notifications.some((x) => x.id === n.id)) {
+                        markRead.mutate(n.id)
+                      }
+                      if ('decisionId' in n && n.decisionId) {
+                        setNotificationsOpen(false)
+                        window.location.href = `/internal/decisions/${n.decisionId}`
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        if (!n.read && notifications.some((x) => x.id === n.id)) {
+                          markRead.mutate(n.id)
+                        }
+                        if ('decisionId' in n && n.decisionId) {
+                          setNotificationsOpen(false)
+                          window.location.href = `/internal/decisions/${n.decisionId}`
+                        }
+                      }
+                    }}
                   >
                     <p className="font-medium">{n.title}</p>
-                    <p className="text-xs text-muted-foreground">{n.time}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {(n.payload as { message?: string })?.message ?? n.time}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">{n.time}</p>
                   </div>
                 ))}
               </div>
