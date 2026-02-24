@@ -16,16 +16,54 @@ export interface UserProfile {
   locale?: string
 }
 
+/** Domain/TLS configuration for custom client-facing links */
+export interface DomainConfig {
+  domain?: string | null
+  prefix?: string | null
+  tlsStatus?: 'pending' | 'provisioning' | 'active' | 'expired' | 'error' | null
+  certificateArn?: string | null
+  issuedAt?: string | null
+  expiresAt?: string | null
+}
+
+/** Font settings for branding */
+export interface FontSettings {
+  family?: string
+  weights?: number[]
+}
+
+/** Color token map for design system */
+export interface ColorTokens {
+  primary?: string
+  secondary?: string
+  accent?: string
+  success?: string
+  warning?: string
+  destructive?: string
+}
+
 export interface WorkspaceBranding {
   logoUrl?: string | null
+  logoAssetType?: 'svg' | 'png' | 'jpg' | null
   primaryColor?: string
   secondaryColor?: string
   accentColor: string
+  colorTokens?: ColorTokens | null
+  fontSettings?: FontSettings | null
   domainPrefix?: string | null
+  domainConfig?: DomainConfig | null
   clientPortalUrl?: string | null
   headerText?: string | null
   footerText?: string | null
   customCss?: string | null
+}
+
+/** Branding validation result */
+export interface BrandingValidation {
+  valid: boolean
+  contrastPassed?: boolean
+  logoSizeOk?: boolean
+  errors?: string[]
 }
 
 export interface Workspace {
