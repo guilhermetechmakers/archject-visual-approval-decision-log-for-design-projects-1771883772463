@@ -50,6 +50,8 @@ export function GettingStartedSection() {
             type="button"
             onClick={() => !isUpdating && updateStep(step.id, !step.completed)}
             disabled={isUpdating}
+            aria-label={`${step.completed ? 'Mark as incomplete' : 'Mark as complete'}: ${step.label}`}
+            aria-pressed={step.completed}
             className={cn(
               'flex w-full items-center gap-3 rounded-lg border border-border p-4 text-left transition-all duration-200',
               'hover:border-primary/30 hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',

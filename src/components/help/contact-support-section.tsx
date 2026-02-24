@@ -117,7 +117,12 @@ export function ContactSupportSection() {
             We&apos;ve received your support request and will get back to you
             soon. You&apos;ll receive an email confirmation.
           </p>
-          <Button variant="outline" className="mt-6" onClick={handleReset}>
+          <Button
+            variant="outline"
+            className="mt-6"
+            onClick={handleReset}
+            aria-label="Submit another support request"
+          >
             Submit another request
           </Button>
         </CardContent>
@@ -237,6 +242,7 @@ export function ContactSupportSection() {
                     setFile(null)
                     if (fileInputRef.current) fileInputRef.current.value = ''
                   }}
+                  aria-label={`Remove attached file: ${file.name}`}
                   className="mt-2 flex items-center gap-1 text-sm text-destructive hover:underline"
                 >
                   <X className="h-4 w-4" />
@@ -247,12 +253,17 @@ export function ContactSupportSection() {
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              aria-label={isSubmitting ? 'Submitting support request' : 'Submit support request'}
+            >
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
             <Button
               type="button"
               variant="outline"
+              aria-label="Cancel and clear form"
               onClick={() => {
                 setSubject('')
                 setDescription('')

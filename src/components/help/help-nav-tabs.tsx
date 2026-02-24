@@ -7,16 +7,52 @@ import {
   FileText,
   Mail,
 } from 'lucide-react'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import type { HelpTab } from '@/types/help'
 
-const TABS: { id: HelpTab; label: string; icon: React.ElementType }[] = [
-  { id: 'getting-started', label: 'Getting Started', icon: Rocket },
-  { id: 'knowledge-base', label: 'Knowledge Base', icon: BookOpen },
-  { id: 'faq', label: 'FAQ', icon: HelpCircle },
-  { id: 'onboarding-guides', label: 'Onboarding Guides', icon: GraduationCap },
-  { id: 'changelog', label: 'Changelog', icon: FileText },
-  { id: 'contact-support', label: 'Contact Support', icon: Mail },
+const TABS: {
+  id: HelpTab
+  label: string
+  icon: React.ElementType
+  ariaLabel: string
+}[] = [
+  {
+    id: 'getting-started',
+    label: 'Getting Started',
+    icon: Rocket,
+    ariaLabel: 'Navigate to Getting Started section',
+  },
+  {
+    id: 'knowledge-base',
+    label: 'Knowledge Base',
+    icon: BookOpen,
+    ariaLabel: 'Navigate to Knowledge Base section',
+  },
+  {
+    id: 'faq',
+    label: 'FAQ',
+    icon: HelpCircle,
+    ariaLabel: 'Navigate to FAQ section',
+  },
+  {
+    id: 'onboarding-guides',
+    label: 'Onboarding Guides',
+    icon: GraduationCap,
+    ariaLabel: 'Navigate to Onboarding Guides section',
+  },
+  {
+    id: 'changelog',
+    label: 'Changelog',
+    icon: FileText,
+    ariaLabel: 'Navigate to Changelog section',
+  },
+  {
+    id: 'contact-support',
+    label: 'Contact Support',
+    icon: Mail,
+    ariaLabel: 'Navigate to Contact Support section',
+  },
 ]
 
 interface HelpNavTabsProps {
@@ -30,38 +66,38 @@ export function HelpNavTabs({ className }: HelpNavTabsProps) {
   const activeTab =
     hash && TABS.some((t) => t.id === hash) ? hash : 'getting-started'
 
-  const handleTab = (id: HelpTab) => {
-    navigate({ pathname: location.pathname, hash: id }, { replace: true })
+  const handleTabChange = (value: string) => {
+    navigate({ pathname: location.pathname, hash: value }, { replace: true })
   }
 
   return (
-    <nav
-      role="tablist"
-      aria-label="Help sections"
-      className={cn('flex flex-wrap gap-2', className)}
+    <Tabs
+      value={activeTab}
+      onValueChange={handleTabChange}
+      className={cn('w-full', className)}
     >
-      {TABS.map(({ id, label, icon: Icon }) => (
-        <button
-          key={id}
-          type="button"
-          role="tab"
-          aria-selected={activeTab === id}
-          aria-controls={`panel-${id}`}
-          id={`tab-${id}`}
-          onClick={() => handleTab(id)}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-            'hover:scale-[1.02] active:scale-[0.98]',
-            activeTab === id
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground'
-          )}
-        >
-          <Icon className="h-4 w-4 shrink-0" aria-hidden />
-          {label}
-        </button>
-      ))}
-    </nav>
+      <TabsList
+        className="flex h-auto flex-wrap gap-2 rounded-full bg-secondary p-4"
+        aria-label="Help documentation sections"
+      >
+        {TABS.map(({ id, label, icon: Icon, ariaLabel }) => (
+          <TabsTrigger
+            key={id}
+            value={id}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200',
+              'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm',
+              'data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground',
+              'hover:scale-[1.02] active:scale-[0.98]',
+              'hover:data-[state=inactive]:bg-secondary/80 hover:data-[state=inactive]:text-foreground'
+            )}
+            aria-label={ariaLabel}
+          >
+            <Icon className="h-4 w-4 shrink-0" aria-hidden />
+            {label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   )
 }

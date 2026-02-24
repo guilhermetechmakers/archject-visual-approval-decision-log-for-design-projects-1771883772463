@@ -68,6 +68,8 @@ export function KnowledgeBaseSection() {
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
+                aria-label={`Filter by ${cat} category`}
+                aria-pressed={category === cat}
                 className={cn(
                   'rounded-full px-3 py-1 text-xs font-medium transition-colors',
                   category === cat
@@ -110,6 +112,7 @@ export function KnowledgeBaseSection() {
                     size="sm"
                     disabled={page <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    aria-label="Go to previous page"
                   >
                     Previous
                   </Button>
@@ -121,6 +124,7 @@ export function KnowledgeBaseSection() {
                     size="sm"
                     disabled={page >= totalPages}
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    aria-label="Go to next page"
                   >
                     Next
                   </Button>
@@ -174,6 +178,7 @@ function ArticleCard({
     <button
       type="button"
       onClick={onClick}
+      aria-label={`Read article: ${article.title}`}
       className={cn(
         'w-full rounded-xl border border-border p-4 text-left transition-all duration-200',
         'hover:border-primary/30 hover:bg-secondary/50 hover:shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'

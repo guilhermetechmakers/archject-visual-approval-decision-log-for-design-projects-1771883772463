@@ -64,6 +64,8 @@ export function FAQSection() {
               key={cat}
               type="button"
               onClick={() => setCategory(cat)}
+              aria-label={`Filter FAQ by ${cat} category`}
+              aria-pressed={category === cat}
               className={
                 category === cat
                   ? 'rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'

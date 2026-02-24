@@ -80,6 +80,8 @@ function GuideCard({
             type="button"
             onClick={() => !isUpdating && onStepToggle(step.id, !step.completed)}
             disabled={isUpdating}
+            aria-label={`${step.completed ? 'Mark as incomplete' : 'Mark as complete'}: ${step.label}`}
+            aria-pressed={step.completed}
             className={cn(
               'flex w-full items-center gap-3 rounded-lg border border-border p-3 text-left text-sm transition-all duration-200',
               'hover:border-primary/30 hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
@@ -110,6 +112,7 @@ function GuideCard({
             variant={allDone ? 'secondary' : 'default'}
             size="sm"
             className="w-full gap-2"
+            aria-label={allDone ? 'Review this onboarding guide' : 'Resume this onboarding guide'}
           >
             <Play className="h-4 w-4" />
             {allDone ? 'Review guide' : 'Resume'}
