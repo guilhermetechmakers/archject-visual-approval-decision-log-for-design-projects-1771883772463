@@ -10,6 +10,9 @@ import {
   Share2,
   FileDown,
   MoreHorizontal,
+  FileCheck,
+  SearchX,
+  AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -60,6 +63,89 @@ function formatHours(hours: number): string {
   return `${days}d`
 }
 
+function DrilldownEmptyState({
+  hasSearchFilter,
+  onClearSearch,
+  onBackToAnalytics,
+}: {
+  hasSearchFilter: boolean
+  onClearSearch: () => void
+  onBackToAnalytics: () => void
+}) {
+  return (
+    <div
+      className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 px-6 py-16 text-center"
+      role="status"
+      aria-live="polite"
+      aria-label="No decisions found"
+    >
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-muted">
+        {hasSearchFilter ? (
+          <SearchX className="h-7 w-7 text-muted-foreground" aria-hidden />
+        ) : (
+          <FileCheck className="h-7 w-7 text-muted-foreground" aria-hidden />
+        )}
+      </div>
+      <h2 className="mt-6 text-lg font-semibold text-foreground">
+        {hasSearchFilter ? 'No decisions match your search' : 'No decisions in this drilldown'}
+      </h2>
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        {hasSearchFilter
+          ? 'Try a different search term or clear your search to see all decisions.'
+          : 'No decisions match the current filters. Try adjusting the date range or criteria.'}
+      </p>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
+        {hasSearchFilter ? (
+          <Button
+            variant="outline"
+            onClick={onClearSearch}
+            className="rounded-lg"
+            aria-label="Clear search"
+          >
+            Clear search
+          </Button>
+        ) : null}
+        <Button
+          variant="outline"
+          onClick={onBackToAnalytics}
+          className="rounded-lg"
+          aria-label="Back to Analytics"
+        >
+          Back to Analytics
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function DrilldownErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div
+      className="flex flex-col items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-16 text-center"
+      role="alert"
+      aria-label="Failed to load drilldown"
+    >
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-destructive/10">
+        <AlertCircle className="h-7 w-7 text-destructive" aria-hidden />
+      </div>
+      <h2 className="mt-6 text-lg font-semibold text-foreground">
+        Failed to load decisions
+      </h2>
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        Something went wrong while loading the drilldown. Please try again.
+      </p>
+      <Button
+        variant="outline"
+        className="mt-6 rounded-lg"
+        onClick={onRetry}
+        aria-label="Retry loading drilldown"
+      >
+        Try again
+      </Button>
+    </div>
+  )
+}
+
 export function AnalyticsDrilldownPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -87,7 +173,7 @@ export function AnalyticsDrilldownPage() {
     stage: state?.stage,
   }
 
-  const { data, isLoading } = useDrilldown(filters, page, pageSize)
+  const { data, isLoading, isError, refetch } = useDrilldown(filters, page, pageSize)
 
   const decisions = data?.decisions ?? []
   const total = data?.total ?? 0
@@ -101,13 +187,19 @@ export function AnalyticsDrilldownPage() {
       )
     : decisions
 
+  const hasSearchFilter = search.trim().length > 0
+
   const handleExportCsv = () => {
+    if (filteredDecisions.length === 0) {
+      toast.error('No decisions to export. Add or adjust filters to include decisions.')
+      return
+    }
     const csv = generateCsvFromDecisions(
       filteredDecisions,
       `Drilldown ${filters.type} (${filters.from} to ${filters.to})`
     )
     downloadCsv(csv, formatFilename('drilldown', undefined, filters.from, filters.to))
-    toast.success('CSV downloaded')
+    toast.success('Drilldown exported successfully')
   }
 
   const handleShareLink = (decisionId: string, projectId: string) => {
@@ -117,6 +209,8 @@ export function AnalyticsDrilldownPage() {
       () => toast.error('Failed to copy')
     )
   }
+
+  const handleClearSearch = () => setSearch('')
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -146,13 +240,21 @@ export function AnalyticsDrilldownPage() {
             <CardTitle>Decisions</CardTitle>
             <div className="flex flex-wrap items-center gap-2">
               <Input
+                type="search"
                 placeholder="Search decisions…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-[200px] rounded-lg"
+                className="w-full min-w-0 rounded-lg sm:w-[200px]"
+                aria-label="Search decisions by title or project"
               />
-              <Button variant="outline" size="sm" onClick={handleExportCsv} className="rounded-lg">
-                <FileDown className="h-4 w-4" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCsv}
+                className="rounded-lg"
+                aria-label="Export decisions to CSV"
+              >
+                <FileDown className="h-4 w-4" aria-hidden />
                 Export CSV
               </Button>
             </div>
@@ -160,26 +262,23 @@ export function AnalyticsDrilldownPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+            <div className="space-y-3" role="status" aria-label="Loading decisions">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-lg" />
               ))}
             </div>
+          ) : isError ? (
+            <DrilldownErrorState onRetry={() => refetch()} />
           ) : filteredDecisions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-muted-foreground">No decisions match your filters</p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => navigate('/dashboard/analytics')}
-              >
-                Back to Analytics
-              </Button>
-            </div>
+            <DrilldownEmptyState
+              hasSearchFilter={hasSearchFilter}
+              onClearSearch={handleClearSearch}
+              onBackToAnalytics={() => navigate('/dashboard/analytics')}
+            />
           ) : (
             <>
               <div className="overflow-x-auto rounded-lg border border-border">
-                <Table>
+                <Table aria-label="Decisions list">
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-b border-border">
                       <TableHead className="font-medium">Title</TableHead>
@@ -231,7 +330,7 @@ export function AnalyticsDrilldownPage() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8"
-                                aria-label="Actions"
+                                aria-label={`Actions for ${d.title}`}
                               >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
@@ -260,8 +359,11 @@ export function AnalyticsDrilldownPage() {
                 </Table>
               </div>
               {totalPages > 1 && (
-                <div className="mt-4 flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
+                <nav
+                  className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                  aria-label="Decisions pagination"
+                >
+                  <p className="text-sm text-muted-foreground" aria-live="polite">
                     Page {page} of {totalPages} ({total} decisions)
                   </p>
                   <div className="flex gap-2">
@@ -270,6 +372,7 @@ export function AnalyticsDrilldownPage() {
                       size="sm"
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page <= 1}
+                      aria-label="Previous page"
                     >
                       Previous
                     </Button>
@@ -278,11 +381,12 @@ export function AnalyticsDrilldownPage() {
                       size="sm"
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page >= totalPages}
+                      aria-label="Next page"
                     >
                       Next
                     </Button>
                   </div>
-                </div>
+                </nav>
               )}
             </>
           )}
