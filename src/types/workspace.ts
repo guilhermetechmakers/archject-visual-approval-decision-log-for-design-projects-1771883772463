@@ -94,13 +94,27 @@ export interface TeamMember {
   accepted_at?: string | null
 }
 
+export interface TemplateUsageStats {
+  timesUsed: number
+  lastUsedAt?: string | null
+  successRate?: number | null
+}
+
 export interface Template {
   id: string
   name: string
   type: TemplateType
+  description?: string | null
   content_json?: Record<string, unknown>
+  metadataSchema?: Record<string, unknown> | null
+  optionSchema?: Record<string, unknown> | null
+  defaultRules?: unknown[] | null
+  version?: number
+  isPublic?: boolean
+  createdBy?: string | null
   created_at: string
   updated_at?: string | null
+  usageStats?: TemplateUsageStats | null
 }
 
 export interface ActivityLog {

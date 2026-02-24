@@ -131,17 +131,33 @@ export async function removeTeamMember(
 }
 
 export async function fetchTemplates(params?: {
-  type?: string;
+  type?: string
+  public?: boolean
+  search?: string
 }): Promise<Template[]> {
   const qs = new URLSearchParams(params as Record<string, string>).toString()
   return api.get<Template[]>(`/templates${qs ? `?${qs}` : ''}`)
 }
 
+export async function fetchTemplate(templateId: string): Promise<Template> {
+  return api.get<Template>(`/templates/${templateId}`)
+}
+
+export interface ApplyTemplatePayload {
+  title?: string
+  description?: string
+  metadata?: Record<string, unknown>
+  options?: Array<{ title?: string; description?: string; order?: number }>
+  approvalRules?: unknown[]
+  assigneeId?: string | null
+  dueDate?: string | null
+}
+
 export async function applyTemplate(
   projectId: string,
   templateId: string
-): Promise<Decision> {
-  return api.post<Decision>(
+): Promise<ApplyTemplatePayload> {
+  return api.post<ApplyTemplatePayload>(
     `/projects/${projectId}/templates/${templateId}/apply`,
     {}
   )
