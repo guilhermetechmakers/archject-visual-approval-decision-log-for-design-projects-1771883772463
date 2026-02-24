@@ -98,11 +98,11 @@ export function VisualSideBySideViewerEnhanced({
 
   const handlePrev = useCallback(() => {
     setActiveIndex((i) => Math.max(0, i - 1))
-  }, [])
+  }, [setActiveIndex])
 
   const handleNext = useCallback(() => {
     setActiveIndex((i) => Math.min(Math.max(0, options.length - paneCount), i + 1))
-  }, [options.length, paneCount])
+  }, [setActiveIndex, options.length, paneCount])
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     setSwipeStart(e.touches[0].clientX)
