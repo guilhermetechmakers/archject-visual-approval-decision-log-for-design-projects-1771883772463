@@ -86,7 +86,7 @@ function EditDecisionContent() {
 
   useEffect(() => {
     if (decision && !draft) {
-      initializeDraft(decision)
+      queueMicrotask(() => initializeDraft(decision))
     }
   }, [decision, draft, initializeDraft])
 

@@ -34,7 +34,7 @@ export function PrivacyPage() {
       })
       downloadPdfBlob(blob, `archject-privacy-policy-${policy.lastUpdated}.pdf`)
       toast.success('Privacy Policy downloaded successfully')
-    } catch (err) {
+    } catch {
       toast.error('Failed to export PDF. Please try again.')
     } finally {
       setIsExporting(false)

@@ -8,7 +8,7 @@ import type { SegmentEventName, SegmentEventProperties } from '@/types/segment'
 
 export type AnalyticsEvent = SegmentEventName
 
-export interface AnalyticsEventProperties extends SegmentEventProperties {}
+export type AnalyticsEventProperties = SegmentEventProperties
 
 /**
  * Track an analytics event with normalized properties (UTC, consistent keys)

@@ -5,6 +5,7 @@
  */
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import type { SupabaseClient } from '@/lib/supabase'
 import type { DecisionStatus } from '@/types/workspace'
 import type {
   DecisionListItem,
@@ -348,7 +349,10 @@ export async function supabaseFetchDecisionPreview(
   const dData = d as Record<string, unknown>
   let options: Array<{ title?: string; description?: string }> = []
   try {
-    const { data: opts } = await (supabase as any).from('decision_options')
+    const { data: opts } = await (
+      supabase as SupabaseClient
+    )
+      .from('decision_options')
       .select('title, description, position')
       .eq('decision_id', decisionId)
       .order('position')
@@ -362,7 +366,7 @@ export async function supabaseFetchDecisionPreview(
   let hasShareLink = !!(dData.share_link_id as string)
   let shareLinkStatus: 'active' | 'expired' | null = null
   try {
-    const { data: shareLinks } = await (supabase as any)
+    const { data: shareLinks } = await (supabase as SupabaseClient)
       .from('decision_share_links')
       .select('expires_at, revocation_flag')
       .eq('decision_id', decisionId)

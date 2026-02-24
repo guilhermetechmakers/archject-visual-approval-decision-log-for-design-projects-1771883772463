@@ -140,10 +140,12 @@ export function CheckoutPage() {
       return
     }
 
+    // Mock payment method ID - stable for mock flow; real flow uses Stripe Elements
+    const paymentMethodId = 'pm_mock'
     confirmPayment.mutate(
       {
         paymentIntentId: paymentIntentId ?? 'pi_mock',
-        paymentMethodId: 'pm_mock_' + Date.now(),
+        paymentMethodId,
         savePaymentMethod: true,
       },
       {

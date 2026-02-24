@@ -101,7 +101,7 @@ export function getMockCheckoutSummary(
   const plan = planId ? MOCK_PLANS.find((p) => p.id === planId) : MOCK_PLANS[0]
   const addons = (addonIds ?? []).map((id) => MOCK_ADDONS.find((a) => a.id === id)).filter(Boolean)
   const lineItems: CheckoutSummary['lineItems'] = []
-  plan &&
+  if (plan) {
     lineItems.push({
       id: plan.id,
       description: `${plan.name} (${plan.interval === 'yearly' ? 'Annual' : 'Monthly'})`,
@@ -109,8 +109,9 @@ export function getMockCheckoutSummary(
       quantity: seats,
       type: 'plan',
     })
-  addons.forEach((a) =>
-    a &&
+  }
+  addons.forEach((a) => {
+    if (a) {
       lineItems.push({
         id: a.id,
         description: a.name,
@@ -118,7 +119,8 @@ export function getMockCheckoutSummary(
         quantity: 1,
         type: 'addon',
       })
-  )
+    }
+  })
   const subtotal = lineItems.reduce((s, i) => s + i.amount * (i.quantity ?? 1), 0)
   const coupon = couponCode ? MOCK_COUPONS[couponCode.toUpperCase()] : null
   const discountAmount = coupon

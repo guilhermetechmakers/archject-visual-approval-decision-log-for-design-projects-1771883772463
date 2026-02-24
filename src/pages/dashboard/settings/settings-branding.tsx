@@ -43,18 +43,20 @@ export function SettingsBranding() {
   useEffect(() => {
     if (workspace?.branding) {
       const b = workspace.branding
-      setLogoUrl(b.logoUrl ?? '')
-      setColorTokens({
-        primary: b.primaryColor ?? b.accentColor ?? '#195C4A',
-        accent: b.accentColor ?? '#7BE495',
-        secondary: b.secondaryColor ?? '#7BE495',
+      queueMicrotask(() => {
+        setLogoUrl(b.logoUrl ?? '')
+        setColorTokens({
+          primary: b.primaryColor ?? b.accentColor ?? '#195C4A',
+          accent: b.accentColor ?? '#7BE495',
+          secondary: b.secondaryColor ?? '#7BE495',
+        })
+        setDomainPrefix(b.domainPrefix ?? '')
+        setHeaderText(b.headerText ?? '')
+        setFooterText(b.footerText ?? '')
+        setCustomCss(b.customCss ?? '')
       })
-      setDomainPrefix(b.domainPrefix ?? '')
-      setHeaderText(b.headerText ?? '')
-      setFooterText(b.footerText ?? '')
-      setCustomCss(b.customCss ?? '')
     }
-  }, [workspace?.id])
+  }, [workspace?.id, workspace?.branding])
 
   const previewTokens = {
     logoUrl: logoUrl || branding.logoUrl,

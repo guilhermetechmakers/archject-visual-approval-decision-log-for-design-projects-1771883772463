@@ -95,9 +95,13 @@ export function SearchPage() {
 
   useEffect(() => {
     const q = searchParams.get('q') ?? ''
-    setQuery(q)
-    setFilters(parseFiltersFromUrl(searchParams))
-    setPage(parseInt(searchParams.get('page') ?? '1', 10))
+    const nextFilters = parseFiltersFromUrl(searchParams)
+    const nextPage = parseInt(searchParams.get('page') ?? '1', 10)
+    queueMicrotask(() => {
+      setQuery(q)
+      setFilters(nextFilters)
+      setPage(nextPage)
+    })
   }, [searchParams])
 
   const syncUrl = useCallback(

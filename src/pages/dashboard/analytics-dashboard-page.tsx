@@ -54,8 +54,9 @@ export function AnalyticsDashboardPage() {
   const { data, isLoading, error } = useStudioAnalytics(filters)
 
   const sortedClients = useMemo(() => {
-    if (!data?.clientResponsiveness) return []
-    const arr = [...data.clientResponsiveness]
+    const list = data?.clientResponsiveness
+    if (!list) return []
+    const arr = [...list]
     const { sortBy, sortOrder } = clientSort
     arr.sort((a, b) => {
       const aVal = a[sortBy]
@@ -66,11 +67,12 @@ export function AnalyticsDashboardPage() {
       return sortOrder === 'asc' ? cmp : -cmp
     })
     return arr
-  }, [data?.clientResponsiveness, clientSort])
+  }, [data, clientSort])
 
   const sortedTemplates = useMemo(() => {
-    if (!data?.templatePerformance) return []
-    const arr = [...data.templatePerformance]
+    const list = data?.templatePerformance
+    if (!list) return []
+    const arr = [...list]
     const { sortBy, sortOrder } = templateSort
     arr.sort((a, b) => {
       const aVal = a[sortBy]
@@ -79,7 +81,7 @@ export function AnalyticsDashboardPage() {
       return sortOrder === 'asc' ? cmp : -cmp
     })
     return arr
-  }, [data?.templatePerformance, templateSort])
+  }, [data, templateSort])
 
   const handleKpiClick = (type: 'time' | 'pending' | 'approval') => {
     const typeMap = { time: 'approved', pending: 'bottleneck', approval: 'approved' } as const

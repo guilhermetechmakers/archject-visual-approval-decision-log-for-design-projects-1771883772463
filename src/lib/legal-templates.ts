@@ -138,12 +138,13 @@ function formatContentBlockForPdf(block: ContentBlock): string {
       return `<p style="margin: 0 0 12px 0;">${formatContentForPdf(block.content)}</p>`
     case 'subheading':
       return `<h3 style="font-size: 14px; font-weight: 600; color: #23272F; margin: 16px 0 8px 0;">${escapeHtml(block.content)}</h3>`
-    case 'list':
+    case 'list': {
       if (!block.bulletPoints?.length) return ''
       const items = block.bulletPoints
         .map((b) => `<li style="margin: 4px 0;">${escapeHtml(b)}</li>`)
         .join('')
       return `<ul style="margin: 0 0 12px 0; padding-left: 20px;">${items}</ul>`
+    }
     case 'blockquote':
       return `<blockquote style="margin: 12px 0; padding-left: 16px; border-left: 4px solid #195C4A; color: #6B7280; font-style: italic;">${escapeHtml(block.content)}</blockquote>`
     case 'link':

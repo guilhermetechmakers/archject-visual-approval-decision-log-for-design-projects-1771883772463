@@ -33,6 +33,45 @@ export function DashboardOverview() {
   const { data, isLoading, error } = useDashboardData(workspaceId ?? undefined)
   const { track } = useSegmentTrack()
 
+  const now = new Date()
+  const start = new Date(now)
+  start.setDate(start.getDate() - 30)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false)
+  const [shareLinkOpen, setShareLinkOpen] = useState(false)
+  const [dashboardFilters, setDashboardFilters] = useState<DashboardFilters>({
+    from: start.toISOString().slice(0, 10),
+    to: now.toISOString().slice(0, 10),
+    projectStatus: 'active',
+  })
+
+  const projects = data?.projects ?? []
+  const awaiting_approvals = data?.awaiting_approvals ?? []
+  const recent_activity = data?.recent_activity ?? []
+  const usage = data?.usage
+  const kpis = data?.kpis
+  const trendData = data?.trendData
+
+  const filteredProjects = searchQuery.trim()
+    ? projects.filter((p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : projects
+  const projectsToShow =
+    dashboardFilters.projectStatus === 'all'
+      ? filteredProjects
+      : filteredProjects
+  const filteredApprovals = searchQuery.trim()
+    ? awaiting_approvals.filter(
+        (a) =>
+          a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (a.project_name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
+      )
+    : awaiting_approvals
+
+  const selectedProjectId = projectsToShow[0]?.id ?? ''
+  const createLinkMutation = useCreateClientLink(selectedProjectId)
+
   useEffect(() => {
     if (data?.workspace?.id) {
       track({
@@ -60,46 +99,6 @@ export function DashboardOverview() {
       </div>
     )
   }
-
-  const {
-    projects,
-    awaiting_approvals,
-    recent_activity,
-    usage,
-    kpis,
-    trendData,
-  } = data
-
-  const now = new Date()
-  const start = new Date(now)
-  start.setDate(start.getDate() - 30)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [quickCreateOpen, setQuickCreateOpen] = useState(false)
-  const [shareLinkOpen, setShareLinkOpen] = useState(false)
-  const [dashboardFilters, setDashboardFilters] = useState<DashboardFilters>({
-    from: start.toISOString().slice(0, 10),
-    to: now.toISOString().slice(0, 10),
-    projectStatus: 'active',
-  })
-  const filteredProjects = searchQuery.trim()
-    ? projects.filter((p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : projects
-  const projectsToShow =
-    dashboardFilters.projectStatus === 'all'
-      ? filteredProjects
-      : filteredProjects
-  const filteredApprovals = searchQuery.trim()
-    ? awaiting_approvals.filter(
-        (a) =>
-          a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (a.project_name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
-      )
-    : awaiting_approvals
-
-  const selectedProjectId = projectsToShow[0]?.id ?? ''
-  const createLinkMutation = useCreateClientLink(selectedProjectId)
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -232,9 +231,11 @@ export function DashboardOverview() {
         </div>
       </section>
 
-      <section>
-        <UsageSnapshotCard usage={usage} />
-      </section>
+      {usage && (
+        <section>
+          <UsageSnapshotCard usage={usage} />
+        </section>
+      )}
 
       <section>
         <AnalyticsWidget />

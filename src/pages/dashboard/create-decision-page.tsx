@@ -92,7 +92,10 @@ function CreateDecisionContent() {
   const [, setIsPreviewMode] = useState(false)
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const editorRef = useRef(editor)
-  editorRef.current = editor
+
+  useEffect(() => {
+    editorRef.current = editor
+  }, [editor])
 
   const performAutosave = useCallback(async () => {
     const state = editorRef.current

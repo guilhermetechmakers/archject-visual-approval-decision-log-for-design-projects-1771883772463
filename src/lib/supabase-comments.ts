@@ -3,6 +3,7 @@
  */
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import type { SupabaseClient } from '@/lib/supabase'
 import type { DecisionComment } from '@/types/decision-detail'
 
 const EDIT_WINDOW_MINUTES = 15
@@ -43,10 +44,10 @@ export async function supabaseFetchComments(
 
   const rows = (data ?? []) as Record<string, unknown>[]
   const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))] as string[]
-  let names: Record<string, string> = {}
+  const names: Record<string, string> = {}
   if (userIds.length > 0) {
     try {
-      const { data: profiles } = await (supabase as any)
+      const { data: profiles } = await (supabase as SupabaseClient)
         .from('profiles')
         .select('id, full_name')
         .in('id', userIds)
