@@ -45,6 +45,18 @@ export function useUpdateProfile() {
   })
 }
 
+export function useUploadAvatar() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const { avatarUrl } = await settingsApi.uploadAvatar(file)
+      await settingsApi.updateProfile({ avatar: avatarUrl })
+      return avatarUrl
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'profile'] }),
+  })
+}
+
 export function useSettingsWorkspace() {
   return useQuery({
     queryKey: [...SETTINGS_KEYS, 'workspace'],

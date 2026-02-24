@@ -19,6 +19,8 @@ export interface AvatarUploaderProps {
   value?: string | null
   /** Callback when a valid file is selected (caller handles upload) */
   onFileSelect?: (file: File) => void
+  /** Callback when user requests to remove the current avatar */
+  onRemove?: () => void
   /** Callback when upload completes with new URL */
   onUploadComplete?: (url: string) => void
   /** Callback when upload fails */
@@ -55,6 +57,7 @@ function validateFile(file: File): string | null {
 export function AvatarUploader({
   value,
   onFileSelect,
+  onRemove,
   isUploading = false,
   progress = 0,
   error,
@@ -66,7 +69,7 @@ export function AvatarUploader({
   const [localError, setLocalError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
-  const displayUrl = previewUrl || value ?? undefined
+  const displayUrl = (previewUrl || value) ?? undefined
   const displayError = error ?? localError
 
   const handleFile = useCallback(

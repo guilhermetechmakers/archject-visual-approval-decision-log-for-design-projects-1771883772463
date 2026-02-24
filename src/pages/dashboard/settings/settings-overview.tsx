@@ -8,17 +8,23 @@ import {
   Download,
   CreditCard,
   ChevronRight,
+  Monitor,
+  Shield,
+  Users,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 const QUICK_LINKS = [
-  { to: '/dashboard/settings/account', icon: User, label: 'Account', desc: 'Profile & password' },
-  { to: '/dashboard/settings/branding', icon: Palette, label: 'Branding', desc: 'Logo & client portal' },
+  { to: '/dashboard/settings/account', icon: User, label: 'Account', desc: 'Profile, avatar & password' },
+  { to: '/dashboard/settings/branding', icon: Palette, label: 'Branding', desc: 'Logo, colors & client portal' },
   { to: '/dashboard/settings/notifications', icon: Bell, label: 'Notifications', desc: 'Channels & reminders' },
   { to: '/dashboard/settings/integrations', icon: Plug, label: 'Integrations', desc: 'Calendar, Forge, Zapier' },
-  { to: '/dashboard/settings/api-keys', icon: Key, label: 'API Keys', desc: 'Keys & webhooks' },
+  { to: '/dashboard/settings/api-keys', icon: Key, label: 'API Keys', desc: 'Keys & scoped permissions' },
   { to: '/dashboard/settings/data-export', icon: Download, label: 'Data Export', desc: 'Export & retention' },
+  { to: '/dashboard/settings/sessions', icon: Monitor, label: 'Sessions', desc: 'Active devices & sign out' },
+  { to: '/dashboard/settings/security', icon: Shield, label: 'Security', desc: '2FA & compliance' },
+  { to: '/dashboard/settings/team', icon: Users, label: 'Team', desc: 'Members & roles' },
   { to: '/dashboard/billing', icon: CreditCard, label: 'Billing', desc: 'Plan & invoices' },
 ] as const
 

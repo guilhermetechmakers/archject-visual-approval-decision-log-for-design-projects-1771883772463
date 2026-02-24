@@ -1,4 +1,5 @@
 export { SettingsNav } from './settings-nav'
+export { NotificationPreview } from './notification-preview'
 export { BrandingCard } from './branding-card'
 export { BillingCard } from './billing-card'
 export { NotificationsCard } from './notifications-card'

@@ -1,17 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, User } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { AvatarUploader } from '@/components/profile'
 import { useAuth } from '@/contexts/auth-context'
-import { useSettingsProfile } from '@/hooks/use-settings'
+import {
+  useSettingsProfile,
+  useUpdateProfile,
+  useUploadAvatar,
+} from '@/hooks/use-settings'
 import { authApi, isApiError } from '@/api/auth'
 import { PasswordStrengthIndicator, PASSWORD_POLICY } from '@/components/auth'
 import { toast } from 'sonner'
+
+const profileSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
+  timeZone: z.string().optional(),
+  locale: z.string().optional(),
+})
 
 const changePasswordSchema = z
   .object({
@@ -30,19 +48,97 @@ const changePasswordSchema = z
     path: ['confirmPassword'],
   })
 
+type ProfileForm = z.infer<typeof profileSchema>
 type ChangePasswordForm = z.infer<typeof changePasswordSchema>
+
+const COMMON_TIMEZONES = [
+  'America/New_York',
+  'America/Los_Angeles',
+  'America/Chicago',
+  'America/Denver',
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Asia/Tokyo',
+  'Asia/Shanghai',
+  'Australia/Sydney',
+  'UTC',
+]
+
+const COMMON_LOCALES = [
+  { value: 'en-US', label: 'English (US)' },
+  { value: 'en-GB', label: 'English (UK)' },
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'fr', label: 'French' },
+  { value: 'de', label: 'German' },
+  { value: 'ja', label: 'Japanese' },
+  { value: 'zh-CN', label: 'Chinese (Simplified)' },
+]
 
 export function SettingsAccount() {
   const { logout } = useAuth()
   const { data: profile } = useSettingsProfile()
+  const updateProfile = useUpdateProfile()
+  const uploadAvatar = useUploadAvatar()
   const [showPasswords, setShowPasswords] = useState(false)
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false)
 
-  const form = useForm<ChangePasswordForm>({
+  const profileForm = useForm<ProfileForm>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: '',
+      timeZone: 'America/New_York',
+      locale: 'en-US',
+    },
+  })
+
+  const passwordForm = useForm<ChangePasswordForm>({
     resolver: zodResolver(changePasswordSchema),
   })
 
-  const newPassword = form.watch('newPassword')
+  const newPassword = passwordForm.watch('newPassword')
+
+  useEffect(() => {
+    if (profile) {
+      profileForm.reset({
+        name: profile.name,
+        timeZone: profile.timeZone ?? 'America/New_York',
+        locale: profile.locale ?? 'en-US',
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id])
+
+  const handleAvatarFileSelect = (file: File) => {
+    uploadAvatar.mutate(file, {
+      onSuccess: () => toast.success('Avatar updated'),
+      onError: () => toast.error('Failed to upload avatar'),
+    })
+  }
+
+  const handleAvatarRemove = () => {
+    updateProfile.mutate(
+      { avatar: null },
+      {
+        onSuccess: () => toast.success('Avatar removed'),
+        onError: () => toast.error('Failed to remove avatar'),
+      }
+    )
+  }
+
+  const onProfileSubmit = async (data: ProfileForm) => {
+    try {
+      await updateProfile.mutateAsync({
+        name: data.name,
+        timeZone: data.timeZone || undefined,
+        locale: data.locale || undefined,
+      })
+      toast.success('Profile updated')
+    } catch {
+      toast.error('Failed to update profile')
+    }
+  }
 
   const onPasswordSubmit = async (data: ChangePasswordForm) => {
     setIsPasswordSubmitting(true)
@@ -53,7 +149,7 @@ export function SettingsAccount() {
         confirmPassword: data.confirmPassword,
       })
       toast.success('Password changed successfully')
-      form.reset()
+      passwordForm.reset()
     } catch (e) {
       if (isApiError(e)) {
         toast.error(e.message ?? 'Failed to update password')
@@ -70,25 +166,109 @@ export function SettingsAccount() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Account</h1>
         <p className="mt-1 text-muted-foreground">
-          Profile details and password
+          Profile details, avatar, and password
         </p>
       </div>
 
       <Card className="rounded-xl border border-border shadow-card transition-all duration-200 hover:shadow-card-hover">
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
+          <div className="flex items-center gap-2">
+            <User className="h-5 w-5 text-primary" />
+            <CardTitle>Profile</CardTitle>
+          </div>
           <CardDescription>
-            Your account information
+            Your account information and avatar
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Email</Label>
-            <Input value={profile?.email ?? ''} disabled className="bg-secondary/50" />
-          </div>
-          <div className="space-y-2">
-            <Label>Name</Label>
-            <Input value={profile?.name ?? ''} disabled className="bg-secondary/50" />
+        <CardContent className="space-y-6">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+            <div className="shrink-0">
+              <AvatarUploader
+                value={profile?.avatar}
+                onFileSelect={handleAvatarFileSelect}
+                onRemove={handleAvatarRemove}
+                isUploading={uploadAvatar.isPending}
+                progress={uploadAvatar.isPending ? 50 : 0}
+                error={uploadAvatar.isError ? 'Upload failed' : null}
+                size="md"
+              />
+            </div>
+            <form
+              onSubmit={profileForm.handleSubmit(onProfileSubmit)}
+              className="min-w-0 flex-1 space-y-4"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  value={profile?.email ?? ''}
+                  disabled
+                  className="bg-secondary/50"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Contact support to change your email
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Your name"
+                  {...profileForm.register('name')}
+                  aria-invalid={!!profileForm.formState.errors.name}
+                />
+                {profileForm.formState.errors.name && (
+                  <p className="text-sm text-destructive">
+                    {profileForm.formState.errors.name.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="timeZone">Time zone</Label>
+                  <Select
+                    value={profileForm.watch('timeZone') ?? 'America/New_York'}
+                    onValueChange={(v) => profileForm.setValue('timeZone', v, { shouldDirty: true })}
+                  >
+                    <SelectTrigger id="timeZone">
+                      <SelectValue placeholder="Select time zone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COMMON_TIMEZONES.map((tz) => (
+                        <SelectItem key={tz} value={tz}>
+                          {tz}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="locale">Locale</Label>
+                  <Select
+                    value={profileForm.watch('locale') ?? 'en-US'}
+                    onValueChange={(v) => profileForm.setValue('locale', v, { shouldDirty: true })}
+                  >
+                    <SelectTrigger id="locale">
+                      <SelectValue placeholder="Select locale" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COMMON_LOCALES.map((loc) => (
+                        <SelectItem key={loc.value} value={loc.value}>
+                          {loc.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button
+                type="submit"
+                disabled={updateProfile.isPending || !profileForm.formState.isDirty}
+                className="transition-all duration-200 hover:scale-[1.02]"
+              >
+                {updateProfile.isPending ? 'Saving...' : 'Save profile'}
+              </Button>
+            </form>
           </div>
         </CardContent>
       </Card>
@@ -102,7 +282,7 @@ export function SettingsAccount() {
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={form.handleSubmit(onPasswordSubmit)}
+            onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
             className="space-y-4"
           >
             <div className="space-y-2">
@@ -111,7 +291,7 @@ export function SettingsAccount() {
                 <Input
                   id="currentPassword"
                   type={showPasswords ? 'text' : 'password'}
-                  {...form.register('currentPassword')}
+                  {...passwordForm.register('currentPassword')}
                   className="pr-10"
                 />
                 <button
@@ -123,9 +303,9 @@ export function SettingsAccount() {
                   {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {form.formState.errors.currentPassword && (
+              {passwordForm.formState.errors.currentPassword && (
                 <p className="text-sm text-destructive">
-                  {form.formState.errors.currentPassword.message}
+                  {passwordForm.formState.errors.currentPassword.message}
                 </p>
               )}
             </div>
@@ -136,13 +316,13 @@ export function SettingsAccount() {
                 type={showPasswords ? 'text' : 'password'}
                 autoComplete="new-password"
                 placeholder="••••••••"
-                {...form.register('newPassword')}
-                aria-invalid={!!form.formState.errors.newPassword}
+                {...passwordForm.register('newPassword')}
+                aria-invalid={!!passwordForm.formState.errors.newPassword}
               />
               <PasswordStrengthIndicator password={newPassword ?? ''} />
-              {form.formState.errors.newPassword && (
+              {passwordForm.formState.errors.newPassword && (
                 <p className="text-sm text-destructive" role="alert">
-                  {form.formState.errors.newPassword.message}
+                  {passwordForm.formState.errors.newPassword.message}
                 </p>
               )}
             </div>
@@ -151,11 +331,11 @@ export function SettingsAccount() {
               <Input
                 id="confirmPassword"
                 type={showPasswords ? 'text' : 'password'}
-                {...form.register('confirmPassword')}
+                {...passwordForm.register('confirmPassword')}
               />
-              {form.formState.errors.confirmPassword && (
+              {passwordForm.formState.errors.confirmPassword && (
                 <p className="text-sm text-destructive">
-                  {form.formState.errors.confirmPassword.message}
+                  {passwordForm.formState.errors.confirmPassword.message}
                 </p>
               )}
             </div>

@@ -34,8 +34,12 @@ export const MOCK_WORKSPACE: Workspace = {
   branding: {
     logoUrl: null,
     accentColor: '#195C4A',
+    primaryColor: '#195C4A',
+    secondaryColor: '#7BE495',
     domainPrefix: 'clients',
     clientPortalUrl: 'https://clients.archject.app/studio-abc',
+    headerText: 'Design Approval Portal',
+    footerText: 'Powered by Archject',
   },
   quotas: { storageGb: 10, projects: 5 },
   templates: ['default'],

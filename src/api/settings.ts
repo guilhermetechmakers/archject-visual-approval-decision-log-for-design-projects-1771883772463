@@ -3,6 +3,7 @@
  */
 
 import { api } from '@/lib/api'
+import { getAccessTokenSync } from '@/lib/auth-service'
 import type {
   UserProfile,
   Workspace,
@@ -23,6 +24,25 @@ export const settingsApi = {
   getProfile: () => api.get<UserProfile>('/settings'),
   updateProfile: (data: Partial<Pick<UserProfile, 'name' | 'avatar' | 'timeZone' | 'locale' | 'role'>>) =>
     api.put<UserProfile>('/settings/profile', data),
+  uploadAvatar: async (file: File): Promise<{ avatarUrl: string }> => {
+    const API_BASE = import.meta.env.VITE_API_URL ?? '/api'
+    const formData = new FormData()
+    formData.append('avatar', file)
+    const token = getAccessTokenSync()
+    const headers: Record<string, string> = {}
+    if (token) headers['Authorization'] = `Bearer ${token}`
+    const res = await fetch(`${API_BASE}/settings/profile/avatar`, {
+      method: 'POST',
+      body: formData,
+      headers,
+      credentials: 'include',
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error((err as { message?: string }).message ?? res.statusText)
+    }
+    return res.json()
+  },
 
   getWorkspace: () => api.get<Workspace>('/settings/workspace'),
   updateWorkspaceBranding: (data: Partial<WorkspaceBranding>) =>

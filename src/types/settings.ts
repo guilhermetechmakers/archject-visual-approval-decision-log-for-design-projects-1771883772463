@@ -18,6 +18,8 @@ export interface UserProfile {
 
 export interface WorkspaceBranding {
   logoUrl?: string | null
+  primaryColor?: string
+  secondaryColor?: string
   accentColor: string
   domainPrefix?: string | null
   clientPortalUrl?: string | null
@@ -74,6 +76,16 @@ export interface NotificationSettings {
   reminderSchedule?: {
     defaultTime?: string
     cadence?: string
+  }
+  /** Per-workspace overrides; when set, these override global defaults */
+  workspaceOverrides?: {
+    workspaceId?: string
+    workspaceName?: string
+    channels?: {
+      approvals?: Partial<NotificationChannels>
+      comments?: Partial<NotificationChannels>
+      reminders?: Partial<NotificationChannels>
+    }
   }
 }
 

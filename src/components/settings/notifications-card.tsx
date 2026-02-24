@@ -1,9 +1,11 @@
-import { Bell, Mail, Smartphone, MessageSquare } from 'lucide-react'
+import { Bell, Mail, Smartphone, MessageSquare, Building2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { NotificationPreview } from './notification-preview'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useSettingsNotifications, useUpdateNotifications } from '@/hooks/use-settings'
+import { useSettingsWorkspace } from '@/hooks/use-settings'
 import { toast } from 'sonner'
 
 const CHANNEL_LABELS = {
@@ -14,6 +16,7 @@ const CHANNEL_LABELS = {
 
 export function NotificationsCard() {
   const { data: settings, isLoading } = useSettingsNotifications()
+  const { data: workspace } = useSettingsWorkspace()
   const updateMutation = useUpdateNotifications()
 
   const channels = settings?.channels ?? {
@@ -49,10 +52,17 @@ export function NotificationsCard() {
           <CardTitle>Notification preferences</CardTitle>
         </div>
         <CardDescription>
-          Choose how you receive notifications for approvals, comments, and reminders
+          Per-user defaults. Per-workspace overrides inherit from these when not set.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {workspace && (
+          <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2">
+            <Building2 className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">Workspace: {workspace.name}</span>
+            <span className="text-xs text-muted-foreground">— using global defaults</span>
+          </div>
+        )}
         {(['approvals', 'comments', 'reminders'] as const).map((category) => (
           <div key={category} className="space-y-4">
             <div className="flex items-center gap-2">
@@ -87,14 +97,7 @@ export function NotificationsCard() {
           </div>
         ))}
 
-        {settings?.reminderSchedule && (
-          <div className="space-y-2 rounded-lg border border-border bg-secondary/30 p-4">
-            <p className="text-sm font-medium">Default reminder</p>
-            <p className="text-sm text-muted-foreground">
-              {settings.reminderSchedule.defaultTime ?? '09:00'} • {settings.reminderSchedule.cadence ?? 'daily'}
-            </p>
-          </div>
-        )}
+        <NotificationPreview settings={settings} />
 
         <Button
           onClick={() => {

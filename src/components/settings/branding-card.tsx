@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { useSettingsWorkspace, useUpdateWorkspaceBranding } from '@/hooks/use-settings'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -17,6 +18,9 @@ export function BrandingCard() {
   const [logoUrl, setLogoUrl] = useState('')
   const [accentColor, setAccentColor] = useState('#195C4A')
   const [domainPrefix, setDomainPrefix] = useState('')
+  const [headerText, setHeaderText] = useState('')
+  const [footerText, setFooterText] = useState('')
+  const [customCss, setCustomCss] = useState('')
   const [domainError, setDomainError] = useState<string | null>(null)
   const [colorError, setColorError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -28,12 +32,18 @@ export function BrandingCard() {
       if (branding.logoUrl) setLogoUrl(branding.logoUrl)
       if (branding.accentColor) setAccentColor(branding.accentColor)
       if (branding.domainPrefix) setDomainPrefix(branding.domainPrefix)
+      if (branding.headerText) setHeaderText(branding.headerText)
+      if (branding.footerText) setFooterText(branding.footerText)
+      if (branding.customCss) setCustomCss(branding.customCss)
     }
   }, [workspace?.id])
 
   const displayLogoUrl = logoUrl || branding.logoUrl || ''
   const displayAccent = accentColor || branding.accentColor || '#195C4A'
   const displayPrefix = domainPrefix || branding.domainPrefix || ''
+  const displayHeader = headerText || branding.headerText || ''
+  const displayFooter = footerText || branding.footerText || ''
+  const displayCustomCss = customCss || branding.customCss || ''
   const clientPortalUrl = branding.clientPortalUrl || `https://clients.archject.app/${displayPrefix || 'your-studio'}`
 
   const validateDomainPrefix = useCallback((value: string) => {
@@ -63,6 +73,9 @@ export function BrandingCard() {
         logoUrl: displayLogoUrl || null,
         accentColor: accentColor || displayAccent,
         domainPrefix: (domainPrefix !== undefined ? domainPrefix : displayPrefix) || null,
+        headerText: displayHeader || null,
+        footerText: displayFooter || null,
+        customCss: displayCustomCss || null,
       })
       toast.success('Branding saved')
     } catch {
@@ -158,6 +171,49 @@ export function BrandingCard() {
             />
           </div>
           {colorError && <p className="text-xs text-destructive">{colorError}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="header-text">Header text</Label>
+          <Input
+            id="header-text"
+            type="text"
+            placeholder="Design Approval Portal"
+            value={headerText || displayHeader}
+            onChange={(e) => setHeaderText(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Shown at the top of client-facing decision logs
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="footer-text">Footer text</Label>
+          <Input
+            id="footer-text"
+            type="text"
+            placeholder="Powered by Archject"
+            value={footerText || displayFooter}
+            onChange={(e) => setFooterText(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Shown at the bottom of client-facing pages
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="custom-css">Custom CSS</Label>
+          <Textarea
+            id="custom-css"
+            placeholder=".client-portal { font-family: sans-serif; }"
+            value={customCss || displayCustomCss}
+            onChange={(e) => setCustomCss(e.target.value)}
+            rows={4}
+            className="font-mono text-sm"
+          />
+          <p className="text-xs text-muted-foreground">
+            Optional CSS for client-facing decision logs. Use with caution.
+          </p>
         </div>
 
         <div className="space-y-2">
