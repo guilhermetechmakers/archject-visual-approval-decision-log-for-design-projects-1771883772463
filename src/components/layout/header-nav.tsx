@@ -6,6 +6,7 @@ const navLinks = [
   { to: '/features', label: 'Features' },
   { to: '/pricing', label: 'Pricing' },
   { to: '/about', label: 'About' },
+  { to: '/privacy', label: 'Privacy' },
 ]
 
 export function HeaderNav() {
