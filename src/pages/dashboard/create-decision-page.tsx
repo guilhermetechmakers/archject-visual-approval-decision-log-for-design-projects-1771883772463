@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Loader2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DecisionEditorProvider, useDecisionEditor } from '@/contexts/decision-editor-context'
 import {
@@ -15,7 +15,10 @@ import {
 } from '@/components/decision-editor'
 import { useProjectWorkspace } from '@/hooks/use-workspace'
 import { useCreateDecisionMutation } from '@/hooks/use-decision'
+import * as workspaceApi from '@/api/workspace'
 import { toast } from 'sonner'
+
+const AUTOSAVE_INTERVAL_MS = 60_000
 
 function CreateDecisionContent() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -40,14 +43,69 @@ function CreateDecisionContent() {
   })
   const createMutation = useCreateDecisionMutation(projectId ?? '', getState)
 
+  const [draftId, setDraftId] = useState<string | null>(null)
+  const [autosaveStatus, setAutosaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [, setIsPreviewMode] = useState(false)
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const editorRef = useRef(editor)
+  editorRef.current = editor
+
+  const performAutosave = useCallback(async () => {
+    const state = editorRef.current
+    if (!state.title?.trim() || !projectId) return
+
+    setAutosaveStatus('saving')
+    try {
+      const payload = {
+        title: state.title,
+        description: state.description || undefined,
+        due_date: state.dueDate || undefined,
+        assignee_id: state.assigneeId || undefined,
+        status: 'draft' as const,
+      }
+      if (draftId && projectId) {
+        await workspaceApi.updateDecision(projectId, draftId, payload)
+      } else {
+        const decision = await workspaceApi.createDecision(projectId!, payload)
+        setDraftId(decision.id)
+      }
+      setAutosaveStatus('saved')
+      setTimeout(() => setAutosaveStatus('idle'), 2000)
+    } catch {
+      setAutosaveStatus('idle')
+    }
+  }, [projectId, draftId])
+
+  useEffect(() => {
+    const state = editorRef.current
+    if (!state.title?.trim() || !projectId) return
+
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current)
+    autosaveTimerRef.current = setTimeout(performAutosave, AUTOSAVE_INTERVAL_MS)
+    return () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current)
+    }
+  }, [editor.title, editor.description, editor.dueDate, editor.assigneeId, projectId, performAutosave])
 
   const handleSaveDraft = async () => {
     try {
-      const decision = await createMutation.mutateAsync({ status: 'draft' })
-      toast.success('Decision saved as draft')
-      reset()
-      navigate(`/dashboard/projects/${projectId}/decisions/${decision.id}/internal`)
+      if (draftId && projectId) {
+        const payload = {
+          title: editor.title,
+          description: editor.description || undefined,
+          due_date: editor.dueDate || undefined,
+          assignee_id: editor.assigneeId || undefined,
+          status: 'draft' as const,
+        }
+        await workspaceApi.updateDecision(projectId, draftId, payload)
+        toast.success('Draft updated')
+        navigate(`/dashboard/projects/${projectId}/decisions/${draftId}/internal`)
+      } else {
+        const decision = await createMutation.mutateAsync({ status: 'draft' })
+        toast.success('Decision saved as draft')
+        reset()
+        navigate(`/dashboard/projects/${projectId}/decisions/${decision.id}/internal`)
+      }
     } catch {
       toast.error('Failed to save draft')
     }
@@ -103,13 +161,32 @@ function CreateDecisionContent() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
         <Button asChild variant="ghost" size="sm">
           <Link to={`/dashboard/projects/${projectId}`}>
             <ChevronLeft className="mr-1 h-4 w-4" />
             {project.name}
           </Link>
         </Button>
+        {editor.title.trim() && (
+          <span
+            className="flex items-center gap-1.5 text-sm text-muted-foreground"
+            aria-live="polite"
+          >
+            {autosaveStatus === 'saving' && (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                Saving draft…
+              </>
+            )}
+            {autosaveStatus === 'saved' && (
+              <>
+                <Check className="h-4 w-4 text-success" aria-hidden />
+                Draft saved
+              </>
+            )}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row">

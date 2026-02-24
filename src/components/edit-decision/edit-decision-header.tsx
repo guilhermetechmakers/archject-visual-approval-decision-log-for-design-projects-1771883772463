@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ChevronLeft, Save, X, RotateCcw, Send } from 'lucide-react'
+import { ChevronLeft, Save, X, RotateCcw, Send, Lock, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -37,6 +37,10 @@ export interface EditDecisionHeaderProps {
   onRevert?: () => void
   onPublish?: () => void
   isSaving?: boolean
+  /** Optimistic concurrency: conflict detected (409) */
+  hasConflict?: boolean
+  /** Version number for lock indicator */
+  version?: number
   className?: string
 }
 
@@ -50,10 +54,23 @@ export function EditDecisionHeader({
   onRevert,
   onPublish,
   isSaving = false,
+  hasConflict = false,
+  version,
   className,
 }: EditDecisionHeaderProps) {
   return (
     <div className={cn('space-y-4', className)}>
+      {hasConflict && (
+        <div
+          className="flex items-center gap-2 rounded-lg border border-warning bg-warning/10 px-4 py-3 text-sm text-foreground"
+          role="alert"
+        >
+          <AlertTriangle className="h-5 w-5 shrink-0 text-warning" aria-hidden />
+          <span>
+            This decision was modified by another user. Revert to reload the latest version, or save to overwrite.
+          </span>
+        </div>
+      )}
       <div className="flex items-center gap-2">
         <Button asChild variant="ghost" size="sm">
           <Link to={`/dashboard/projects/${projectId}/decisions`}>
@@ -84,6 +101,12 @@ export function EditDecisionHeader({
             {hasUnsavedChanges && (
               <Badge variant="outline" className="text-warning-muted border-warning-muted">
                 Unsaved
+              </Badge>
+            )}
+            {version != null && (
+              <Badge variant="outline" className="gap-1">
+                <Lock className="h-3 w-3" aria-hidden />
+                v{version}
               </Badge>
             )}
           </div>

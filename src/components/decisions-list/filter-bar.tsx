@@ -119,7 +119,9 @@ export function FilterBar({
         filters.templateType ||
         filters.dueDateFrom ||
         filters.dueDateTo ||
-        filters.quickFilter
+        filters.quickFilter ||
+        filters.tags?.length ||
+        (filters.metadataKey && filters.metadataValue)
       ),
     [filters]
   )
@@ -283,6 +285,47 @@ export function FilterBar({
               }
               className="w-[140px]"
               aria-label="Due date to"
+            />
+          </div>
+          <Input
+            type="text"
+            placeholder="Tags (comma-separated)"
+            value={filters.tags?.join(', ') ?? ''}
+            onChange={(e) => {
+              const tags = e.target.value
+                .split(',')
+                .map((t) => t.trim())
+                .filter(Boolean)
+              onFiltersChange({ ...filters, tags: tags.length ? tags : undefined })
+            }}
+            className="w-[180px]"
+            aria-label="Filter by tags"
+          />
+          <div className="flex items-center gap-2">
+            <Input
+              type="text"
+              placeholder="Metadata key"
+              value={filters.metadataKey ?? ''}
+              onChange={(e) => {
+                const key = e.target.value || undefined
+                onFiltersChange({
+                  ...filters,
+                  metadataKey: key,
+                  metadataValue: key ? filters.metadataValue : undefined,
+                })
+              }}
+              className="w-[120px]"
+              aria-label="Metadata key"
+            />
+            <Input
+              type="text"
+              placeholder="Metadata value"
+              value={filters.metadataValue ?? ''}
+              onChange={(e) =>
+                onFiltersChange({ ...filters, metadataValue: e.target.value || undefined })
+              }
+              className="w-[120px]"
+              aria-label="Metadata value"
             />
           </div>
         </div>

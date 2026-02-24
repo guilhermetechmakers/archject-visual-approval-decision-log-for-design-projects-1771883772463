@@ -350,6 +350,7 @@ export interface Database {
           id: string
           project_id: string
           title: string
+          description: string | null
           options: Json
           chosen_option_id: string | null
           status: 'draft' | 'pending' | 'accepted' | 'rejected'
@@ -359,11 +360,21 @@ export interface Database {
           created_at: string
           updated_at: string
           approved_at: string | null
+          version: number
+          metadata: Json
+          assignee_id: string | null
+          reminder_schedule: Json
+          shared: boolean
+          share_link_id: string | null
+          last_edited_by: string | null
+          deleted_at: string | null
+          priority: string | null
         }
         Insert: {
           id?: string
           project_id: string
           title: string
+          description?: string | null
           options?: Json
           chosen_option_id?: string | null
           status?: 'draft' | 'pending' | 'accepted' | 'rejected'
@@ -373,11 +384,21 @@ export interface Database {
           created_at?: string
           updated_at?: string
           approved_at?: string | null
+          version?: number
+          metadata?: Json
+          assignee_id?: string | null
+          reminder_schedule?: Json
+          shared?: boolean
+          share_link_id?: string | null
+          last_edited_by?: string | null
+          deleted_at?: string | null
+          priority?: string | null
         }
         Update: {
           id?: string
           project_id?: string
           title?: string
+          description?: string | null
           options?: Json
           chosen_option_id?: string | null
           status?: 'draft' | 'pending' | 'accepted' | 'rejected'
@@ -387,6 +408,94 @@ export interface Database {
           created_at?: string
           updated_at?: string
           approved_at?: string | null
+          version?: number
+          metadata?: Json
+          assignee_id?: string | null
+          reminder_schedule?: Json
+          shared?: boolean
+          share_link_id?: string | null
+          last_edited_by?: string | null
+          deleted_at?: string | null
+          priority?: string | null
+        }
+      }
+      decision_options: {
+        Row: {
+          id: string
+          decision_id: string
+          title: string
+          description: string | null
+          image_url: string | null
+          specs_url: string | null
+          layout_url: string | null
+          position: number
+          metadata: Json
+          is_recommended: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          decision_id: string
+          title: string
+          description?: string | null
+          image_url?: string | null
+          specs_url?: string | null
+          layout_url?: string | null
+          position?: number
+          metadata?: Json
+          is_recommended?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          decision_id?: string
+          title?: string
+          description?: string | null
+          image_url?: string | null
+          specs_url?: string | null
+          layout_url?: string | null
+          position?: number
+          metadata?: Json
+          is_recommended?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      decision_share_links: {
+        Row: {
+          id: string
+          decision_id: string
+          token: string
+          expires_at: string | null
+          created_by: string | null
+          revocation_flag: boolean
+          scope: string
+          remaining_uses: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          decision_id: string
+          token: string
+          expires_at?: string | null
+          created_by?: string | null
+          revocation_flag?: boolean
+          scope?: string
+          remaining_uses?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          decision_id?: string
+          token?: string
+          expires_at?: string | null
+          created_by?: string | null
+          revocation_flag?: boolean
+          scope?: string
+          remaining_uses?: number | null
+          created_at?: string
         }
       }
       project_files: {

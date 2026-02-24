@@ -4,11 +4,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import * as decisionDetailApi from '@/api/decision-detail'
 import { getMockDecisionDetail } from '@/lib/decision-detail-mock'
 import type { DecisionOption } from '@/types/decision-detail'
 
-const USE_MOCK = true
+const USE_MOCK = !isSupabaseConfigured
 
 export function useDecisionDetail(decisionId: string | undefined) {
   return useQuery({

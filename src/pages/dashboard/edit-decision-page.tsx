@@ -61,6 +61,7 @@ function EditDecisionContent() {
   } | null>(null)
   const [shareLink, setShareLink] = useState<{ url: string; expires_at?: string } | null>(null)
   const [filterAction, setFilterAction] = useState<AuditAction | 'all'>('all')
+  const [hasConflict, setHasConflict] = useState(false)
 
   const displayDecision = draft
     ? {
@@ -105,6 +106,7 @@ function EditDecisionContent() {
 
   const handleSave = useCallback(async () => {
     if (!draft || !decision) return
+    setHasConflict(false)
     try {
       await saveMutation.mutateAsync({
         snapshot: {
@@ -120,8 +122,9 @@ function EditDecisionContent() {
       })
       setDraft(null)
       navigate(`/dashboard/projects/${projectId}/decisions/${decisionId}/internal`)
-    } catch {
-      // toast handled by mutation
+    } catch (err) {
+      const status = (err as { status?: number })?.status
+      if (status === 409) setHasConflict(true)
     }
   }, [draft, decision, saveMutation, projectId, decisionId, navigate])
 
@@ -133,6 +136,7 @@ function EditDecisionContent() {
   const handleRevert = useCallback(() => {
     if (decision) {
       initializeDraft(decision)
+      setHasConflict(false)
       toast.success('Reverted to last saved state')
     }
   }, [decision, initializeDraft])
@@ -210,6 +214,8 @@ function EditDecisionContent() {
         onRevert={handleRevert}
         onPublish={handlePublish}
         isSaving={saveMutation.isPending}
+        hasConflict={hasConflict}
+        version={(decision as { version?: number })?.version ?? decision.current_version_number}
       />
 
       <div className="grid gap-6 lg:grid-cols-3">

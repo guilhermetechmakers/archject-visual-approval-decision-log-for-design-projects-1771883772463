@@ -35,7 +35,16 @@ const STATUS_VARIANT: Record<string, 'default' | 'success' | 'warning' | 'destru
   draft: 'default',
   pending: 'warning',
   approved: 'success',
+  accepted: 'success', // DB uses accepted, map to approved in UI
   rejected: 'destructive',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  draft: 'Draft',
+  pending: 'Pending',
+  approved: 'Approved',
+  accepted: 'Approved',
+  rejected: 'Rejected',
 }
 
 function formatDate(dateStr: string | null | undefined): string {
@@ -163,7 +172,7 @@ export function DecisionsTable({
                 </TableCell>
                 <TableCell>
                   <Badge variant={STATUS_VARIANT[decision.status] ?? 'default'}>
-                    {decision.status}
+                    {STATUS_LABEL[decision.status] ?? decision.status}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
@@ -272,7 +281,7 @@ export function DecisionsTable({
                       {decision.title}
                     </Link>
                     <Badge variant={STATUS_VARIANT[decision.status] ?? 'default'}>
-                      {decision.status}
+                      {STATUS_LABEL[decision.status] ?? decision.status}
                     </Badge>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-4 text-xs text-muted-foreground">

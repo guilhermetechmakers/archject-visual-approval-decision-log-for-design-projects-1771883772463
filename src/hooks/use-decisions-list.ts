@@ -15,15 +15,24 @@ import type {
   BulkChangeStatusPayload,
 } from '@/types/decisions-list'
 import type { DecisionStatus } from '@/types/workspace'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import {
   mockDecisions,
   mockClientLinks,
   mockTeam,
   mockTemplates,
 } from '@/lib/workspace-mock'
+import {
+  supabaseFetchDecisionsList,
+  supabaseFetchDecisionPreview,
+  supabaseCreateDecision,
+  supabaseDeleteDecision,
+  supabaseCloneDecision,
+  supabaseBulkChangeStatus,
+} from '@/lib/supabase-decisions'
 import type { DecisionListItem, DecisionsListResponse } from '@/types/decisions-list'
 
-const USE_MOCK = true
+const USE_MOCK = !isSupabaseConfigured
 
 function toListItem(
   d: { id: string; project_id: string; title: string; status: DecisionStatus; due_date?: string | null; assignee_id?: string | null; assignee_name?: string | null; created_at: string; updated_at: string; description?: string | null; template_id?: string | null; options_count?: number },
@@ -87,6 +96,18 @@ async function mockFetchDecisions(params: DecisionsListParams): Promise<Decision
       (d) => d.status === 'pending' && d.has_share_link
     )
   }
+  if (filters?.tags?.length) {
+    filtered = filtered.filter((d) => {
+      const itemTags = d.tags ?? (d.metadata as { tags?: string[] })?.tags ?? []
+      return filters!.tags!.some((t) => itemTags.includes(t))
+    })
+  }
+  if (filters?.metadataKey && filters?.metadataValue) {
+    filtered = filtered.filter((d) => {
+      const meta = (d.metadata as Record<string, unknown>) ?? {}
+      return meta[filters!.metadataKey!] === filters!.metadataValue
+    })
+  }
 
   filtered.sort((a, b) => {
     let cmp = 0
@@ -129,24 +150,11 @@ export function useDecisionsList(
       pageSize,
     ],
     queryFn: async () => {
-      if (USE_MOCK) {
-        return mockFetchDecisions({
-          projectId,
-          filters,
-          sort,
-          order,
-          page,
-          pageSize,
-        })
-      }
-      return decisionsApi.fetchDecisionsList({
-        projectId,
-        filters,
-        sort,
-        order,
-        page,
-        pageSize,
-      })
+      const params = { projectId, filters, sort, order, page, pageSize }
+      const supabaseResult = await supabaseFetchDecisionsList(params)
+      if (supabaseResult) return supabaseResult
+      if (USE_MOCK) return mockFetchDecisions(params)
+      return decisionsApi.fetchDecisionsList(params)
     },
     enabled: !!projectId,
   })
@@ -156,6 +164,8 @@ export function useDecisionPreview(projectId: string, decisionId: string | null)
   return useQuery({
     queryKey: ['decision-preview', projectId, decisionId],
     queryFn: async () => {
+      const supabaseResult = await supabaseFetchDecisionPreview(projectId, decisionId!)
+      if (supabaseResult) return supabaseResult
       if (USE_MOCK) {
         const decisions = mockDecisions.map((d) =>
           toListItem({ ...d, project_id: projectId }, projectId, mockClientLinks)
@@ -184,6 +194,15 @@ export function useCreateDecision(projectId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (data: Parameters<typeof decisionsApi.createDecision>[1]) => {
+      const supabaseResult = await supabaseCreateDecision(projectId, {
+        title: data.title,
+        status: data.status,
+        due_date: data.due_date,
+        assignee_id: data.assignee_id,
+        description: data.summary,
+        metadata: data.metadata,
+      })
+      if (supabaseResult) return supabaseResult
       if (USE_MOCK) {
         const newDecision = {
           id: `dec-${Date.now()}`,
@@ -217,6 +236,8 @@ export function useDeleteDecision(projectId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (decisionId: string) => {
+      const deleted = await supabaseDeleteDecision(projectId, decisionId)
+      if (deleted) return
       if (USE_MOCK) return
       return decisionsApi.deleteDecision(projectId, decisionId)
     },
@@ -235,6 +256,8 @@ export function useCloneDecision(projectId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (decisionId: string) => {
+      const supabaseResult = await supabaseCloneDecision(projectId, decisionId)
+      if (supabaseResult) return supabaseResult
       if (USE_MOCK) {
         const d = mockDecisions.find((x) => x.id === decisionId)
         if (!d) throw new Error('Decision not found')
@@ -307,6 +330,12 @@ export function useBulkChangeStatus(projectId: string) {
   return useMutation({
     mutationFn: async (payload: BulkChangeStatusPayload) => {
       if (USE_MOCK) return
+      const done = await supabaseBulkChangeStatus(
+        projectId,
+        payload.decisionIds,
+        payload.newStatus
+      )
+      if (done) return
       return decisionsApi.bulkChangeStatus(projectId, payload)
     },
     onSuccess: () => {

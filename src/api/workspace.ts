@@ -1,8 +1,12 @@
 /**
- * Project Workspace API - RESTful endpoints for project-level operations
+ * Project Workspace API - delegates to decisions API when Supabase configured
  */
 
 import { api } from '@/lib/api'
+import {
+  createDecision as createDecisionApi,
+  updateDecision as updateDecisionApi,
+} from '@/api/decisions'
 import type {
   Project,
   Decision,
@@ -53,16 +57,38 @@ export async function fetchDecision(decisionId: string): Promise<Decision> {
 
 export async function createDecision(
   projectId: string,
-  data: Partial<Decision>
+  data: Partial<Decision> & { metadata?: Record<string, unknown>; options?: unknown[] }
 ): Promise<Decision> {
-  return api.post<Decision>(`/projects/${projectId}/decisions`, data)
+  const metadata = { ...(data.metadata ?? {}) }
+  const options = data.options ?? (metadata.options as unknown[])
+  if (Array.isArray(options) && options.length > 0) {
+    metadata.options = options
+  }
+  return createDecisionApi(projectId, {
+    title: data.title ?? 'Untitled',
+    status: data.status,
+    due_date: data.due_date ?? undefined,
+    assignee_id: data.assignee_id ?? undefined,
+    summary: data.description ?? undefined,
+    metadata: Object.keys(metadata).length ? metadata : undefined,
+  })
 }
 
 export async function updateDecision(
-  decisionId: string,
-  data: Partial<Decision>
+  projectIdOrDecisionId: string,
+  decisionIdOrData: string | Partial<Decision>,
+  data?: Partial<Decision>
 ): Promise<Decision> {
-  return api.patch<Decision>(`/decisions/${decisionId}`, data)
+  const projectId = data !== undefined ? projectIdOrDecisionId : ''
+  const decisionId = data !== undefined ? (decisionIdOrData as string) : projectIdOrDecisionId
+  const payload = (data ?? decisionIdOrData) as Partial<Decision>
+  return updateDecisionApi(projectId, decisionId, {
+    title: payload.title,
+    status: payload.status,
+    due_date: payload.due_date ?? undefined,
+    assignee_id: payload.assignee_id ?? undefined,
+    summary: payload.description ?? undefined,
+  })
 }
 
 export async function fetchProjectFiles(

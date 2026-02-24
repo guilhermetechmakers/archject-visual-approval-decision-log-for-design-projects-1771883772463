@@ -23,6 +23,8 @@ export interface DecisionListItem {
   created_at: string
   updated_at: string
   last_activity?: string | null
+  metadata?: Record<string, unknown>
+  tags?: string[]
 }
 
 export interface DecisionPreview extends DecisionListItem {
@@ -39,6 +41,9 @@ export interface DecisionsListFilters {
   dueDateFrom?: string
   dueDateTo?: string
   quickFilter?: 'my_decisions' | 'awaiting_client' | 'overdue'
+  tags?: string[]
+  metadataKey?: string
+  metadataValue?: string
 }
 
 export type DecisionsSortField = 'title' | 'due_date' | 'updated_at' | 'status'

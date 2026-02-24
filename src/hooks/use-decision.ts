@@ -4,6 +4,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import * as decisionsApi from '@/api/workspace'
 import type { Decision } from '@/types/workspace'
 import type { DecisionEditorState } from '@/types/decision-editor'
@@ -70,7 +71,7 @@ function buildCreatePayload(
   }
 }
 
-const USE_MOCK = true
+const USE_MOCK = !isSupabaseConfigured
 
 export function useCreateDecisionMutation(
   projectId: string,
@@ -102,13 +103,14 @@ export function useCreateDecisionMutation(
         return mock
       }
       return decisionsApi.createDecision(projectId, {
-        title: payload.title,
+        title: payload.title ?? 'Untitled',
         description: payload.description,
         template_id: payload.template_id,
-        due_date: payload.due_date,
-        status: payload.status as Decision['status'],
+        due_date: payload.due_date ?? undefined,
+        status: (overrides.status ?? 'draft') as Decision['status'],
         assignee_id: payload.assignee_id,
-      })
+        metadata: { options: payload.options, approval_rules: payload.approval_rules },
+      } as Parameters<typeof decisionsApi.createDecision>[1])
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspace', 'decisions', projectId] })
