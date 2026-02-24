@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { AlertCircle, FileText } from 'lucide-react'
 import { HeaderNav } from '@/components/layout/header-nav'
 import {
   HeroHeader,
@@ -14,10 +15,12 @@ import {
   downloadPdfBlob,
 } from '@/lib/pdf-export-service'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
 export function TermsPage() {
-  const { data: document, isLoading, error } = useTermsOfService()
+  const { data: document, isLoading, error, refetch } = useTermsOfService()
   const [isExporting, setIsExporting] = useState(false)
 
   const handleExportPdf = useCallback(async () => {
@@ -43,8 +46,41 @@ export function TermsPage() {
     return (
       <div className="min-h-screen bg-background">
         <HeaderNav />
-        <main className="container mx-auto max-w-3xl px-4 py-16">
-          <p className="text-destructive">Failed to load Terms of Service.</p>
+        <main
+          className="container mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-16"
+          role="main"
+          aria-label="Terms of Service"
+        >
+          <Card
+            className="border-destructive/30 bg-destructive/5"
+            role="alert"
+            aria-live="assertive"
+          >
+            <CardContent className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-start">
+              <AlertCircle
+                className="h-10 w-10 shrink-0 text-destructive"
+                aria-hidden
+              />
+              <div className="min-w-0 flex-1 space-y-2">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Failed to load Terms of Service
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  We could not load the document. Please check your connection
+                  and try again.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => refetch()}
+                  aria-label="Retry loading Terms of Service"
+                  className="mt-2 w-fit"
+                >
+                  Try again
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </main>
       </div>
     )
@@ -55,6 +91,7 @@ export function TermsPage() {
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground print:hidden"
+        aria-label="Skip to main content"
       >
         Skip to content
       </a>
@@ -63,6 +100,7 @@ export function TermsPage() {
         id="main-content"
         className="container mx-auto max-w-4xl px-4 py-8 md:px-6 md:py-16"
         role="main"
+        aria-label="Terms of Service"
       >
         {isLoading ? (
           <TermsPageSkeleton />
@@ -112,7 +150,9 @@ export function TermsPage() {
               </div>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <TermsPageEmptyState />
+        )}
       </main>
     </div>
   )
@@ -120,7 +160,7 @@ export function TermsPage() {
 
 function TermsPageSkeleton() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in" aria-busy="true" aria-label="Loading Terms of Service">
       <div className="space-y-4">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-5 w-72" />
@@ -141,5 +181,29 @@ function TermsPageSkeleton() {
         </div>
       </div>
     </div>
+  )
+}
+
+function TermsPageEmptyState() {
+  return (
+    <Card
+      className="flex flex-col items-center justify-center gap-4 py-12 text-center"
+      role="status"
+      aria-label="No content available"
+    >
+      <FileText
+        className="h-12 w-12 text-muted-foreground"
+        aria-hidden
+      />
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold text-foreground">
+          No content available
+        </h2>
+        <p className="max-w-sm text-sm text-muted-foreground">
+          The Terms of Service document could not be found. Please try again
+          later or contact support.
+        </p>
+      </div>
+    </Card>
   )
 }

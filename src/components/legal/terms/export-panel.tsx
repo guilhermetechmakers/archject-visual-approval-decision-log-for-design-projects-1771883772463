@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { FileDown, Printer } from 'lucide-react'
+import { FileDown, Loader2, Printer } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export interface ExportPanelProps {
@@ -32,6 +32,8 @@ export function ExportPanel({
         'rounded-xl border border-border bg-card p-4 shadow-card',
         className
       )}
+      role="region"
+      aria-label="Export and print options"
     >
       <h3 className="mb-3 text-sm font-semibold text-foreground">
         Export & Print
@@ -43,15 +45,21 @@ export function ExportPanel({
           onClick={handleExport}
           disabled={isExporting}
           className="transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
-          aria-label="Export Terms of Service as PDF"
+          aria-label={isExporting ? 'Exporting Terms of Service as PDF' : 'Export Terms of Service as PDF'}
+          aria-busy={isExporting}
         >
-          <FileDown className="h-4 w-4" aria-hidden />
+          {isExporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          ) : (
+            <FileDown className="h-4 w-4" aria-hidden />
+          )}
           {isExporting ? 'Exporting...' : 'Export PDF'}
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={handlePrint}
+          disabled={isExporting}
           className="transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
           aria-label="Print Terms of Service"
         >

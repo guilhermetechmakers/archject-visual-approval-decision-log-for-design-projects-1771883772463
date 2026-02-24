@@ -80,6 +80,8 @@ export function TableOfContents({
                   ? 'bg-secondary text-foreground'
                   : 'text-muted-foreground'
               )}
+              aria-label={`Jump to section: ${item.title}`}
+              aria-current={activeId === item.id ? true : undefined}
             >
               {item.title}
             </a>

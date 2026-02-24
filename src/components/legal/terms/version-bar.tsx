@@ -31,21 +31,24 @@ export function VersionBar({
         <span>Last updated: {displayLastUpdated}</span>
         <a
           href={`mailto:${legalContact}`}
-          className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+          className="rounded text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          aria-label="Contact legal team via email"
         >
           Contact legal
         </a>
       </div>
-      <div className="mt-4 flex flex-wrap gap-4">
+      <div className="mt-4 flex flex-wrap gap-4" role="navigation" aria-label="Legal documents">
         <a
           href="/privacy"
-          className="text-sm text-primary hover:underline"
+          className="text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded"
+          aria-label="View Privacy Policy"
         >
           Privacy Policy
         </a>
         <a
           href="/cookies"
-          className="text-sm text-primary hover:underline"
+          className="text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded"
+          aria-label="View Cookie Policy"
         >
           Cookie Policy
         </a>
