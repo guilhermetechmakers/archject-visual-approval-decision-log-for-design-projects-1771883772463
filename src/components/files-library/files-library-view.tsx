@@ -25,6 +25,7 @@ import {
 } from '@/hooks/use-files-library'
 import { useProjectWorkspace } from '@/hooks/use-workspace'
 import { computeFileHash } from '@/lib/file-hash'
+import { cn } from '@/lib/utils'
 import type { LibraryFile, FileFilters, FileVersion } from '@/types/files-library'
 
 export interface FilesLibraryViewProps {
@@ -32,6 +33,8 @@ export interface FilesLibraryViewProps {
   onUpload?: (files: File[]) => void
   showWorkspaceLink?: boolean
   showFullLibraryLink?: boolean
+  /** When true, hides the section title (e.g. when page provides h1) */
+  hideTitle?: boolean
   className?: string
 }
 
@@ -40,6 +43,7 @@ export function FilesLibraryView({
   onUpload: onUploadProp,
   showWorkspaceLink = true,
   showFullLibraryLink = false,
+  hideTitle = false,
   className,
 }: FilesLibraryViewProps) {
   const { projectId } = useParams<{ projectId: string }>()
@@ -174,11 +178,13 @@ export function FilesLibraryView({
       error instanceof Error ? error.message : 'Failed to load files'
     return (
       <div className={className}>
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold text-foreground">
-            Files & Drawings Library
-          </h2>
-        </div>
+        {!hideTitle && (
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-foreground" id="files-library-section">
+              Files & Drawings Library
+            </h2>
+          </div>
+        )}
         <Card
           className="border-destructive/30 bg-destructive/5"
           role="alert"
@@ -191,9 +197,9 @@ export function FilesLibraryView({
                 aria-hidden
               />
             </div>
-            <h2 className="mt-6 text-lg font-semibold text-foreground">
+            <h3 className="mt-6 text-lg font-semibold text-foreground">
               Unable to load files
-            </h2>
+            </h3>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">
               {errorMessage}
             </p>
@@ -209,11 +215,10 @@ export function FilesLibraryView({
                 isFetching ? 'Retrying to load files' : 'Retry loading files'
               }
             >
-              {isFetching ? (
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-              ) : (
-                <RefreshCw className="mr-2 h-4 w-4" aria-hidden />
-              )}
+              <RefreshCw
+                className={cn('mr-2 h-4 w-4', isFetching && 'animate-spin')}
+                aria-hidden
+              />
               {isFetching ? 'Retrying…' : 'Retry'}
             </Button>
           </CardContent>
@@ -224,11 +229,12 @@ export function FilesLibraryView({
 
   return (
     <div className={className}>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold text-foreground">
-          Files & Drawings Library
-        </h2>
-        <div className="flex items-center gap-2">
+      {!hideTitle && (
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold text-foreground" id="files-library-section">
+            Files & Drawings Library
+          </h2>
+          <div className="flex items-center gap-2">
           {showFullLibraryLink && (
             <Button variant="outline" size="sm" asChild>
               <Link
@@ -242,8 +248,9 @@ export function FilesLibraryView({
           {showWorkspaceLink && (
             <ProjectWorkspaceLink projectId={projectId} />
           )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="space-y-6">
         <FileUploadZone

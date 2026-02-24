@@ -1,4 +1,5 @@
-import { Search, Filter, X, Calendar } from 'lucide-react'
+import { useMemo } from 'react'
+import { Search, Filter, X, Calendar, AlertCircle } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
 import type { FileFilters, PreviewStatus } from '@/types/files-library'
 import type { FileType } from '@/types/workspace'
@@ -101,10 +103,21 @@ export function FiltersBar({
     filters.previewStatus?.length ||
     (filters.search?.trim().length ?? 0) > 0
 
+  const dateRangeError = useMemo(() => {
+    if (filters.dateFrom && filters.dateTo) {
+      const from = new Date(filters.dateFrom)
+      const to = new Date(filters.dateTo)
+      if (from > to) {
+        return 'Date "from" must be before or equal to date "to".'
+      }
+    }
+    return null
+  }, [filters.dateFrom, filters.dateTo])
+
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between',
+        'flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between',
         className
       )}
       role="search"
@@ -183,23 +196,48 @@ export function FiltersBar({
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden />
-          <Input
-            type="date"
-            value={filters.dateFrom ?? ''}
-            onChange={handleDateFromChange}
-            className="w-[140px]"
-            aria-label="Date from"
-          />
-          <span className="text-muted-foreground">–</span>
-          <Input
-            type="date"
-            value={filters.dateTo ?? ''}
-            onChange={handleDateToChange}
-            className="w-[140px]"
-            aria-label="Date to"
-          />
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden />
+            <Input
+              type="date"
+              value={filters.dateFrom ?? ''}
+              onChange={handleDateFromChange}
+              className={cn(
+                'w-[140px]',
+                dateRangeError && 'border-destructive focus-visible:ring-destructive'
+              )}
+              aria-label="Date from"
+              aria-invalid={!!dateRangeError}
+              aria-describedby={dateRangeError ? 'date-range-error' : undefined}
+            />
+            <span className="text-muted-foreground">–</span>
+            <Input
+              type="date"
+              value={filters.dateTo ?? ''}
+              onChange={handleDateToChange}
+              className={cn(
+                'w-[140px]',
+                dateRangeError && 'border-destructive focus-visible:ring-destructive'
+              )}
+              aria-label="Date to"
+              aria-invalid={!!dateRangeError}
+              aria-describedby={dateRangeError ? 'date-range-error' : undefined}
+            />
+          </div>
+          {dateRangeError && (
+            <Alert
+              id="date-range-error"
+              variant="destructive"
+              className="py-2"
+              role="alert"
+            >
+              <AlertCircle className="h-4 w-4" aria-hidden />
+              <AlertDescription className="text-sm">
+                {dateRangeError}
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
         {hasActiveFilters && (

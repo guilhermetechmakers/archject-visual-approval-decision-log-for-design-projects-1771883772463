@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import { ChevronLeft, AlertCircle, RefreshCw } from 'lucide-react'
+import { ChevronLeft, AlertCircle, RefreshCw, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -25,8 +25,14 @@ export function FilesLibraryPage() {
         role="alert"
         aria-label="Project not found"
       >
-        <p className="text-muted-foreground">Project not found</p>
-        <Button asChild className="mt-4" variant="outline">
+        <h1 className="text-2xl font-bold text-foreground">Files & Drawings Library</h1>
+        <h2 className="mt-4 text-lg font-semibold text-foreground">
+          Project not found
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The requested project could not be found.
+        </p>
+        <Button asChild className="mt-6" variant="outline">
           <Link
             to="/dashboard/projects"
             aria-label="Back to projects list"
@@ -41,8 +47,22 @@ export function FilesLibraryPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-fade-in">
-        <Skeleton className="h-9 w-40" aria-hidden />
+      <div
+        className="space-y-6 animate-fade-in"
+        aria-busy="true"
+        aria-live="polite"
+        role="status"
+        aria-label="Loading files library"
+      >
+        <div className="flex items-center gap-3">
+          <Loader2
+            className="h-6 w-6 animate-spin text-primary"
+            aria-hidden
+          />
+          <h1 className="text-2xl font-bold text-foreground">
+            Files & Drawings Library
+          </h1>
+        </div>
         <div className="space-y-6">
           <Skeleton className="h-[180px] w-full rounded-xl" aria-hidden />
           <Skeleton className="h-10 w-full max-w-md" aria-hidden />
@@ -91,7 +111,10 @@ export function FilesLibraryPage() {
                 aria-hidden
               />
             </div>
-            <h2 className="mt-6 text-lg font-semibold text-foreground">
+            <h1 className="mt-6 text-2xl font-bold text-foreground">
+              Files & Drawings Library
+            </h1>
+            <h2 className="mt-2 text-lg font-semibold text-foreground">
               Unable to load files library
             </h2>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">
@@ -117,7 +140,10 @@ export function FilesLibraryPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold text-foreground">
+          Files & Drawings Library
+        </h1>
         <Button asChild variant="ghost" size="sm">
           <Link
             to={`/dashboard/projects/${projectId}`}
@@ -132,6 +158,7 @@ export function FilesLibraryPage() {
       <FilesLibraryView
         storageUsedPercent={storagePercent}
         showFullLibraryLink={false}
+        hideTitle
       />
     </div>
   )
