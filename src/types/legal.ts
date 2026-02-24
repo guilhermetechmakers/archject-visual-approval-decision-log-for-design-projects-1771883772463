@@ -9,6 +9,48 @@ export interface PolicySection {
   content: string
 }
 
+/** Link within a content block */
+export interface LegalLink {
+  text: string
+  href: string
+}
+
+/** Content block types for structured legal documents (Terms of Service) */
+export type ContentBlockType =
+  | 'paragraph'
+  | 'list'
+  | 'subheading'
+  | 'link'
+  | 'blockquote'
+
+export interface ContentBlock {
+  type: ContentBlockType
+  content: string
+  bulletPoints?: string[]
+  links?: LegalLink[]
+}
+
+export interface LegalSection {
+  id: string
+  title: string
+  contentBlocks: ContentBlock[]
+}
+
+export interface LegalDocumentBranding {
+  companyName: string
+  logoUrl?: string
+}
+
+export interface LegalDocument {
+  id: string
+  name: string
+  version: number
+  effectiveDate: string
+  lastUpdated: string
+  sections: LegalSection[]
+  brandingMeta: LegalDocumentBranding
+}
+
 export interface RegionNotice {
   region: string
   content: string

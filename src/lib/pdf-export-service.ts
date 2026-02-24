@@ -1,11 +1,15 @@
 /**
- * PDF Export Service for Privacy Policy and legal documents
+ * PDF Export Service for Privacy Policy, Terms of Service, and legal documents
  * Uses html2pdf.js (jspdf + html2canvas) for client-side PDF generation
  */
 
 import html2pdf from 'html2pdf.js'
-import { buildPrivacyPolicyHtml, buildDecisionLogCoverHtml } from '@/lib/legal-templates'
-import type { PrivacyPolicy } from '@/types/legal'
+import {
+  buildPrivacyPolicyHtml,
+  buildDecisionLogCoverHtml,
+  buildTermsOfServiceHtml,
+} from '@/lib/legal-templates'
+import type { PrivacyPolicy, LegalDocument } from '@/types/legal'
 
 export interface PdfExportOptions {
   region?: string
@@ -78,6 +82,70 @@ export async function exportPrivacyPolicyToPdf(
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
     }
     // html2pdf types omit pagebreak; library supports it
+    const blob = await html2pdf().set(opts as never).from(body).outputPdf('blob')
+    return blob
+  } finally {
+    document.body.removeChild(iframe)
+  }
+}
+
+/**
+ * Exports Terms of Service document to PDF.
+ */
+export async function exportTermsOfServiceToPdf(
+  doc: LegalDocument,
+  options: { companyName?: string; includeCoverPage?: boolean } = {}
+): Promise<Blob> {
+  const {
+    companyName = doc.brandingMeta.companyName,
+    includeCoverPage = false,
+  } = options
+
+  const termsHtml = buildTermsOfServiceHtml(doc, { companyName })
+
+  let bodyContent = termsHtml
+  if (includeCoverPage) {
+    const coverHtml = buildDecisionLogCoverHtml({
+      title: doc.name,
+      version: String(doc.version),
+      date: doc.lastUpdated,
+      companyName,
+    })
+    bodyContent = `<div style="page-break-after: always;">${coverHtml}</div>${termsHtml}`
+  }
+
+  const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;font-family:Inter,system-ui,sans-serif;}</style></head><body>${bodyContent}</body></html>`
+
+  const iframe = document.createElement('iframe')
+  iframe.style.position = 'absolute'
+  iframe.style.left = '-9999px'
+  iframe.style.width = '210mm'
+  iframe.style.height = '297mm'
+  document.body.appendChild(iframe)
+
+  const iframeDoc = iframe.contentDocument
+  if (!iframeDoc) {
+    document.body.removeChild(iframe)
+    throw new Error('Could not create iframe for PDF export')
+  }
+
+  iframeDoc.open()
+  iframeDoc.write(fullHtml)
+  iframeDoc.close()
+
+  try {
+    const body = iframeDoc.body
+    if (!body) {
+      throw new Error('Iframe body not ready')
+    }
+    const opts = {
+      margin: 10,
+      filename: `archject-terms-of-service-v${doc.version}.pdf`,
+      image: { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+    }
     const blob = await html2pdf().set(opts as never).from(body).outputPdf('blob')
     return blob
   } finally {

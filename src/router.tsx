@@ -90,6 +90,7 @@ export const router = createBrowserRouter([
       { path: '/privacy-policy', element: <PrivacyPage /> },
       { path: '/legal/privacy', element: <PrivacyPage /> },
       { path: '/terms', element: <TermsPage /> },
+      { path: '/legal/terms', element: <TermsPage /> },
       { path: '/cookies', element: <CookiesPage /> },
       { path: '/portal/:token', element: <ClientPortalPage /> },
       {

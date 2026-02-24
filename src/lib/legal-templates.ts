@@ -4,8 +4,12 @@
  * Reusable for Privacy Policy, Terms of Service, and Decision Log cover.
  */
 
-import type { PrivacyPolicy } from '@/types/legal'
-import type { PolicySection } from '@/types/legal'
+import type {
+  PrivacyPolicy,
+  PolicySection,
+  LegalDocument,
+  ContentBlock,
+} from '@/types/legal'
 
 export function buildPrivacyPolicyHtml(
   policy: PrivacyPolicy,
@@ -92,9 +96,74 @@ export function buildDecisionLogCoverHtml(options: {
 }
 
 /**
- * Terms of Service template - same structure as Privacy Policy for consistency.
+ * Terms of Service template - uses LegalDocument structure with content blocks.
  */
 export function buildTermsOfServiceHtml(
+  doc: LegalDocument,
+  options: { companyName?: string } = {}
+): string {
+  const companyName = options.companyName ?? doc.brandingMeta.companyName
+
+  const sectionsHtml = doc.sections
+    .map((section) => {
+      const blocksHtml = section.contentBlocks
+        .map((block) => formatContentBlockForPdf(block))
+        .join('')
+      return `
+    <div class="section" style="margin-bottom: 24px; page-break-inside: avoid;">
+      <h2 style="font-size: 16px; font-weight: 600; color: #23272F; margin-bottom: 8px;">${escapeHtml(section.title)}</h2>
+      <div class="content" style="font-size: 12px; line-height: 1.6; color: #23272F;">${blocksHtml}</div>
+    </div>
+  `
+    })
+    .join('')
+
+  return `
+  <div style="font-family: Inter, 'SF Pro', system-ui, sans-serif; padding: 24px; color: #23272F; background: white;">
+    <div style="border-bottom: 2px solid #195C4A; padding-bottom: 16px; margin-bottom: 24px;">
+      <div style="font-size: 24px; font-weight: 700; color: #195C4A;">${escapeHtml(doc.name)}</div>
+      <div style="font-size: 11px; color: #6B7280; margin-top: 8px;">${escapeHtml(companyName)} • Version ${doc.version} • Effective: ${escapeHtml(doc.effectiveDate)} • Last updated: ${escapeHtml(doc.lastUpdated)}</div>
+    </div>
+    ${sectionsHtml}
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #E6E8F0; font-size: 10px; color: #6B7280;">
+      ${escapeHtml(companyName)} • ${escapeHtml(doc.name)} • ${escapeHtml(doc.lastUpdated)}
+    </div>
+  </div>
+  `.trim()
+}
+
+function formatContentBlockForPdf(block: ContentBlock): string {
+  switch (block.type) {
+    case 'paragraph':
+      return `<p style="margin: 0 0 12px 0;">${formatContentForPdf(block.content)}</p>`
+    case 'subheading':
+      return `<h3 style="font-size: 14px; font-weight: 600; color: #23272F; margin: 16px 0 8px 0;">${escapeHtml(block.content)}</h3>`
+    case 'list':
+      if (!block.bulletPoints?.length) return ''
+      const items = block.bulletPoints
+        .map((b) => `<li style="margin: 4px 0;">${escapeHtml(b)}</li>`)
+        .join('')
+      return `<ul style="margin: 0 0 12px 0; padding-left: 20px;">${items}</ul>`
+    case 'blockquote':
+      return `<blockquote style="margin: 12px 0; padding-left: 16px; border-left: 4px solid #195C4A; color: #6B7280; font-style: italic;">${escapeHtml(block.content)}</blockquote>`
+    case 'link':
+      if (!block.links?.length) return ''
+      return block.links
+        .map(
+          (l) =>
+            `<a href="${escapeHtml(l.href)}" style="color: #195C4A;">${escapeHtml(l.text)}</a>`
+        )
+        .join(' ')
+    default:
+      return ''
+  }
+}
+
+/**
+ * Legacy Terms of Service template - same structure as Privacy Policy for consistency.
+ * @deprecated Use buildTermsOfServiceHtml with LegalDocument instead.
+ */
+export function buildTermsOfServiceHtmlLegacy(
   title: string,
   sections: PolicySection[],
   options: { companyName?: string; version?: string; lastUpdated?: string } = {}

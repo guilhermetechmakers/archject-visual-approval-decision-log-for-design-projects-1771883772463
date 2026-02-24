@@ -62,3 +62,29 @@
     text-wrap: balance;
   }
 }
+
+/* Print styles for legal documents (Terms, Privacy) */
+@media print {
+  header[class*="sticky"],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+  }
+
+  a[href^="#"]::after {
+    content: "";
+  }
+}
+
+/* Print styles for legal documents */
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  .print\:max-w-none {
+    max-width: none !important;
+  }
+}
