@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
-import { Check } from 'lucide-react'
+import { Check, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 export interface PricingTier {
@@ -16,10 +17,17 @@ export interface PricingTier {
 
 export interface PricingPreviewProps {
   tiers: PricingTier[]
+  isLoading?: boolean
   className?: string
 }
 
-export function PricingPreview({ tiers, className }: PricingPreviewProps) {
+export function PricingPreview({
+  tiers,
+  isLoading = false,
+  className,
+}: PricingPreviewProps) {
+  const isEmpty = !isLoading && tiers.length === 0
+
   return (
     <section
       id="pricing"
@@ -36,8 +44,43 @@ export function PricingPreview({ tiers, className }: PricingPreviewProps) {
         <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
           Start free. Scale as your studio grows.
         </p>
-        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {tiers.map((tier, i) => (
+        {isLoading ? (
+          <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <CardHeader>
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="mt-2 h-8 w-20" />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {Array.from({ length: 4 }).map((_, j) => (
+                    <Skeleton key={j} className="h-4 w-full" />
+                  ))}
+                </CardContent>
+                <CardFooter>
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : isEmpty ? (
+          <div
+            className="mt-16 flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 px-8 py-16 text-center"
+            role="status"
+            aria-label="No pricing tiers available"
+          >
+            <CreditCard className="h-12 w-12 text-muted-foreground" aria-hidden />
+            <p className="mt-4 text-lg font-medium text-foreground">
+              No pricing plans yet
+            </p>
+            <p className="mt-2 max-w-md text-sm text-muted-foreground">
+              Pricing tiers will appear here once they are configured. Contact
+              us for custom plans.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {tiers.map((tier, i) => (
             <Card
               key={tier.id}
               className={cn(
@@ -92,7 +135,8 @@ export function PricingPreview({ tiers, className }: PricingPreviewProps) {
               </CardFooter>
             </Card>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </section>
   )

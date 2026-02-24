@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { FileImage } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
@@ -6,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 export interface TemplateItem {
@@ -17,11 +19,17 @@ export interface TemplateItem {
 
 export interface TemplatesGalleryProps {
   templates: TemplateItem[]
+  isLoading?: boolean
   className?: string
 }
 
-export function TemplatesGallery({ templates, className }: TemplatesGalleryProps) {
+export function TemplatesGallery({
+  templates,
+  isLoading = false,
+  className,
+}: TemplatesGalleryProps) {
   const [selected, setSelected] = useState<TemplateItem | null>(null)
+  const isEmpty = !isLoading && templates.length === 0
 
   return (
     <>
@@ -40,8 +48,39 @@ export function TemplatesGallery({ templates, className }: TemplatesGalleryProps
             Opinionated templates for common design choices — finishes, layouts,
             change requests.
           </p>
-          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {templates.map((template, i) => (
+          {isLoading ? (
+            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <CardContent className="p-0">
+                    <Skeleton className="aspect-video w-full rounded-t-xl" />
+                    <div className="p-6">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="mt-2 h-4 w-full" />
+                      <Skeleton className="mt-2 h-4 w-40" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : isEmpty ? (
+            <div
+              className="mt-16 flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 px-8 py-16 text-center"
+              role="status"
+              aria-label="No templates available"
+            >
+              <FileImage className="h-12 w-12 text-muted-foreground" aria-hidden />
+              <p className="mt-4 text-lg font-medium text-foreground">
+                No templates yet
+              </p>
+              <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                Templates will appear here once they are added. Get started by
+                creating your first template.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {templates.map((template, i) => (
               <Card
                 key={template.id}
                 className="group cursor-pointer transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -80,7 +119,8 @@ export function TemplatesGallery({ templates, className }: TemplatesGalleryProps
                 </CardContent>
               </Card>
             ))}
-          </div>
+            </div>
+          )}
         </div>
       </section>
 

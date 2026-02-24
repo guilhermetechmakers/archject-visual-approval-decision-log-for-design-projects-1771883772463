@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, ListOrdered } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 export interface StepItem {
@@ -11,10 +12,17 @@ export interface StepItem {
 
 export interface HowItWorksSectionProps {
   steps: StepItem[]
+  isLoading?: boolean
   className?: string
 }
 
-export function HowItWorksSection({ steps, className }: HowItWorksSectionProps) {
+export function HowItWorksSection({
+  steps,
+  isLoading = false,
+  className,
+}: HowItWorksSectionProps) {
+  const isEmpty = !isLoading && steps.length === 0
+
   return (
     <section
       id="how-it-works"
@@ -31,8 +39,36 @@ export function HowItWorksSection({ steps, className }: HowItWorksSectionProps) 
         <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
           Three simple steps from decision to approval to export.
         </p>
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, i) => (
+        {isLoading ? (
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <CardContent className="p-6">
+                  <Skeleton className="mb-4 h-12 w-12 rounded-xl" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="mt-2 h-5 w-48" />
+                  <Skeleton className="mt-2 h-4 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : isEmpty ? (
+          <div
+            className="mt-16 flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 px-8 py-16 text-center"
+            role="status"
+            aria-label="No steps available"
+          >
+            <ListOrdered className="h-12 w-12 text-muted-foreground" aria-hidden />
+            <p className="mt-4 text-lg font-medium text-foreground">
+              No steps to display
+            </p>
+            <p className="mt-2 max-w-md text-sm text-muted-foreground">
+              How-it-works steps will appear here once they are configured.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((step, i) => (
             <div key={step.title} className="relative">
               <Card
                 className="h-full transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1"
@@ -65,7 +101,8 @@ export function HowItWorksSection({ steps, className }: HowItWorksSectionProps) 
               )}
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </section>
   )

@@ -38,7 +38,7 @@ export function HeroBlock({
     >
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-[fade-in_0.6s_ease-out]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(25,92,74,0.08),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgb(var(--primary)/0.08),transparent)]" />
 
       <div className="container relative mx-auto max-w-6xl">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
