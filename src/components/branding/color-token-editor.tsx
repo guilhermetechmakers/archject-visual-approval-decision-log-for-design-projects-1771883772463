@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import { DEFAULT_PRIMARY_HEX, DEFAULT_ACCENT_HEX } from '@/lib/design-tokens'
 import type { ColorTokens } from '@/types/branding'
 
 const HEX_REGEX = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
@@ -105,7 +106,8 @@ export function ColorTokenEditor({
       <CardContent className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
           {TOKEN_LABELS.map(({ key, label }) => {
-            const val = tokens[key] ?? (key === 'primary' ? '#195C4A' : key === 'accent' ? '#7BE495' : '')
+            const defaultHex = key === 'primary' ? DEFAULT_PRIMARY_HEX : key === 'accent' ? DEFAULT_ACCENT_HEX : ''
+            const val = tokens[key] ?? defaultHex
             const result = contrastResults[key]
             return (
               <div key={key} className="space-y-2">
@@ -114,17 +116,18 @@ export function ColorTokenEditor({
                   <Input
                     id={`color-${key}`}
                     type="text"
-                    placeholder="#195C4A"
+                    placeholder={defaultHex || undefined}
                     value={val}
                     onChange={(e) => handleColorChange(key, e.target.value)}
                     className={cn(
                       'max-w-[140px] font-mono',
                       !validateHex(val) && val && 'border-destructive'
                     )}
+                    aria-label={`${label} color value`}
                   />
                   <input
                     type="color"
-                    value={val.startsWith('#') ? val : '#195C4A'}
+                    value={val.startsWith('#') ? val : DEFAULT_PRIMARY_HEX}
                     onChange={(e) => handleColorChange(key, e.target.value)}
                     className="h-10 w-12 cursor-pointer rounded-lg border border-border"
                     aria-label={`Pick ${label} color`}
@@ -157,6 +160,7 @@ export function ColorTokenEditor({
               size="sm"
               onClick={onExportCss}
               className="rounded-full transition-all duration-200 hover:scale-[1.02]"
+              aria-label="Export color tokens as CSS"
             >
               Export CSS
             </Button>
@@ -167,6 +171,7 @@ export function ColorTokenEditor({
               size="sm"
               onClick={onExportJson}
               className="rounded-full transition-all duration-200 hover:scale-[1.02]"
+              aria-label="Export color tokens as JSON"
             >
               Export JSON
             </Button>

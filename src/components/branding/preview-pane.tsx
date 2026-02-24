@@ -6,6 +6,7 @@
 import { useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { DEFAULT_PRIMARY_HEX, DEFAULT_ACCENT_HEX } from '@/lib/design-tokens'
 import type { BrandingTokens } from '@/types/branding'
 
 export interface PreviewPaneProps {
@@ -19,8 +20,8 @@ export function PreviewPane({
   sampleContent = 'Design Approval Portal',
   className,
 }: PreviewPaneProps) {
-  const accentColor = tokens.colorTokens?.accent ?? tokens.accentColor ?? '#195C4A'
-  const primaryColor = tokens.colorTokens?.primary ?? '#195C4A'
+  const accentColor = tokens.colorTokens?.accent ?? tokens.accentColor ?? DEFAULT_ACCENT_HEX
+  const primaryColor = tokens.colorTokens?.primary ?? DEFAULT_PRIMARY_HEX
   const logoUrl = tokens.logoUrl
 
   const previewStyle = useMemo(
@@ -46,13 +47,13 @@ export function PreviewPane({
       </CardHeader>
       <CardContent>
         <div
-          className="rounded-lg border border-border bg-white p-0 shadow-inner"
+          className="rounded-lg border border-border bg-card p-0 shadow-inner"
           style={previewStyle}
         >
           {/* Simulated client portal header */}
           <header
-            className="flex items-center gap-4 border-b border-[#E6E8F0] px-4 py-3"
-            style={{ backgroundColor: '#FFFFFF' }}
+            className="flex items-center gap-4 border-b border-border px-4 py-3"
+            style={{ backgroundColor: 'rgb(var(--card))' }}
           >
             {logoUrl ? (
               <img
@@ -69,10 +70,10 @@ export function PreviewPane({
               </span>
             )}
             <div className="min-w-0 flex-1">
-              <h2 className="truncate text-sm font-semibold text-[#23272F]">
+              <h2 className="truncate text-sm font-semibold text-foreground">
                 {tokens.headerText || sampleContent}
               </h2>
-              <p className="text-xs text-[#6B7280]">
+              <p className="text-xs text-muted-foreground">
                 Please review the options below.
               </p>
             </div>
@@ -80,8 +81,7 @@ export function PreviewPane({
 
           {/* Simulated content area */}
           <div
-            className="flex h-32 items-center justify-center gap-4 px-4"
-            style={{ backgroundColor: '#F5F6FA' }}
+            className="flex h-32 items-center justify-center gap-4 bg-secondary/50 px-4"
           >
             <div
               className="flex h-12 w-24 items-center justify-center rounded-lg text-xs font-medium text-white"
@@ -100,8 +100,8 @@ export function PreviewPane({
           {/* Simulated footer */}
           {tokens.footerText && (
             <footer
-              className="border-t border-[#E6E8F0] px-4 py-2 text-center text-xs text-[#6B7280]"
-              style={{ backgroundColor: '#FFFFFF' }}
+              className="border-t border-border px-4 py-2 text-center text-xs text-muted-foreground"
+              style={{ backgroundColor: 'rgb(var(--card))' }}
             >
               {tokens.footerText}
             </footer>
