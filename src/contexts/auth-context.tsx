@@ -34,6 +34,11 @@ interface AuthContextValue {
     agreeToTerms: boolean
   }) => Promise<{ requiresEmailVerification: boolean }>
   googleSignIn: (redirectTo?: string) => Promise<void>
+  changePassword: (data: {
+    currentPassword: string
+    newPassword: string
+    confirmPassword: string
+  }) => Promise<void>
   logout: () => void
   setSession: (session: AuthSession | null) => void
 }
@@ -311,6 +316,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [navigate]
   )
 
+  const changePassword = React.useCallback(
+    async (data: {
+      currentPassword: string
+      newPassword: string
+      confirmPassword: string
+    }) => {
+      await authApi.changePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
+      })
+      toast.success('Password changed successfully')
+    },
+    []
+  )
+
   const logout = React.useCallback(() => {
     const client = isSupabaseConfigured ? supabase : null
     if (client) {
@@ -332,6 +353,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     register,
     googleSignIn,
+    changePassword,
     logout,
     setSession,
   }

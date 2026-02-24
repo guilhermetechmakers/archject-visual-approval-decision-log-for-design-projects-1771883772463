@@ -12,10 +12,13 @@ export function PasswordResetPage() {
   const [submitted, setSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (data: { email: string }) => {
+  const handleSubmit = async (data: { email: string; workspace_id?: string }) => {
     setIsLoading(true)
     try {
-      await authApi.forgotPassword({ email: data.email })
+      await authApi.forgotPassword({
+        email: data.email,
+        ...(data.workspace_id && { workspace_id: data.workspace_id }),
+      })
       setSubmitted(true)
       toast.success('Reset link sent')
     } catch (e) {

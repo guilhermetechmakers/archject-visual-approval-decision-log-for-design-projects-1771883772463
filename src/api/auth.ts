@@ -5,6 +5,7 @@
 
 import { api } from '@/lib/api'
 import type { ApiError } from '@/lib/api'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import type {
   RegisterRequest,
   RegisterResponse,
@@ -13,6 +14,7 @@ import type {
   GoogleSignInRequest,
   ForgotPasswordRequest,
   ResetPasswordRequest,
+  ChangePasswordRequest,
   VerifyEmailRequest,
   CreateWorkspaceRequest,
   VerifyTokenRequest,
@@ -160,6 +162,11 @@ async function mockResendVerificationToken(
   }
 }
 
+async function mockChangePassword(_data: ChangePasswordRequest): Promise<{ success: boolean }> {
+  await new Promise((r) => setTimeout(r, 400))
+  return { success: true }
+}
+
 /** Real API calls - used when VITE_API_URL is set */
 async function realRegister(data: RegisterRequest): Promise<RegisterResponse> {
   const res = await api.post<RegisterResponse>('/auth/register', data)
@@ -189,11 +196,43 @@ export const authApi = {
   googleSignIn: (data: GoogleSignInRequest): Promise<LoginResponse> =>
     USE_MOCK ? mockGoogleSignIn(data) : realGoogleSignIn(data),
 
-  forgotPassword: (data: ForgotPasswordRequest): Promise<{ success: boolean }> =>
-    USE_MOCK ? mockForgotPassword(data) : api.post<{ success: boolean }>('/auth/forgot-password', data),
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<{ success: boolean }> => {
+    if (isSupabaseConfigured && supabase) {
+      const { error } = await supabase.functions.invoke('auth-forgot-password', {
+        body: { email: data.email, workspace_id: data.workspace_id },
+      })
+      if (error) {
+        const msg = (error as { message?: string; context?: { body?: { message?: string } } })?.context?.body?.message
+          ?? (error as { message?: string }).message
+          ?? 'Failed to send reset link'
+        throw { message: msg }
+      }
+      return { success: true }
+    }
+    if (USE_MOCK) return mockForgotPassword(data)
+    return api.post<{ success: boolean }>('/auth/forgot-password', data)
+  },
 
-  resetPassword: (data: ResetPasswordRequest): Promise<{ success: boolean }> =>
-    USE_MOCK ? mockResetPassword(data) : api.post<{ success: boolean }>('/auth/reset-password', data),
+  resetPassword: async (data: ResetPasswordRequest): Promise<{ success: boolean }> => {
+    if (isSupabaseConfigured && supabase) {
+      const { error } = await supabase.functions.invoke('auth-reset-password', {
+        body: {
+          token: data.token,
+          new_password: data.newPassword,
+          confirm_password: data.confirmPassword,
+        },
+      })
+      if (error) {
+        const msg = (error as { message?: string; context?: { body?: { message?: string } } })?.context?.body?.message
+          ?? (error as { message?: string }).message
+          ?? 'Failed to reset password'
+        throw { message: msg }
+      }
+      return { success: true }
+    }
+    if (USE_MOCK) return mockResetPassword(data)
+    return api.post<{ success: boolean }>('/auth/reset-password', data)
+  },
 
   verifyEmail: (data: VerifyEmailRequest): Promise<{ success: boolean }> =>
     USE_MOCK ? mockVerifyEmail(data) : api.post<{ success: boolean }>('/auth/verify-email', data),
@@ -213,6 +252,45 @@ export const authApi = {
 
   createWorkspace: (data: CreateWorkspaceRequest) =>
     api.post<{ id: string; name: string }>('/workspaces/create', data),
+
+  changePassword: async (data: ChangePasswordRequest): Promise<{ success: boolean }> => {
+    if (isSupabaseConfigured && supabase) {
+      const { error } = await supabase.functions.invoke('auth-change-password', {
+        body: {
+          current_password: data.currentPassword,
+          new_password: data.newPassword,
+          confirm_password: data.confirmPassword,
+        },
+      })
+      if (error) {
+        const err = error as { message?: string; context?: { body?: { message?: string } } }
+        const msg = err?.context?.body?.message ?? err?.message ?? 'Failed to change password'
+        throw { message: msg }
+      }
+      return { success: true }
+    }
+    if (USE_MOCK) return mockChangePassword(data)
+    return api.post<{ success: boolean }>('/auth/change-password', data)
+  },
+
+  validateResetToken: async (token: string): Promise<{ valid: boolean; expires_at?: string; used?: boolean }> => {
+    if (isSupabaseConfigured && supabase) {
+      const { data, error } = await supabase.functions.invoke('validate-reset-token', {
+        body: { token },
+      })
+      if (error) return { valid: false }
+      const res = data as { valid?: boolean; expires_at?: string; used?: boolean } | null
+      return res ? { valid: !!res.valid, expires_at: res.expires_at, used: res.used } : { valid: false }
+    }
+    if (USE_MOCK) {
+      await new Promise((r) => setTimeout(r, 200))
+      return { valid: !!token && token.length > 10 }
+    }
+    const res = await api.get<{ valid: boolean; expires_at?: string; used?: boolean }>(
+      `/auth/validate-reset-token?token=${encodeURIComponent(token)}`
+    )
+    return res ?? { valid: false }
+  },
 }
 
 export function isApiError(e: unknown): e is ApiError {

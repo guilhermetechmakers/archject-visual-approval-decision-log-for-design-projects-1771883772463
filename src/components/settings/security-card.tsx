@@ -1,4 +1,5 @@
-import { Shield, ShieldCheck, Download } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Shield, ShieldCheck, Download, KeyRound } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -23,6 +24,25 @@ export function SecurityCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="flex items-center justify-between rounded-lg border border-border p-4">
+          <div className="flex items-center gap-3">
+            <KeyRound className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <Label htmlFor="password-link" className="cursor-pointer font-medium">
+                Password
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Change your password from account settings
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/dashboard/settings/account" id="password-link">
+              Change password
+            </Link>
+          </Button>
+        </div>
+
         <div className="flex items-center justify-between rounded-lg border border-border p-4">
           <div className="flex items-center gap-3">
             <ShieldCheck className="h-5 w-5 text-muted-foreground" />

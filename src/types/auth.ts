@@ -65,6 +65,7 @@ export interface VerifyEmailRequest {
 
 export interface ForgotPasswordRequest {
   email: string
+  workspace_id?: string
 }
 
 export interface ResetPasswordRequest {
@@ -76,6 +77,7 @@ export interface ResetPasswordRequest {
 export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string
+  confirmPassword: string
 }
 
 export interface CreateWorkspaceRequest {

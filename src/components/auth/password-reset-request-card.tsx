@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 
 const schema = z.object({
   email: z.string().email('Please enter a valid email address'),
+  workspace_id: z.string().optional(),
 })
 
 export type PasswordResetRequestFormData = z.infer<typeof schema>
@@ -17,6 +18,8 @@ export type PasswordResetRequestFormData = z.infer<typeof schema>
 export interface PasswordResetRequestCardProps {
   onSubmit: (data: PasswordResetRequestFormData) => Promise<void>
   isLoading?: boolean
+  /** Show optional workspace/tenant field for enterprise flows */
+  showWorkspaceField?: boolean
   className?: string
 }
 
@@ -27,6 +30,7 @@ export interface PasswordResetRequestCardProps {
 export function PasswordResetRequestCard({
   onSubmit,
   isLoading = false,
+  showWorkspaceField = false,
   className,
 }: PasswordResetRequestCardProps) {
   const {
@@ -72,6 +76,23 @@ export function PasswordResetRequestCard({
           </p>
         )}
       </div>
+
+      {showWorkspaceField && (
+        <div className="space-y-2">
+          <Label htmlFor="password-reset-workspace">Workspace ID (optional)</Label>
+          <Input
+            id="password-reset-workspace"
+            type="text"
+            placeholder="Your workspace ID"
+            autoComplete="organization"
+            {...register('workspace_id')}
+            aria-describedby="workspace-hint"
+          />
+          <p id="workspace-hint" className="text-xs text-muted-foreground">
+            Required for some enterprise accounts
+          </p>
+        </div>
+      )}
 
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? 'Sending...' : 'Send reset link'}

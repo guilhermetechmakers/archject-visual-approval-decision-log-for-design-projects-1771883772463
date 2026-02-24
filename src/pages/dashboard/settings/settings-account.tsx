@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/contexts/auth-context'
 import { useSettingsProfile } from '@/hooks/use-settings'
+import { authApi, isApiError } from '@/api/auth'
+import { PasswordStrengthIndicator, PASSWORD_POLICY } from '@/components/auth'
 import { toast } from 'sonner'
 
 const changePasswordSchema = z
@@ -16,11 +18,11 @@ const changePasswordSchema = z
     currentPassword: z.string().min(1, 'Current password is required'),
     newPassword: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
-      .refine(
-        (p) => /\d/.test(p) || /[^a-zA-Z0-9]/.test(p),
-        'Include a number or special character'
-      ),
+      .min(PASSWORD_POLICY.minLength, `Password must be at least ${PASSWORD_POLICY.minLength} characters`)
+      .refine((p) => /[a-z]/.test(p), 'Include at least one lowercase letter')
+      .refine((p) => /[A-Z]/.test(p), 'Include at least one uppercase letter')
+      .refine((p) => /\d/.test(p), 'Include at least one number')
+      .refine((p) => /[^a-zA-Z0-9]/.test(p), 'Include at least one special character'),
     confirmPassword: z.string(),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {
@@ -34,18 +36,32 @@ export function SettingsAccount() {
   const { logout } = useAuth()
   const { data: profile } = useSettingsProfile()
   const [showPasswords, setShowPasswords] = useState(false)
+  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false)
 
   const form = useForm<ChangePasswordForm>({
     resolver: zodResolver(changePasswordSchema),
   })
 
-  const onPasswordSubmit = async (_data: ChangePasswordForm) => {
+  const newPassword = form.watch('newPassword')
+
+  const onPasswordSubmit = async (data: ChangePasswordForm) => {
+    setIsPasswordSubmitting(true)
     try {
-      await new Promise((r) => setTimeout(r, 400))
-      toast.success('Password updated')
+      await authApi.changePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
+      })
+      toast.success('Password changed successfully')
       form.reset()
-    } catch {
-      toast.error('Failed to update password')
+    } catch (e) {
+      if (isApiError(e)) {
+        toast.error(e.message ?? 'Failed to update password')
+      } else {
+        toast.error('Failed to update password')
+      }
+    } finally {
+      setIsPasswordSubmitting(false)
     }
   }
 
@@ -118,10 +134,14 @@ export function SettingsAccount() {
               <Input
                 id="newPassword"
                 type={showPasswords ? 'text' : 'password'}
+                autoComplete="new-password"
+                placeholder="••••••••"
                 {...form.register('newPassword')}
+                aria-invalid={!!form.formState.errors.newPassword}
               />
+              <PasswordStrengthIndicator password={newPassword ?? ''} />
               {form.formState.errors.newPassword && (
-                <p className="text-sm text-destructive">
+                <p className="text-sm text-destructive" role="alert">
                   {form.formState.errors.newPassword.message}
                 </p>
               )}
@@ -140,7 +160,9 @@ export function SettingsAccount() {
               )}
             </div>
             <div className="flex gap-4">
-              <Button type="submit">Update password</Button>
+              <Button type="submit" disabled={isPasswordSubmitting}>
+                {isPasswordSubmitting ? 'Updating...' : 'Update password'}
+              </Button>
               <Button type="button" variant="outline" onClick={() => logout()}>
                 Sign out
               </Button>

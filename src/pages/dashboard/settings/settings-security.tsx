@@ -1,4 +1,4 @@
-import { SecurityCard } from '@/components/settings'
+import { SecurityCard, PasswordChangeCard } from '@/components/settings'
 
 export function SettingsSecurity() {
   return (
@@ -6,10 +6,13 @@ export function SettingsSecurity() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Security & compliance</h1>
         <p className="mt-1 text-muted-foreground">
-          Audit logs, 2FA, and privacy controls
+          Password, audit logs, 2FA, and privacy controls
         </p>
       </div>
-      <SecurityCard />
+      <div className="space-y-6">
+        <PasswordChangeCard />
+        <SecurityCard />
+      </div>
     </div>
   )
 }
