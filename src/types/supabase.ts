@@ -179,6 +179,93 @@ export interface Database {
           details?: Json | null
         }
       }
+      user_2fa_config: {
+        Row: {
+          id: string
+          user_id: string
+          is_enabled: boolean
+          method: 'totp' | 'sms' | null
+          totp_secret: string | null
+          phone_number: string | null
+          phone_verified_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          is_enabled?: boolean
+          method?: 'totp' | 'sms' | null
+          totp_secret?: string | null
+          phone_number?: string | null
+          phone_verified_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          is_enabled?: boolean
+          method?: 'totp' | 'sms' | null
+          totp_secret?: string | null
+          phone_number?: string | null
+          phone_verified_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      recovery_codes: {
+        Row: {
+          id: string
+          user_id: string
+          code_hash: string
+          used: boolean
+          used_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          code_hash: string
+          used?: boolean
+          used_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          code_hash?: string
+          used?: boolean
+          used_at?: string | null
+          created_at?: string
+        }
+      }
+      otp_attempts: {
+        Row: {
+          id: string
+          user_id: string | null
+          method: string
+          ip_address: string | null
+          success: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          method: string
+          ip_address?: string | null
+          success: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          method?: string
+          ip_address?: string | null
+          success?: boolean
+          created_at?: string
+        }
+      }
       email_verification_tokens: {
         Row: {
           id: string

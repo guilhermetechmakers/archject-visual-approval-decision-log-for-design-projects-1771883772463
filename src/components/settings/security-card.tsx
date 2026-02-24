@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Shield, ShieldCheck, Download, KeyRound } from 'lucide-react'
+import { Shield, Download, KeyRound } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { useSettingsAuditLogs } from '@/hooks/use-settings'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -41,21 +40,6 @@ export function SecurityCard() {
               Change password
             </Link>
           </Button>
-        </div>
-
-        <div className="flex items-center justify-between rounded-lg border border-border p-4">
-          <div className="flex items-center gap-3">
-            <ShieldCheck className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <Label htmlFor="2fa" className="cursor-pointer font-medium">
-                Two-factor authentication
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Add an extra layer of security
-              </p>
-            </div>
-          </div>
-          <Switch id="2fa" disabled />
         </div>
 
         <div className="space-y-2">

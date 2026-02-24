@@ -1,4 +1,4 @@
-import { SecurityCard, PasswordChangeCard } from '@/components/settings'
+import { SecurityCard, PasswordChangeCard, TwoFACard } from '@/components/settings'
 
 export function SettingsSecurity() {
   return (
@@ -11,6 +11,7 @@ export function SettingsSecurity() {
       </div>
       <div className="space-y-6">
         <PasswordChangeCard />
+        <TwoFACard />
         <SecurityCard />
       </div>
     </div>
