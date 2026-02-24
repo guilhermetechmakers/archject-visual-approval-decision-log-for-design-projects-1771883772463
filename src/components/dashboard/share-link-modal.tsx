@@ -38,7 +38,7 @@ export interface ShareLinkModalProps {
 export function ShareLinkModal({
   open,
   onOpenChange,
-  projectId,
+  projectId: _projectId,
   decisionId,
   projectName,
   decisionTitle,

@@ -17,9 +17,11 @@ import {
   DecisionLogExporter,
   WebhookTaskingCenter,
   IntegrationsHub,
+  DecisionsList,
   type WorkspaceTab,
   type CreateDecisionFormData,
 } from '@/components/workspace'
+import { ShareLinkModal } from '@/components/dashboard'
 import { FilesLibraryView } from '@/components/files-library'
 import { useProjectWorkspace, useCreateClientLink, useCreateExport } from '@/hooks/use-workspace'
 import { toast } from 'sonner'
@@ -30,6 +32,7 @@ export function ProjectWorkspacePage() {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('overview')
   const [createDecisionOpen, setCreateDecisionOpen] = useState(false)
   const [exportModalOpen, setExportModalOpen] = useState(false)
+  const [shareLinkOpen, setShareLinkOpen] = useState(false)
 
   const {
     project,
@@ -47,9 +50,7 @@ export function ProjectWorkspacePage() {
   const createExportMutation = useCreateExport(projectId ?? '')
 
   const handleShareClientPortal = () => {
-    setActiveTab('overview')
-    // Could open a modal or navigate to client links section
-    toast.info('Open Client Portal Links section to generate a link')
+    setShareLinkOpen(true)
   }
 
   const handleExportDecisionLog = () => {
@@ -139,6 +140,26 @@ export function ProjectWorkspacePage() {
         project={project}
         onShareClientPortal={handleShareClientPortal}
         onExportDecisionLog={handleExportDecisionLog}
+        onArchive={() => toast.info('Archive project — connect to API')}
+        onRestore={() => toast.info('Restore project — connect to API')}
+      />
+
+      <ShareLinkModal
+        open={shareLinkOpen}
+        onOpenChange={setShareLinkOpen}
+        projectId={projectId}
+        projectName={project.name}
+        onGenerate={async (opts) => {
+          const result = await createLinkMutation.mutateAsync({
+            decision_id: opts.decisionId,
+            expires_at: opts.expiresAt,
+            otp_required: opts.otpRequired ?? false,
+          })
+          return {
+            url: result.url,
+            expiresAt: result.expires_at ?? opts.expiresAt ?? null,
+          }
+        }}
       />
 
       <div className="flex flex-col gap-6 lg:flex-row">
@@ -161,6 +182,15 @@ export function ProjectWorkspacePage() {
                   filesCount={files.length}
                   templatesUsed={0}
                 />
+                <div className="mt-6">
+                  <DecisionsList
+                    decisions={decisions}
+                    projectId={projectId}
+                    onCreateDecision={handleNavigateToCreateDecision}
+                    onApplyTemplate={() => setActiveTab('templates')}
+                    onExportLog={handleExportDecisionLog}
+                  />
+                </div>
                 <div className="mt-6">
                   <SearchFilterPanel
                     onSearch={(q) => toast.info(`Search: ${q}`)}

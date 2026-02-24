@@ -6,7 +6,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Plus,
   FolderKanban,
   FileText,
   Building2,
@@ -44,7 +43,6 @@ export function QuickCreatePanel({
   open,
   onOpenChange,
   projects = [],
-  workspaceId,
   onCreateProject,
   onCreateWorkspace,
   className,

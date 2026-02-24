@@ -123,6 +123,7 @@ export interface CreateInviteInput {
   roleId: string
   projectsScoped: string[]
   message?: string
+  expiresAt?: string
 }
 
 export interface CreateRoleInput {

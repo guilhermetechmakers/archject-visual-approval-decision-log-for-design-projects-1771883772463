@@ -37,7 +37,7 @@ export function BillingCard() {
           <CardTitle>Billing & subscription</CardTitle>
         </div>
         <CardDescription>
-          Manage your plan, payment method, and invoices
+          Plan, renewal, invoices, payment methods, and usage metrics
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

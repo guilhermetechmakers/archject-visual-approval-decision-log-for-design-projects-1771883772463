@@ -13,6 +13,7 @@ import { PasswordResetGuard, ProtectedRoute, VerifiedRoute, AdminRoleRoute } fro
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DashboardOverview } from '@/pages/dashboard/overview'
 import { ProjectsPage } from '@/pages/dashboard/projects'
+import { CreateProjectPage } from '@/pages/dashboard/create-project-page'
 import { ProjectWorkspacePage } from '@/pages/dashboard/project-workspace'
 import { DecisionsListPage } from '@/pages/dashboard/decisions-list-page'
 import { DecisionsPage } from '@/pages/dashboard/decisions'
@@ -130,6 +131,7 @@ export const router = createBrowserRouter([
           { path: 'analytics', element: <AnalyticsDashboardPage /> },
           { path: 'analytics/drilldown', element: <AnalyticsDrilldownPage /> },
           { path: 'projects', element: <ProjectsPage /> },
+          { path: 'projects/new', element: <CreateProjectPage /> },
           { path: 'projects/:projectId', element: <ProjectWorkspacePage /> },
           { path: 'projects/:projectId/decisions', element: <DecisionsListPage /> },
           { path: 'projects/:projectId/decisions/new', element: <CreateDecisionPage /> },

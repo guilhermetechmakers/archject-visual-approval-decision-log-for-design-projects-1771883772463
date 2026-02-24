@@ -20,6 +20,7 @@ interface QuickActionsBarProps {
   onSearchChange?: (value: string) => void
   placeholder?: string
   className?: string
+  onShareClientLink?: () => void
 }
 
 export function QuickActionsBar({
@@ -27,6 +28,7 @@ export function QuickActionsBar({
   onSearchChange,
   placeholder = 'Search projects, decisions...',
   className,
+  onShareClientLink,
 }: QuickActionsBarProps) {
   const [localSearch, setLocalSearch] = useState(searchValue)
   const value = onSearchChange !== undefined ? searchValue : localSearch
@@ -62,18 +64,31 @@ export function QuickActionsBar({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-              asChild
-            >
-              <Link to="/dashboard/decisions">
+            {onShareClientLink ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                onClick={onShareClientLink}
+              >
                 <Link2 className="mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">Share Client Link</span>
                 <span className="sm:hidden">Share</span>
-              </Link>
-            </Button>
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                asChild
+              >
+                <Link to="/dashboard/decisions">
+                  <Link2 className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Share Client Link</span>
+                  <span className="sm:hidden">Share</span>
+                </Link>
+              </Button>
+            )}
           </TooltipTrigger>
           <TooltipContent>
             <p>Share client link</p>

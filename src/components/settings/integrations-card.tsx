@@ -48,7 +48,7 @@ export function IntegrationsCard() {
           <CardTitle>Integrations</CardTitle>
         </div>
         <CardDescription>
-          Connect Google Calendar, Autodesk Forge, Zapier, and Stripe
+          Slack, Microsoft Teams, CAD viewers, file storage, and more
         </CardDescription>
       </CardHeader>
       <CardContent>

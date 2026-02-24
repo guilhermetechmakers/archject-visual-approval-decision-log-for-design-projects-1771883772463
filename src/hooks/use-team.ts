@@ -82,6 +82,15 @@ const MOCK_ROLES = [
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },
+  {
+    id: 'r4',
+    name: 'Client',
+    permissions: { access: true, projectActions: false, adminActions: false, dataExport: false, integrations: false, sso: false },
+    isCustom: false,
+    projectScoped: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
 ]
 
 const MOCK_PROJECTS = [

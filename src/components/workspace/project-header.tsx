@@ -6,6 +6,8 @@ import {
   FolderKanban,
   FileText,
   HardDrive,
+  Archive,
+  ArchiveRestore,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +25,8 @@ export interface ProjectHeaderProps {
   onShareClientPortal?: () => void
   onExportDecisionLog?: () => void
   onEditBranding?: () => void
+  onArchive?: () => void
+  onRestore?: () => void
   className?: string
 }
 
@@ -36,6 +40,8 @@ export function ProjectHeader({
   onShareClientPortal,
   onExportDecisionLog,
   onEditBranding,
+  onArchive,
+  onRestore,
   className,
 }: ProjectHeaderProps) {
   const storagePercent =
@@ -145,6 +151,20 @@ export function ProjectHeader({
                   Project settings
                 </Link>
               </DropdownMenuItem>
+              {project.status === 'archived' && onRestore ? (
+                <DropdownMenuItem onClick={onRestore}>
+                  <ArchiveRestore className="mr-2 h-4 w-4" />
+                  Restore project
+                </DropdownMenuItem>
+              ) : onArchive ? (
+                <DropdownMenuItem
+                  onClick={onArchive}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Archive className="mr-2 h-4 w-4" />
+                  Archive project
+                </DropdownMenuItem>
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

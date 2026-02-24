@@ -29,6 +29,7 @@ const inviteSchema = z.object({
   roleId: z.string().min(1, 'Role is required'),
   message: z.string().max(500).optional(),
   projectsScoped: z.array(z.string()).min(1, 'Select at least one project'),
+  expiresAt: z.string().optional(),
 })
 
 export type InviteFormData = z.infer<typeof inviteSchema>
@@ -57,6 +58,7 @@ export function InviteModal({
       roleId: '',
       message: '',
       projectsScoped: [],
+      expiresAt: '',
     },
   })
 
@@ -130,6 +132,17 @@ export function InviteModal({
               error={form.formState.errors.projectsScoped?.message}
             />
           </div>
+          {roles.some((r) => r.name?.toLowerCase() === 'client') && (
+            <div className="space-y-2">
+              <Label htmlFor="invite-expires">Access expires (optional, for clients)</Label>
+              <Input
+                id="invite-expires"
+                type="date"
+                {...form.register('expiresAt')}
+                className="rounded-lg bg-[#F5F6FA] border-border"
+              />
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="invite-message">Message (optional)</Label>
             <Textarea

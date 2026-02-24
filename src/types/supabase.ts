@@ -459,6 +459,32 @@ export interface Database {
           created_at?: string
         }
       }
+      project_rbac: {
+        Row: {
+          id: string
+          project_id: string
+          user_id: string
+          role: string
+          scopes: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          user_id: string
+          role?: string
+          scopes?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          user_id?: string
+          role?: string
+          scopes?: Json
+          created_at?: string
+        }
+      }
       client_links: {
         Row: {
           id: string

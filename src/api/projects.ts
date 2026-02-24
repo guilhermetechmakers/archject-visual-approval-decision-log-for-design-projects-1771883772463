@@ -11,7 +11,7 @@ export interface CreateProjectPayload {
   workspace_id: string
   name: string
   client_info?: { name?: string; email?: string }
-  branding?: { logo_url?: string; primary_color?: string }
+  branding?: { logo_url?: string | null; primary_color?: string | null }
   quota?: { storage_bytes?: number; decision_count?: number }
 }
 
@@ -60,7 +60,8 @@ function projectFromRow(row: {
 
 export async function fetchProjects(workspaceId?: string): Promise<ProjectListItem[]> {
   if (isSupabaseConfigured && supabase) {
-    let query = supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query = (supabase as any)
       .from('projects')
       .select('id, name, workspace_id, status, usage, quota, archived_at, created_at')
       .is('archived_at', null)
@@ -87,7 +88,8 @@ export async function fetchProjects(workspaceId?: string): Promise<ProjectListIt
 export async function createProject(payload: CreateProjectPayload): Promise<Project> {
   if (isSupabaseConfigured && supabase) {
     const quota = payload.quota ?? { storage_bytes: 1073741824, decision_count: 100 }
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from('projects')
       .insert({
         workspace_id: payload.workspace_id,
@@ -137,12 +139,61 @@ export async function createProject(payload: CreateProjectPayload): Promise<Proj
   return api.post<Project>('/projects', payload)
 }
 
+export async function fetchProject(projectId: string): Promise<Project | null> {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await (supabase as any)
+      .from('projects')
+      .select('*')
+      .eq('id', projectId)
+      .single()
+
+    if (error || !data) return null
+
+    const row = data as {
+      id: string
+      name: string
+      workspace_id: string
+      client_info: unknown
+      branding: unknown
+      quota: { storage_bytes?: number; decision_count?: number }
+      usage: { storage_bytes?: number; decision_count?: number }
+      status: string
+      created_at: string
+      updated_at: string
+      archived_at: string | null
+    }
+    const q = row.quota ?? {}
+    const u = row.usage ?? {}
+    return {
+      id: row.id,
+      name: row.name,
+      workspace_id: row.workspace_id,
+      client_name: (row.client_info as { name?: string })?.name ?? null,
+      branding_logo_url: (row.branding as { logo_url?: string })?.logo_url ?? null,
+      branding_color: (row.branding as { primary_color?: string })?.primary_color ?? '#195C4A',
+      storage_quota_bytes: q.storage_bytes ?? 1073741824,
+      current_storage_bytes: u.storage_bytes ?? 0,
+      status: row.status as 'active' | 'archived' | 'on_hold',
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      archived: !!row.archived_at,
+    } as Project
+  }
+
+  try {
+    return await api.get<Project>(`/projects/${projectId}`)
+  } catch {
+    return null
+  }
+}
+
 export async function createWorkspace(payload: CreateWorkspacePayload): Promise<{ id: string; name: string }> {
   if (isSupabaseConfigured && supabase) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('Not authenticated')
 
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from('workspaces')
       .insert({
         name: payload.name,
@@ -156,7 +207,7 @@ export async function createWorkspace(payload: CreateWorkspacePayload): Promise<
 
     if (error) throw new Error(error.message)
 
-    await supabase.from('user_workspace_links').insert({
+    await (supabase as any).from('user_workspace_links').insert({
       user_id: user.id,
       workspace_id: data.id,
       role: 'owner',
@@ -171,7 +222,7 @@ export async function createWorkspace(payload: CreateWorkspacePayload): Promise<
 
 export async function archiveProject(projectId: string): Promise<void> {
   if (isSupabaseConfigured && supabase) {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('projects')
       .update({ status: 'archived', archived_at: new Date().toISOString(), updated_at: new Date().toISOString() })
       .eq('id', projectId)
@@ -183,7 +234,7 @@ export async function archiveProject(projectId: string): Promise<void> {
 
 export async function restoreProject(projectId: string): Promise<void> {
   if (isSupabaseConfigured && supabase) {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('projects')
       .update({ status: 'active', archived_at: null, updated_at: new Date().toISOString() })
       .eq('id', projectId)

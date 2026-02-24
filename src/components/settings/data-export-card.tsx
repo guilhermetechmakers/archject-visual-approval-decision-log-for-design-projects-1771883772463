@@ -38,7 +38,7 @@ export function DataExportCard() {
           <CardTitle>Data export & retention</CardTitle>
         </div>
         <CardDescription>
-          Request export of your workspace data. Exports include projects, decisions, and files.
+          Export workspace data, decisions, templates, and audit logs. Data residency options available.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

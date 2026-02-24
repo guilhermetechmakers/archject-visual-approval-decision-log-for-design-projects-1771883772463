@@ -1,10 +1,14 @@
 /**
  * React Query hooks for Project Workspace data
+ * Uses Supabase when configured, falls back to REST API or mock
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import * as workspaceApi from '@/api/workspace'
+import { fetchProject } from '@/api/projects'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import type { Decision, ProjectFile, TeamMember, ActivityLog, ClientLink } from '@/types/workspace'
 import {
   mockProject,
   mockDecisions,
@@ -24,12 +28,16 @@ const projectNames: Record<string, string> = {
   '3': 'Garden House',
 }
 
-const USE_MOCK = true // Toggle when API is ready
+const USE_MOCK = !isSupabaseConfigured && !import.meta.env.VITE_API_URL
 
-function useMockProject(projectId: string) {
+function useProjectQuery(projectId: string) {
   return useQuery({
     queryKey: ['workspace', 'project', projectId],
     queryFn: async () => {
+      if (isSupabaseConfigured) {
+        const p = await fetchProject(projectId)
+        if (p) return p
+      }
       if (USE_MOCK)
         return {
           ...mockProject,
@@ -42,36 +50,99 @@ function useMockProject(projectId: string) {
   })
 }
 
-function useMockDecisions(projectId: string) {
+function useDecisionsQuery(projectId: string) {
   return useQuery({
     queryKey: ['workspace', 'decisions', projectId],
-    queryFn: async () => {
-      if (USE_MOCK)
-        return mockDecisions.map((d) => ({ ...d, project_id: projectId }))
+    queryFn: async (): Promise<Decision[]> => {
+      if (isSupabaseConfigured && supabase) {
+        const { data, error } = await (supabase as any)
+          .from('decisions')
+          .select('id, project_id, title, status, due_date, created_at, updated_at, approved_at')
+          .eq('project_id', projectId)
+          .order('updated_at', { ascending: false })
+        if (!error && data) {
+          type D = { id: string; project_id: string; title: string; status: string; due_date: string | null; created_at: string; updated_at: string; approved_at: string | null }
+          return (data as D[]).map((d) => ({
+            id: d.id,
+            project_id: d.project_id,
+            title: d.title,
+            status: d.status as Decision['status'],
+            due_date: d.due_date,
+            created_at: d.created_at,
+            updated_at: d.updated_at,
+            approved_at: d.approved_at,
+          }))
+        }
+      }
+      if (USE_MOCK) return mockDecisions.map((d) => ({ ...d, project_id: projectId }))
       return workspaceApi.fetchProjectDecisions(projectId)
     },
     enabled: !!projectId,
   })
 }
 
-function useMockFiles(projectId: string) {
+function useFilesQuery(projectId: string) {
   return useQuery({
     queryKey: ['workspace', 'files', projectId],
-    queryFn: async () => {
-      if (USE_MOCK)
-        return mockFiles.map((f) => ({ ...f, project_id: projectId }))
+    queryFn: async (): Promise<ProjectFile[]> => {
+      if (isSupabaseConfigured && supabase) {
+        const { data, error } = await (supabase as any)
+          .from('project_files')
+          .select('id, project_id, filename, size, mime_type, storage_path, version, uploaded_at')
+          .eq('project_id', projectId)
+          .order('uploaded_at', { ascending: false })
+        if (!error && data) {
+          type F = { id: string; project_id: string; filename: string; storage_path: string; version: number; uploaded_at: string }
+          return (data as F[]).map((f) => ({
+            id: f.id,
+            project_id: f.project_id,
+            file_name: f.filename,
+            file_type: 'image' as const,
+            file_url: f.storage_path,
+            version: f.version,
+            uploaded_at: f.uploaded_at,
+          }))
+        }
+      }
+      if (USE_MOCK) return mockFiles.map((f) => ({ ...f, project_id: projectId }))
       return workspaceApi.fetchProjectFiles(projectId)
     },
     enabled: !!projectId,
   })
 }
 
-function useMockTeam(projectId: string) {
+function useTeamQuery(projectId: string) {
   return useQuery({
     queryKey: ['workspace', 'team', projectId],
-    queryFn: async () => {
-      if (USE_MOCK)
-        return mockTeam.map((t) => ({ ...t, project_id: projectId }))
+    queryFn: async (): Promise<TeamMember[]> => {
+      if (isSupabaseConfigured && supabase) {
+        const { data } = await (supabase as any)
+          .from('project_rbac')
+          .select('id, project_id, user_id, role')
+          .eq('project_id', projectId)
+        if (data && data.length > 0) {
+          type R = { id: string; project_id: string; user_id: string; role: string }
+          type P = { id: string; full_name?: string }
+          const rows = data as R[]
+          const userIds = [...new Set(rows.map((r) => r.user_id))]
+          const { data: profiles } = await (supabase as any)
+            .from('profiles')
+            .select('id, full_name, avatar_url')
+            .in('id', userIds)
+          const profileMap = new Map(((profiles ?? []) as P[]).map((p) => [p.id, p]))
+          return rows.map((r) => {
+            const p = profileMap.get(r.user_id)
+            return {
+              id: r.id,
+              project_id: r.project_id,
+              user_id: r.user_id,
+              name: (p?.full_name as string) ?? 'Unknown',
+              role: r.role as TeamMember['role'],
+            }
+          })
+        }
+      }
+      if (USE_MOCK) return mockTeam.map((t) => ({ ...t, project_id: projectId }))
       return workspaceApi.fetchProjectTeam(projectId)
     },
     enabled: !!projectId,
@@ -88,24 +159,90 @@ function useMockTemplates() {
   })
 }
 
-function useMockActivity(projectId: string) {
+function useActivityQuery(projectId: string) {
+  type AuditRow = { id: string; target_id: string; timestamp: string; details?: { project_id?: string; summary?: string }; action: string }
   return useQuery({
     queryKey: ['workspace', 'activity', projectId],
-    queryFn: async () => {
-      if (USE_MOCK)
-        return mockActivity.map((a) => ({ ...a, project_id: projectId }))
+    queryFn: async (): Promise<ActivityLog[]> => {
+      if (isSupabaseConfigured && supabase) {
+        const { data: decisions } = await (supabase as any)
+          .from('decisions')
+          .select('id')
+          .eq('project_id', projectId)
+        const decisionIds = ((decisions ?? []) as { id: string }[]).map((d) => d.id)
+        if (decisionIds.length > 0) {
+          const { data } = await (supabase as any)
+            .from('audit_logs')
+            .select('id, user_id, action, target_id, timestamp, details')
+            .in('target_id', decisionIds)
+            .order('timestamp', { ascending: false })
+            .limit(20)
+          if (data) {
+          return (data as AuditRow[]).map((a) => ({
+            id: a.id,
+            project_id: projectId,
+            type: 'decision_created' as const,
+            reference_id: a.target_id,
+            created_at: a.timestamp,
+            summary: a.details?.summary ?? a.action,
+              actor: null,
+            }))
+          }
+        }
+        const { data } = await (supabase as any)
+          .from('audit_logs')
+          .select('id, user_id, action, target_id, timestamp, details')
+          .order('timestamp', { ascending: false })
+          .limit(20)
+        if (data) {
+          const filtered = (data as AuditRow[]).filter(
+            (a) => a.details?.project_id === projectId
+          )
+          return filtered.map((a) => ({
+            id: a.id,
+            project_id: projectId,
+            type: 'decision_created' as const,
+            reference_id: a.target_id,
+            created_at: a.timestamp,
+            summary: a.details?.summary ?? a.action,
+            actor: null,
+          }))
+        }
+      }
+      if (USE_MOCK) return mockActivity.map((a) => ({ ...a, project_id: projectId }))
       return workspaceApi.fetchProjectActivity(projectId)
     },
     enabled: !!projectId,
   })
 }
 
-function useMockClientLinks(projectId: string) {
+function useClientLinksQuery(projectId: string) {
   return useQuery({
     queryKey: ['workspace', 'client-links', projectId],
-    queryFn: async () => {
-      if (USE_MOCK)
-        return mockClientLinks.map((l) => ({ ...l, project_id: projectId }))
+    queryFn: async (): Promise<ClientLink[]> => {
+      if (isSupabaseConfigured && supabase) {
+        const { data } = await (supabase as any)
+          .from('client_links')
+          .select('id, project_id, decision_id, token, expires_at, otp_required, created_at, used_at, is_active')
+          .eq('project_id', projectId)
+          .eq('is_active', true)
+        if (data) {
+          type L = { id: string; project_id: string; decision_id: string | null; token: string; expires_at: string | null; otp_required: boolean; created_at: string; used_at: string | null; is_active: boolean }
+          const base = typeof window !== 'undefined' ? window.location?.origin ?? '' : ''
+          return (data as L[]).map((l) => ({
+            id: l.id,
+            project_id: l.project_id,
+            decision_id: l.decision_id,
+            url: `${base}/portal/${l.token}`,
+            expires_at: l.expires_at,
+            otp_required: l.otp_required ?? false,
+            created_at: l.created_at,
+            used_at: l.used_at,
+            is_active: l.is_active ?? true,
+          }))
+        }
+      }
+      if (USE_MOCK) return mockClientLinks.map((l) => ({ ...l, project_id: projectId }))
       return workspaceApi.fetchProjectClientLinks(projectId)
     },
     enabled: !!projectId,
@@ -113,13 +250,13 @@ function useMockClientLinks(projectId: string) {
 }
 
 export function useProjectWorkspace(projectId: string) {
-  const project = useMockProject(projectId)
-  const decisions = useMockDecisions(projectId)
-  const files = useMockFiles(projectId)
-  const team = useMockTeam(projectId)
+  const project = useProjectQuery(projectId)
+  const decisions = useDecisionsQuery(projectId)
+  const files = useFilesQuery(projectId)
+  const team = useTeamQuery(projectId)
   const templates = useMockTemplates()
-  const activity = useMockActivity(projectId)
-  const clientLinks = useMockClientLinks(projectId)
+  const activity = useActivityQuery(projectId)
+  const clientLinks = useClientLinksQuery(projectId)
 
   const isLoading =
     project.isLoading ||

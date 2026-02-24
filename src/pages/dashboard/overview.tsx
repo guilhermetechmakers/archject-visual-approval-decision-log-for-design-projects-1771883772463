@@ -15,6 +15,7 @@ import {
   ShareLinkModal,
 } from '@/components/dashboard'
 import { useDashboardData } from '@/hooks/use-dashboard'
+import { useCreateClientLink } from '@/hooks/use-workspace'
 
 export function DashboardOverview() {
   const { data, isLoading, error } = useDashboardData()
@@ -61,6 +62,9 @@ export function DashboardOverview() {
       )
     : awaiting_approvals
 
+  const selectedProjectId = filteredProjects[0]?.id ?? ''
+  const createLinkMutation = useCreateClientLink(selectedProjectId)
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -91,7 +95,6 @@ export function DashboardOverview() {
         open={quickCreateOpen}
         onOpenChange={setQuickCreateOpen}
         projects={filteredProjects}
-        workspaceId={data.workspace?.id}
       />
 
       <ShareLinkModal
@@ -100,6 +103,16 @@ export function DashboardOverview() {
         projectId={filteredProjects[0]?.id}
         projectName={filteredProjects[0]?.name}
         onGenerate={async (opts) => {
+          if (selectedProjectId) {
+            const result = await createLinkMutation.mutateAsync({
+              expires_at: opts.expiresAt,
+              otp_required: opts.otpRequired,
+            })
+            return {
+              url: result.url,
+              expiresAt: opts.expiresAt ?? result.expires_at ?? null,
+            }
+          }
           const base = `${window.location.origin}/portal`
           const token = `mock-${Date.now().toString(36)}`
           return {

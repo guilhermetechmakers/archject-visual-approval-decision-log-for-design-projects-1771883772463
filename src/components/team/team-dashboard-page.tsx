@@ -39,13 +39,14 @@ export function TeamDashboardPage() {
   const { data: ssoData } = useSSOConfig()
   const activity = activityData ?? []
 
-  const handleInvite = async (values: { email: string; roleId: string; projectsScoped: string[]; message?: string }) => {
+  const handleInvite = async (values: { email: string; roleId: string; projectsScoped: string[]; message?: string; expiresAt?: string }) => {
     try {
       await inviteMutation.mutateAsync({
         email: values.email,
         roleId: values.roleId,
         projectsScoped: values.projectsScoped,
         message: values.message,
+        expiresAt: values.expiresAt || undefined,
       })
       setNotification('Invite sent')
       toast.success('Invite sent successfully')
