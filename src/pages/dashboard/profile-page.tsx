@@ -17,25 +17,43 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Shimmer } from '@/components/loading/shimmer'
-import { User, Settings } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { User, Settings, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
 function ProfileHeaderSkeleton() {
   return (
-    <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
-      <Shimmer className="h-24 w-24 shrink-0 rounded-full" aria-hidden />
-      <div className="space-y-2">
-        <Shimmer className="h-10 w-48" aria-hidden />
-        <Shimmer className="h-4 w-32" aria-hidden />
+    <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8" role="status" aria-label="Loading profile">
+      <Skeleton className="h-24 w-24 shrink-0 rounded-full" aria-hidden />
+      <div className="min-w-0 flex-1 space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-48" aria-hidden />
+          <Skeleton className="h-4 w-32" aria-hidden />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-16" aria-hidden />
+              <Skeleton className="h-10 w-full" aria-hidden />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="h-9 w-32 rounded-pill" aria-hidden />
       </div>
     </div>
   )
 }
 
+const INPUT_IDS = {
+  email: 'profile-email',
+  name: 'profile-name',
+  timeZone: 'profile-timezone',
+  locale: 'profile-locale',
+} as const
+
 export function ProfilePage() {
   const { logout } = useAuth()
-  const { data: profile, isLoading } = useSettingsProfile()
+  const { data: profile, isLoading, isError } = useSettingsProfile()
   const uploadAvatar = useUploadAvatar()
 
   const handleAvatarFileSelect = (file: File) => {
@@ -58,7 +76,7 @@ export function ProfilePage() {
       <Card className="rounded-xl border border-border shadow-card transition-all duration-200 hover:shadow-card-hover">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <User className="h-5 w-5 text-primary" />
+            <User className="h-5 w-5 text-primary" aria-hidden />
             <CardTitle>Profile information</CardTitle>
           </div>
           <CardDescription>
@@ -68,6 +86,27 @@ export function ProfilePage() {
         <CardContent className="space-y-6">
           {isLoading ? (
             <ProfileHeaderSkeleton />
+          ) : isError ? (
+            <div
+              className="flex flex-col items-center justify-center gap-4 rounded-lg border border-border bg-muted/30 px-6 py-12 text-center"
+              role="alert"
+            >
+              <AlertCircle className="h-12 w-12 text-destructive" aria-hidden />
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">Failed to load profile</p>
+                <p className="text-sm text-muted-foreground">
+                  Could not load your profile information. Please try again later.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.reload()}
+                className="rounded-pill"
+              >
+                Retry
+              </Button>
+            </div>
           ) : (
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
               <div className="shrink-0">
@@ -89,25 +128,45 @@ export function ProfilePage() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Email</Label>
-                    <Input value={profile?.email ?? ''} disabled className="bg-secondary/50" />
+                    <Label htmlFor={INPUT_IDS.email}>Email</Label>
+                    <Input
+                      id={INPUT_IDS.email}
+                      value={profile?.email ?? ''}
+                      disabled
+                      className="bg-secondary/50"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label>Name</Label>
-                    <Input value={profile?.name ?? ''} disabled className="bg-secondary/50" />
+                    <Label htmlFor={INPUT_IDS.name}>Name</Label>
+                    <Input
+                      id={INPUT_IDS.name}
+                      value={profile?.name ?? ''}
+                      disabled
+                      className="bg-secondary/50"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label>Time zone</Label>
-                    <Input value={profile?.timeZone ?? '—'} disabled className="bg-secondary/50" />
+                    <Label htmlFor={INPUT_IDS.timeZone}>Time zone</Label>
+                    <Input
+                      id={INPUT_IDS.timeZone}
+                      value={profile?.timeZone ?? '—'}
+                      disabled
+                      className="bg-secondary/50"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label>Locale</Label>
-                    <Input value={profile?.locale ?? '—'} disabled className="bg-secondary/50" />
+                    <Label htmlFor={INPUT_IDS.locale}>Locale</Label>
+                    <Input
+                      id={INPUT_IDS.locale}
+                      value={profile?.locale ?? '—'}
+                      disabled
+                      className="bg-secondary/50"
+                    />
                   </div>
                 </div>
                 <Link to="/dashboard/settings/account">
                   <Button variant="outline" size="sm" className="transition-all duration-200 hover:scale-[1.02]">
-                    <Settings className="mr-2 h-4 w-4" />
+                    <Settings className="mr-2 h-4 w-4" aria-hidden />
                     Edit in Settings
                   </Button>
                 </Link>
@@ -126,10 +185,15 @@ export function ProfilePage() {
       <SecurityCard />
 
       <div className="flex flex-wrap gap-4">
-        <Button variant="outline" onClick={() => logout()} className="transition-all duration-200 hover:scale-[1.02]">
+        <Button
+          variant="outline"
+          onClick={() => logout()}
+          className="transition-all duration-200 hover:scale-[1.02]"
+          aria-label="Sign out of your account"
+        >
           Sign out
         </Button>
-        <Link to="/dashboard/settings">
+        <Link to="/dashboard/settings" aria-label="Go to all settings">
           <Button variant="secondary" className="transition-all duration-200 hover:scale-[1.02]">
             All settings
           </Button>
