@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
-import { Plus, FileCheck, Search } from 'lucide-react'
+import { Plus, FileCheck, Search, AlertCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const mockDecisions = [
@@ -22,9 +23,9 @@ export function DecisionsPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold">Decisions</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Decisions</h1>
         <Link to="/dashboard/decisions/new">
-          <Button>
+          <Button variant="default" className="rounded-pill">
             <Plus className="mr-2 h-4 w-4" />
             New decision
           </Button>
@@ -49,42 +50,135 @@ export function DecisionsPage() {
           <TabsTrigger value="draft">Draft</TabsTrigger>
         </TabsList>
         <TabsContent value="all" className="mt-6">
-          <DecisionsList decisions={mockDecisions} />
+          <DecisionsList decisions={mockDecisions} isLoading={false} error={null} />
         </TabsContent>
         <TabsContent value="pending" className="mt-6">
-          <DecisionsList decisions={mockDecisions.filter((d) => d.status === 'pending')} />
+          <DecisionsList
+            decisions={mockDecisions.filter((d) => d.status === 'pending')}
+            isLoading={false}
+            error={null}
+          />
         </TabsContent>
         <TabsContent value="approved" className="mt-6">
-          <DecisionsList decisions={mockDecisions.filter((d) => d.status === 'approved')} />
+          <DecisionsList
+            decisions={mockDecisions.filter((d) => d.status === 'approved')}
+            isLoading={false}
+            error={null}
+          />
         </TabsContent>
         <TabsContent value="draft" className="mt-6">
-          <DecisionsList decisions={mockDecisions.filter((d) => d.status === 'draft')} />
+          <DecisionsList
+            decisions={mockDecisions.filter((d) => d.status === 'draft')}
+            isLoading={false}
+            error={null}
+          />
         </TabsContent>
       </Tabs>
     </div>
   )
 }
 
+function DecisionsEmptyState() {
+  return (
+    <Card
+      className="border border-border border-dashed bg-card shadow-card"
+      role="status"
+      aria-label="No decisions"
+    >
+      <CardContent className="flex flex-col items-center justify-center px-6 py-16 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <FileCheck className="h-7 w-7 text-muted-foreground" aria-hidden />
+        </div>
+        <h2 className="mt-6 text-lg font-semibold text-foreground">
+          No decisions found
+        </h2>
+        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+          Create your first decision to get started, or invite your team to collaborate.
+        </p>
+        <div className="mt-6">
+          <Button
+            asChild
+            variant="default"
+            size="lg"
+            className="rounded-pill"
+            aria-label="Create your first decision"
+          >
+            <Link to="/dashboard/decisions/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Create decision
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function DecisionsErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Card
+      className="border border-destructive/30 bg-destructive/5"
+      role="alert"
+      aria-label="Failed to load decisions"
+    >
+      <CardContent className="flex flex-col items-center justify-center px-6 py-16 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+          <AlertCircle className="h-7 w-7 text-destructive" aria-hidden />
+        </div>
+        <h2 className="mt-6 text-lg font-semibold text-foreground">
+          Failed to load decisions
+        </h2>
+        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+          Something went wrong while loading your decisions. Please try again.
+        </p>
+        <Button variant="outline" size="lg" className="mt-6 rounded-pill" onClick={onRetry}>
+          Try again
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
+function DecisionsListSkeleton() {
+  return (
+    <div className="space-y-2">
+      {[1, 2, 3].map((i) => (
+        <Card key={i} className="overflow-hidden">
+          <CardContent className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-10 w-10 shrink-0 rounded-md" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            </div>
+            <Skeleton className="h-5 w-16 rounded-md" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
 function DecisionsList({
   decisions,
+  isLoading = false,
+  error = null,
 }: {
   decisions: { id: string; title: string; status: string; project: string }[]
+  isLoading?: boolean
+  error?: string | null
 }) {
+  if (error) {
+    return <DecisionsErrorState onRetry={() => window.location.reload()} />
+  }
+
+  if (isLoading) {
+    return <DecisionsListSkeleton />
+  }
+
   if (decisions.length === 0) {
-    return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <FileCheck className="h-12 w-12 text-muted-foreground" />
-          <p className="mt-4 font-medium">No decisions found</p>
-          <p className="text-sm text-muted-foreground">
-            Create your first decision to get started
-          </p>
-          <Link to="/dashboard/decisions/new" className="mt-4">
-            <Button>New decision</Button>
-          </Link>
-        </CardContent>
-      </Card>
-    )
+    return <DecisionsEmptyState />
   }
 
   return (
@@ -95,14 +189,14 @@ function DecisionsList({
           to={`/dashboard/decisions/${decision.id}`}
           className="block"
         >
-          <Card className="transition-all hover:shadow-card-hover">
+          <Card className="transition-all duration-200 hover:shadow-card-hover">
             <CardContent className="flex items-center justify-between py-4">
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-                  <FileCheck className="h-5 w-5 text-muted-foreground" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary">
+                  <FileCheck className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="font-medium">{decision.title}</p>
+                  <p className="font-medium text-foreground">{decision.title}</p>
                   <p className="text-sm text-muted-foreground">{decision.project}</p>
                 </div>
               </div>
