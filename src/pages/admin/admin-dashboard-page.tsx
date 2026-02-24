@@ -127,9 +127,7 @@ export function AdminDashboardPage() {
           {data.recent_escalations && data.recent_escalations.length > 0 && (
             <RecentEscalationsPanel escalations={data.recent_escalations} />
           )}
-          {data.top_tenants && data.top_tenants.length > 0 && (
-            <TopTenantsPanel topTenants={data.top_tenants} />
-          )}
+          <TopTenantsPanel topTenants={data.top_tenants ?? []} />
         </div>
       </div>
     </div>
