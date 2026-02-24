@@ -15,12 +15,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ServerErrorIllustration } from '@/components/illustrations'
 import { submitSupportTicket, openSupportMailto } from '@/api/support'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 const RETRY_DEBOUNCE_MS = 2000
+const RETRY_RELOAD_DELAY_MS = 400
 const MIN_NAME_LEN = 3
 const MAX_NAME_LEN = 100
 const MIN_MESSAGE_LEN = 10
@@ -39,7 +41,10 @@ function useRetry() {
     }
     lastRetryRef.current = now
     setIsRetrying(true)
-    window.location.reload()
+    toast.loading('Retrying...', { id: 'server-error-retry' })
+    setTimeout(() => {
+      window.location.reload()
+    }, RETRY_RELOAD_DELAY_MS)
   }, [])
 
   return { retry, isRetrying }
@@ -246,6 +251,31 @@ function SupportContactPanel() {
   )
 }
 
+function RetryLoadingOverlay() {
+  return (
+    <div
+      className="absolute inset-0 z-10 flex flex-col items-center gap-6 rounded-2xl bg-card p-6 md:p-8"
+      role="status"
+      aria-live="polite"
+      aria-label="Retrying, please wait"
+    >
+      <Skeleton className="h-[180px] w-[180px] shrink-0 rounded-2xl" aria-hidden />
+      <div className="flex w-full max-w-md flex-col items-center gap-3">
+        <Skeleton className="h-8 w-64" aria-hidden />
+        <Skeleton className="h-5 w-full max-w-sm" aria-hidden />
+      </div>
+      <div className="flex flex-col items-center gap-4">
+        <Skeleton className="h-12 w-40 rounded-lg" aria-hidden />
+        <Skeleton className="h-4 w-28" aria-hidden />
+      </div>
+      <div className="mt-4 w-full border-t border-border pt-6">
+        <Skeleton className="mb-3 h-4 w-20" aria-hidden />
+        <Skeleton className="h-10 w-32 rounded-lg" aria-hidden />
+      </div>
+    </div>
+  )
+}
+
 function ErrorDetailsDrawer({ sanitizedMessage }: { sanitizedMessage?: string }) {
   const [open, setOpen] = useState(false)
 
@@ -260,6 +290,7 @@ function ErrorDetailsDrawer({ sanitizedMessage }: { sanitizedMessage?: string })
         className="flex w-full items-center justify-between gap-2 px-6 py-4 text-left text-sm font-medium text-muted-foreground hover:bg-muted/30 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         aria-expanded={open}
         aria-controls="error-details-content"
+        aria-label={open ? 'Hide technical error details' : 'Show technical error details'}
       >
         <span>Technical details</span>
         {open ? (
@@ -304,11 +335,17 @@ export function ServerErrorPage() {
       >
         <Card
           className={cn(
-            'w-full max-w-xl shadow-card rounded-2xl p-6 md:p-8',
+            'relative w-full max-w-xl shadow-card rounded-2xl p-6 md:p-8',
             'animate-fade-in-up'
           )}
         >
-          <CardContent className="flex flex-col items-center gap-6 p-0">
+          {isRetrying && <RetryLoadingOverlay />}
+          <CardContent
+            className={cn(
+              'flex flex-col items-center gap-6 p-0',
+              isRetrying && 'pointer-events-none opacity-60'
+            )}
+          >
             <ServerErrorIllustration size={180} className="shrink-0" />
 
             <div
