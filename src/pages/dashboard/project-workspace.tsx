@@ -34,6 +34,7 @@ import {
   useReissueClientLink,
   useExtendClientLink,
 } from '@/hooks/use-workspace'
+import { useCreateDecision } from '@/hooks/use-decisions-list'
 import { toast } from 'sonner'
 
 export function ProjectWorkspacePage() {
@@ -62,6 +63,7 @@ export function ProjectWorkspacePage() {
   const revokeLinkMutation = useRevokeClientLink(projectId ?? '')
   const reissueLinkMutation = useReissueClientLink(projectId ?? '')
   const extendLinkMutation = useExtendClientLink(projectId ?? '')
+  const createDecisionMutation = useCreateDecision(projectId ?? '')
 
   const handleShareClientPortal = () => {
     setShareLinkOpen(true)
@@ -89,9 +91,21 @@ export function ProjectWorkspacePage() {
     })
   }
 
-  const handleCreateDecision = async (_data: CreateDecisionFormData) => {
-    toast.success('Decision created')
-    setCreateDecisionOpen(false)
+  const handleCreateDecision = async (data: CreateDecisionFormData) => {
+    try {
+      await createDecisionMutation.mutateAsync({
+        title: data.title,
+        status: data.status,
+        due_date: data.due_date || undefined,
+        assignee_id: data.assignee_id || undefined,
+        summary: data.description,
+      })
+      setCreateDecisionOpen(false)
+      refetch()
+      toast.success(`Decision "${data.title}" created successfully`)
+    } catch {
+      // useCreateDecision shows error toast on mutation failure
+    }
   }
 
   const handleNavigateToCreateDecision = () => {
@@ -110,11 +124,15 @@ export function ProjectWorkspacePage() {
 
   if (!projectId) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
+      <div
+        className="flex flex-col items-center justify-center py-16"
+        role="status"
+        aria-label="Project not found"
+      >
         <p className="text-muted-foreground">Project not found</p>
-        <Button asChild className="mt-4" variant="outline">
+        <Button asChild className="mt-4" variant="outline" aria-label="Back to projects list">
           <Link to="/dashboard/projects">
-            <ChevronLeft className="mr-2 h-4 w-4" />
+            <ChevronLeft className="mr-2 h-4 w-4" aria-hidden />
             Back to projects
           </Link>
         </Button>
@@ -123,17 +141,26 @@ export function ProjectWorkspacePage() {
   }
 
   if (isLoading || !project) {
-    return <ProjectWorkspaceSkeleton />
+    return (
+      <div role="status" aria-busy="true" aria-label="Loading project workspace">
+        <ProjectWorkspaceSkeleton />
+      </div>
+    )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
+      <div
+        className="flex flex-col items-center justify-center py-16"
+        role="alert"
+        aria-label="Failed to load project"
+      >
         <p className="text-muted-foreground">Failed to load project</p>
         <Button
           variant="outline"
           className="mt-4"
-          onClick={() => window.location.reload()}
+          onClick={() => refetch()}
+          aria-label="Retry loading project"
         >
           Retry
         </Button>
@@ -142,11 +169,11 @@ export function ProjectWorkspacePage() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in" role="main" aria-label="Project workspace">
       <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="sm">
+        <Button asChild variant="ghost" size="sm" aria-label="Back to projects list">
           <Link to="/dashboard/projects">
-            <ChevronLeft className="mr-1 h-4 w-4" />
+            <ChevronLeft className="mr-1 h-4 w-4" aria-hidden />
             Projects
           </Link>
         </Button>
@@ -321,6 +348,7 @@ export function ProjectWorkspacePage() {
           .filter((m) => m.role !== 'client')
           .map((m) => ({ id: m.user_id, name: m.name }))}
         onSubmit={handleCreateDecision}
+        isSubmitting={createDecisionMutation.isPending}
       />
 
       <DecisionLogExporter
@@ -338,7 +366,7 @@ export function ProjectWorkspacePage() {
 
 function ProjectWorkspaceSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" aria-hidden>
       <Skeleton className="h-32 w-full rounded-xl" />
       <div className="flex gap-6">
         <div className="w-56 space-y-2">

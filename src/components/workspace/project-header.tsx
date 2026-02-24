@@ -59,11 +59,15 @@ export function ProjectHeader({
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 flex-1 gap-4">
           <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border-2"
-            style={{
-              borderColor: project.branding_color ?? 'rgb(25, 92, 74)',
-              backgroundColor: `${project.branding_color ?? '#195C4A'}15`,
-            }}
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border-2 border-primary/80 bg-primary/10"
+            style={
+              project.branding_color
+                ? {
+                    borderColor: project.branding_color,
+                    backgroundColor: `${project.branding_color}15`,
+                  }
+                : undefined
+            }
           >
             {project.branding_logo_url ? (
               <img
@@ -73,8 +77,10 @@ export function ProjectHeader({
               />
             ) : (
               <FolderKanban
-                className="h-7 w-7"
-                style={{ color: project.branding_color ?? 'rgb(25, 92, 74)' }}
+                className="h-7 w-7 text-primary"
+                style={
+                  project.branding_color ? { color: project.branding_color } : undefined
+                }
               />
             )}
           </div>

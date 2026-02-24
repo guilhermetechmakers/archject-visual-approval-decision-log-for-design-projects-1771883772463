@@ -50,8 +50,12 @@ export function DecisionsList({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold">Decisions</h2>
         <div className="flex gap-2">
-          <Button size="sm" onClick={onCreateDecision}>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button
+            size="sm"
+            onClick={onCreateDecision}
+            aria-label="Create new decision"
+          >
+            <Plus className="mr-2 h-4 w-4" aria-hidden />
             Create decision
           </Button>
         </div>
@@ -66,10 +70,19 @@ export function DecisionsList({
               Create your first decision or apply a template to get started.
             </p>
             <div className="mt-4 flex gap-2">
-              <Button size="sm" onClick={onCreateDecision}>
+              <Button
+                size="sm"
+                onClick={onCreateDecision}
+                aria-label="Create your first decision"
+              >
                 Create decision
               </Button>
-              <Button variant="outline" size="sm" onClick={onApplyTemplate}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onApplyTemplate}
+                aria-label="Apply template to create decision"
+              >
                 Apply template
               </Button>
             </div>
@@ -80,7 +93,7 @@ export function DecisionsList({
           {decisions.map((decision) => (
             <Card
               key={decision.id}
-              className="transition-all duration-200 hover:shadow-card-hover hover:bg-[#F7F8FA]"
+              className="transition-all duration-200 hover:shadow-card-hover hover:bg-muted"
             >
               <CardContent className="p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
