@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, ChevronLeft } from 'lucide-react'
+import { Plus, ChevronLeft, FileCheck, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FilterBar } from './filter-bar'
 import { DecisionsTable } from './decisions-table'
@@ -27,6 +28,88 @@ import type {
   DecisionsSortOrder,
 } from '@/types/decisions-list'
 import type { CreateDecisionFormData } from '@/components/workspace'
+
+function DecisionsEmptyState({
+  hasActiveFilters,
+  onClearFilters,
+  onCreateClick,
+}: {
+  hasActiveFilters: boolean
+  onClearFilters: () => void
+  onCreateClick: () => void
+}) {
+  return (
+    <Card
+      className="border-dashed border-border bg-card shadow-card"
+      role="status"
+      aria-label="No decisions"
+    >
+      <CardContent className="flex flex-col items-center justify-center py-16 px-6 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <FileCheck className="h-7 w-7 text-muted-foreground" aria-hidden />
+        </div>
+        <h2 className="mt-6 text-lg font-semibold text-foreground">
+          No decisions found
+        </h2>
+        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+          {hasActiveFilters
+            ? 'No decisions match your current filters. Try adjusting your search or filters to see more results.'
+            : 'Create your first decision to get started, or invite your team to collaborate.'}
+        </p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
+          <Button
+            onClick={onCreateClick}
+            className="rounded-full"
+            aria-label="Create your first decision"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create decision
+          </Button>
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              onClick={onClearFilters}
+              className="rounded-full"
+              aria-label="Clear filters"
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function DecisionsErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Card
+      className="border-destructive/30 bg-destructive/5"
+      role="alert"
+      aria-label="Failed to load decisions"
+    >
+      <CardContent className="flex flex-col items-center justify-center py-16 px-6 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+          <AlertCircle className="h-7 w-7 text-destructive" aria-hidden />
+        </div>
+        <h2 className="mt-6 text-lg font-semibold text-foreground">
+          Failed to load decisions
+        </h2>
+        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+          Something went wrong while loading your decisions. Please try again.
+        </p>
+        <Button
+          variant="outline"
+          className="mt-6 rounded-full"
+          onClick={onRetry}
+          aria-label="Retry loading decisions"
+        >
+          Retry
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
 
 export interface DecisionsListContainerProps {
   projectId: string
@@ -78,6 +161,27 @@ export function DecisionsListContainer({
   const decisions = data?.decisions ?? []
   const total = data?.total ?? 0
   const totalPages = Math.ceil(total / pageSize)
+
+  const hasActiveFilters = useMemo(
+    () =>
+      !!(
+        filters.search ||
+        filters.status?.length ||
+        filters.assigneeId ||
+        filters.templateType ||
+        filters.dueDateFrom ||
+        filters.dueDateTo ||
+        filters.quickFilter ||
+        filters.tags?.length ||
+        (filters.metadataKey && filters.metadataValue)
+      ),
+    [filters]
+  )
+
+  const handleClearFilters = useCallback(() => {
+    setFilters({})
+    setPage(1)
+  }, [])
 
   const handleCreateSubmit = useCallback(
     async (formData: CreateDecisionFormData & { templateId?: string }) => {
@@ -148,15 +252,21 @@ export function DecisionsListContainer({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-muted-foreground">Failed to load decisions</p>
-        <Button
-          variant="outline"
-          className="mt-4"
-          onClick={() => window.location.reload()}
-        >
-          Retry
-        </Button>
+      <div className={className}>
+        <div className="flex items-center gap-2 mb-6">
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/dashboard/projects">
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              Projects
+            </Link>
+          </Button>
+          {projectName && (
+            <Button asChild variant="ghost" size="sm">
+              <Link to={`/dashboard/projects/${projectId}`}>{projectName}</Link>
+            </Button>
+          )}
+        </div>
+        <DecisionsErrorState onRetry={() => window.location.reload()} />
       </div>
     )
   }
@@ -222,11 +332,17 @@ export function DecisionsListContainer({
       <div className="grid gap-6 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_360px]">
         <div className="min-w-0">
           {isLoading ? (
-            <div className="space-y-4">
+            <div className="space-y-4" role="status" aria-label="Loading decisions">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-16 w-full rounded-xl" />
               ))}
             </div>
+          ) : decisions.length === 0 ? (
+            <DecisionsEmptyState
+              hasActiveFilters={hasActiveFilters}
+              onClearFilters={handleClearFilters}
+              onCreateClick={() => setCreateOpen(true)}
+            />
           ) : (
             <DecisionsTable
               decisions={decisions}
@@ -251,7 +367,7 @@ export function DecisionsListContainer({
             />
           )}
 
-          {totalPages > 1 && (
+          {!isLoading && decisions.length > 0 && totalPages > 1 && (
             <div className="mt-6 flex items-center justify-center gap-2">
               <Button
                 variant="outline"
@@ -287,7 +403,7 @@ export function DecisionsListContainer({
 
       {/* Mobile: Preview as sheet/drawer - could use Sheet component */}
       {previewId && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-black/50 animate-fade-in" onClick={() => setPreviewId(null)}>
+        <div className="lg:hidden fixed inset-0 z-50 bg-foreground/50 animate-fade-in" onClick={() => setPreviewId(null)}>
           <div
             className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-background shadow-xl animate-slide-in-right"
             onClick={(e) => e.stopPropagation()}
