@@ -35,6 +35,7 @@ export function WorkspaceNav({
 }: WorkspaceNavProps) {
   const location = useLocation()
   const isOnDecisionsPage = projectId && location.pathname.includes(`/projects/${projectId}/decisions`)
+  const isOnTemplatesPage = projectId && location.pathname.includes(`/projects/${projectId}/templates`)
 
   return (
     <nav
@@ -44,13 +45,39 @@ export function WorkspaceNav({
     >
       {tabs.map((tab) => {
         const isDecisionsLink = tab.id === 'decisions' && projectId
-        const isActive = isDecisionsLink ? isOnDecisionsPage : activeTab === tab.id
+        const isTemplatesLink = tab.id === 'templates' && projectId
+        const isActive = isDecisionsLink
+          ? isOnDecisionsPage
+          : isTemplatesLink
+            ? isOnTemplatesPage
+            : activeTab === tab.id
 
         if (isDecisionsLink) {
           return (
             <Link
               key={tab.id}
               to={`/dashboard/projects/${projectId}/decisions`}
+              role="tab"
+              aria-selected={isActive ? 'true' : 'false'}
+              id={`tab-${tab.id}`}
+              className={cn(
+                'rounded-full px-4 py-2.5 text-left text-sm font-medium transition-all duration-200',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                isActive
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+              )}
+            >
+              {tab.label}
+            </Link>
+          )
+        }
+
+        if (isTemplatesLink) {
+          return (
+            <Link
+              key={tab.id}
+              to={`/dashboard/projects/${projectId}/templates`}
               role="tab"
               aria-selected={isActive ? 'true' : 'false'}
               id={`tab-${tab.id}`}

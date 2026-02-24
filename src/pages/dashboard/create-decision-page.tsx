@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useParams, Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { ChevronLeft, Loader2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DecisionEditorProvider, useDecisionEditor } from '@/contexts/decision-editor-context'
@@ -17,8 +17,51 @@ import { useProjectWorkspace } from '@/hooks/use-workspace'
 import { useCreateDecisionMutation } from '@/hooks/use-decision'
 import * as workspaceApi from '@/api/workspace'
 import { toast } from 'sonner'
+import type { DecisionEditorState, DecisionOptionForm } from '@/types/decision-editor'
 
 const AUTOSAVE_INTERVAL_MS = 60_000
+
+function buildInitialFromTemplate(template: {
+  id: string
+  name: string
+  type: string
+  description?: string | null
+  content_json?: Record<string, unknown>
+  optionSchema?: Record<string, unknown> | null
+}): Partial<DecisionEditorState> {
+  const contentFields =
+    template.content_json &&
+    typeof template.content_json === 'object' &&
+    'fields' in template.content_json
+      ? (template.content_json.fields as string[])
+      : []
+  const optionSchema = template.optionSchema
+  const optionSpecs =
+    optionSchema && typeof optionSchema === 'object' && 'specs' in optionSchema
+      ? (optionSchema.specs as string[])
+      : optionSchema && typeof optionSchema === 'object' && 'layoutData' in optionSchema
+        ? (optionSchema.layoutData as string[])
+        : []
+  const schemaFields = optionSpecs.length > 0 ? optionSpecs : contentFields
+  const placeholderOptions: DecisionOptionForm[] =
+    schemaFields.length > 0
+      ? schemaFields.slice(0, 3).map((_, i) => ({
+          id: `opt-${Date.now()}-${i}`,
+          title: `Option ${i + 1}`,
+          order: i,
+          mediaFiles: [],
+          version: 1,
+        }))
+      : []
+
+  return {
+    title: `${template.name} - `,
+    description: template.description ?? '',
+    templateId: template.id,
+    typeName: template.type,
+    options: placeholderOptions,
+  }
+}
 
 function CreateDecisionContent() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -239,10 +282,29 @@ function CreateDecisionContent() {
   )
 }
 
-export function CreateDecisionPage() {
+function CreateDecisionPageInner() {
+  const { projectId } = useParams<{ projectId: string }>()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const templateIdFromState = (location.state as { templateId?: string } | null)?.templateId
+  const templateIdFromUrl = searchParams.get('templateId')
+  const templateId = templateIdFromState ?? templateIdFromUrl
+  const { templates } = useProjectWorkspace(projectId ?? '')
+
+  const initialState = useMemo(() => {
+    if (!templateId || !templates.length) return undefined
+    const template = templates.find((t) => t.id === templateId)
+    if (!template) return undefined
+    return buildInitialFromTemplate(template)
+  }, [templateId, templates])
+
   return (
-    <DecisionEditorProvider>
+    <DecisionEditorProvider initial={initialState}>
       <CreateDecisionContent />
     </DecisionEditorProvider>
   )
+}
+
+export function CreateDecisionPage() {
+  return <CreateDecisionPageInner />
 }

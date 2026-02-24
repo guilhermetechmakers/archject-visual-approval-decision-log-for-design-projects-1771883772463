@@ -195,7 +195,8 @@ export function ProjectWorkspacePage() {
                   projectId={projectId}
                   decisionsCount={decisions.length}
                   filesCount={files.length}
-                  templatesUsed={0}
+                  templatesUsed={templates.length}
+                  decisions={decisions}
                 />
                 <div className="mt-6">
                   <DecisionsList
@@ -272,9 +273,8 @@ export function ProjectWorkspacePage() {
             <TemplatesLibrary
               templates={templates}
               projectId={projectId}
-              onApplyTemplate={(id) => {
-                toast.info(`Applying template ${id}`)
-                handleNavigateToCreateDecision()
+              onApplyTemplate={(templateId) => {
+                navigate(`/dashboard/projects/${projectId}/decisions/new?templateId=${templateId}`)
               }}
               onCreateDecision={handleNavigateToCreateDecision}
             />

@@ -363,7 +363,15 @@ export function useTemplates() {
 export function useProjectTeamForFilters(projectId: string) {
   return useQuery({
     queryKey: ['workspace', 'team', projectId],
-    queryFn: async () => mockTeam.filter((t) => t.project_id === projectId || t.project_id === 'proj-1'),
+    queryFn: async () => {
+      if (USE_MOCK) {
+        return mockTeam.filter(
+          (t) => t.project_id === projectId || t.project_id === 'proj-1'
+        )
+      }
+      const workspaceApi = await import('@/api/workspace')
+      return workspaceApi.fetchProjectTeam(projectId)
+    },
     enabled: !!projectId,
   })
 }

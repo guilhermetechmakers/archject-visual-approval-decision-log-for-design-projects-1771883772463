@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import { Image, ChevronRight } from 'lucide-react'
+import { Image, ChevronRight, AlertCircle, Clock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import type { Project } from '@/types/workspace'
+import type { Project, Decision } from '@/types/workspace'
 
 export interface OverviewCardProps {
   project: Project
@@ -11,6 +11,7 @@ export interface OverviewCardProps {
   decisionsCount?: number
   filesCount?: number
   templatesUsed?: number
+  decisions?: Decision[]
   className?: string
 }
 
@@ -19,14 +20,27 @@ function formatBytes(bytes: number): string {
   return `${gb.toFixed(1)} GB`
 }
 
+function computeDecisionStats(decisions: Decision[] = []) {
+  const today = new Date().toISOString().slice(0, 10)
+  const open = decisions.filter((d) => d.status === 'pending').length
+  const overdue = decisions.filter(
+    (d) => d.status === 'pending' && d.due_date && d.due_date < today
+  ).length
+  const approved = decisions.filter((d) => d.status === 'approved').length
+  const draft = decisions.filter((d) => d.status === 'draft').length
+  return { open, overdue, approved, draft }
+}
+
 export function OverviewCard({
   project,
   projectId,
   decisionsCount = 0,
   filesCount = 0,
   templatesUsed = 0,
+  decisions = [],
   className,
 }: OverviewCardProps) {
+  const stats = computeDecisionStats(decisions)
   const storagePercent =
     project.storage_quota_bytes > 0
       ? Math.round((project.current_storage_bytes / project.storage_quota_bytes) * 100)
@@ -119,6 +133,30 @@ export function OverviewCard({
             <p className="text-muted-foreground">Files</p>
             <p className="font-semibold">{filesCount}</p>
           </div>
+          {stats.open > 0 && (
+            <div>
+              <p className="text-muted-foreground">Open</p>
+              <p className="font-semibold text-primary">{stats.open}</p>
+            </div>
+          )}
+          {stats.overdue > 0 && (
+            <div>
+              <p className="text-muted-foreground flex items-center gap-1">
+                <AlertCircle className="h-3.5 w-3.5" />
+                Overdue
+              </p>
+              <p className="font-semibold text-destructive">{stats.overdue}</p>
+            </div>
+          )}
+          {stats.draft > 0 && (
+            <div>
+              <p className="text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                Drafts
+              </p>
+              <p className="font-semibold">{stats.draft}</p>
+            </div>
+          )}
           <div>
             <p className="text-muted-foreground">Templates used</p>
             <p className="font-semibold">{templatesUsed}</p>

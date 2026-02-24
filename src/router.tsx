@@ -16,6 +16,7 @@ import { ProjectsPage } from '@/pages/dashboard/projects'
 import { CreateProjectPage } from '@/pages/dashboard/create-project-page'
 import { ProjectWorkspacePage } from '@/pages/dashboard/project-workspace'
 import { DecisionsListPage } from '@/pages/dashboard/decisions-list-page'
+import { TemplatesLibraryPage } from '@/pages/dashboard/templates-library-page'
 import { DecisionsPage } from '@/pages/dashboard/decisions'
 import { DecisionDetailPage } from '@/pages/dashboard/decision-detail'
 import { CreateDecisionPlaceholder } from '@/pages/dashboard/create-decision-placeholder'
@@ -146,6 +147,7 @@ export const router = createBrowserRouter([
           { path: 'projects', element: <ProjectsPage /> },
           { path: 'projects/new', element: <CreateProjectPage /> },
           { path: 'projects/:projectId', element: <ProjectWorkspacePage /> },
+          { path: 'projects/:projectId/templates', element: <TemplatesLibraryPage /> },
           { path: 'projects/:projectId/decisions', element: <DecisionsListPage /> },
           { path: 'projects/:projectId/decisions/new', element: <CreateDecisionPage /> },
           { path: 'projects/:projectId/decisions/:decisionId/edit', element: <EditDecisionPage /> },
