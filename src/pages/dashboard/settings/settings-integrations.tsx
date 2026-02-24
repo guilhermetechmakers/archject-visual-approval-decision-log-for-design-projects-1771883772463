@@ -1,4 +1,4 @@
-import { IntegrationsCard } from '@/components/settings'
+import { IntegrationsCard, NotificationIntegrationsCard } from '@/components/settings'
 
 export function SettingsIntegrations() {
   return (
@@ -6,9 +6,10 @@ export function SettingsIntegrations() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Integrations</h1>
         <p className="mt-1 text-muted-foreground">
-          Google Calendar, Autodesk Forge, Zapier, Stripe
+          Google Calendar, Autodesk Forge, Zapier, Stripe, SendGrid, Twilio
         </p>
       </div>
+      <NotificationIntegrationsCard />
       <IntegrationsCard />
     </div>
   )
