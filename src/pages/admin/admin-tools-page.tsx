@@ -16,6 +16,7 @@ import {
   Download,
   Database,
   LogOut,
+  AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,6 +47,7 @@ import {
   RetentionPolicyModal,
   CreateEscalationModal,
 } from '@/components/admin'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import type { ColumnDef } from '@/components/admin/admin-data-table'
 import {
   useAdminWorkspaces,
@@ -116,11 +118,20 @@ export function AdminToolsPage() {
   const [showBulkDisable, setShowBulkDisable] = React.useState(false)
   const [forceLogoutUser, setForceLogoutUser] = React.useState<AdminUser | null>(null)
 
-  const { data: disputes, isLoading: disputesLoading } = useAdminDisputes()
-  const { data: billingExceptions, isLoading: billingLoading } = useAdminBillingExceptions()
-  const { data: workspaces, isLoading: workspacesLoading } = useAdminWorkspaces()
-  const { data: users, isLoading: usersLoading } = useAdminUsers()
-  const { data: escalations, isLoading: escalationsLoading } = useAdminEscalations()
+  const { data: disputes, isLoading: disputesLoading, isError: disputesError } = useAdminDisputes()
+  const { data: billingExceptions, isLoading: billingLoading, isError: billingError } =
+    useAdminBillingExceptions()
+  const { data: workspaces, isLoading: workspacesLoading, isError: workspacesError } =
+    useAdminWorkspaces()
+  const { data: users, isLoading: usersLoading, isError: usersError } = useAdminUsers()
+  const { data: escalations, isLoading: escalationsLoading, isError: escalationsError } =
+    useAdminEscalations()
+
+  const isTabLoading =
+    (activeTab === 'users' && usersLoading) ||
+    (activeTab === 'workspaces' && workspacesLoading) ||
+    (activeTab === 'billing' && (disputesLoading || billingLoading)) ||
+    (activeTab === 'escalations' && escalationsLoading)
 
   const resolveMutation = useDisputeResolve()
   const escalateMutation = useDisputeEscalate()
@@ -234,20 +245,34 @@ export function AdminToolsPage() {
       id: 'actions',
       header: '',
       accessor: (row) => (
-        <div className="flex gap-1">
+        <div className="flex gap-1" role="group" aria-label={`Actions for workspace ${row.name}`}>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setDisableWorkspace(row)}
             disabled={row.status === 'disabled'}
+            aria-label={`Disable workspace ${row.name}`}
+            title={row.status === 'disabled' ? 'Workspace already disabled' : 'Disable workspace'}
           >
-            <Ban className="h-4 w-4" />
+            <Ban className="h-4 w-4" aria-hidden />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setExportWorkspace(row)}>
-            <Download className="h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setExportWorkspace(row)}
+            aria-label={`Export data for workspace ${row.name}`}
+            title="Export workspace data"
+          >
+            <Download className="h-4 w-4" aria-hidden />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setRetentionWorkspace(row)}>
-            <Database className="h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setRetentionWorkspace(row)}
+            aria-label={`Set retention policy for workspace ${row.name}`}
+            title="Retention policy"
+          >
+            <Database className="h-4 w-4" aria-hidden />
           </Button>
         </div>
       ),
@@ -255,7 +280,22 @@ export function AdminToolsPage() {
   ]
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="relative space-y-8 animate-fade-in">
+      {isTabLoading && (
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-sm"
+          role="status"
+          aria-live="polite"
+          aria-label="Loading admin data"
+        >
+          <div className="flex flex-col items-center gap-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="h-4 w-48" />
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      )}
+
       <div>
         <h1 className="text-2xl font-bold text-foreground">Admin Tools & Moderation</h1>
         <p className="mt-1 text-muted-foreground">
@@ -268,21 +308,25 @@ export function AdminToolsPage() {
         onValueChange={(v) => setSearchParams({ tab: v })}
         className="space-y-6"
       >
-        <TabsList className="flex flex-wrap h-auto gap-1 p-1">
-          <TabsTrigger value="users" className="rounded-full">
-            <UserCheck className="mr-2 h-4 w-4" />
+        <TabsList
+          className="flex flex-wrap h-auto gap-1 p-1"
+          role="tablist"
+          aria-label="Admin tools sections"
+        >
+          <TabsTrigger value="users" className="rounded-full" aria-label="Users management tab">
+            <UserCheck className="mr-2 h-4 w-4" aria-hidden />
             Users
           </TabsTrigger>
-          <TabsTrigger value="workspaces" className="rounded-full">
-            <Building2 className="mr-2 h-4 w-4" />
+          <TabsTrigger value="workspaces" className="rounded-full" aria-label="Workspaces management tab">
+            <Building2 className="mr-2 h-4 w-4" aria-hidden />
             Workspaces
           </TabsTrigger>
-          <TabsTrigger value="billing" className="rounded-full">
-            <CreditCard className="mr-2 h-4 w-4" />
+          <TabsTrigger value="billing" className="rounded-full" aria-label="Billing and disputes tab">
+            <CreditCard className="mr-2 h-4 w-4" aria-hidden />
             Billing & Disputes
           </TabsTrigger>
-          <TabsTrigger value="escalations" className="rounded-full">
-            <TicketPlus className="mr-2 h-4 w-4" />
+          <TabsTrigger value="escalations" className="rounded-full" aria-label="Escalations tab">
+            <TicketPlus className="mr-2 h-4 w-4" aria-hidden />
             Escalations
           </TabsTrigger>
         </TabsList>
@@ -291,7 +335,7 @@ export function AdminToolsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <UserMinus className="h-5 w-5 text-primary" />
+                <UserMinus className="h-5 w-5 text-primary" aria-hidden />
                 Users Management
               </CardTitle>
               <CardDescription>
@@ -300,7 +344,19 @@ export function AdminToolsPage() {
             </CardHeader>
             <CardContent>
               {usersLoading ? (
-                <Skeleton className="h-64" />
+                <div className="space-y-4" role="status" aria-label="Loading users">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </div>
+              ) : usersError ? (
+                <Alert variant="destructive" className="max-w-full">
+                  <AlertCircle className="h-4 w-4" aria-hidden />
+                  <AlertTitle>Failed to load users</AlertTitle>
+                  <AlertDescription>
+                    Unable to fetch user data. Please try again later or check your connection.
+                  </AlertDescription>
+                </Alert>
               ) : (
                 <AdminDataTable<AdminUser>
                   columns={userColumns}
@@ -317,10 +373,21 @@ export function AdminToolsPage() {
 
         <TabsContent value="workspaces" className="space-y-6">
           {selectedWorkspaceIds.size > 0 && (
-            <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 animate-fade-in">
-              <span className="text-sm font-medium">{selectedWorkspaceIds.size} workspace(s) selected</span>
+            <div
+              className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 animate-fade-in"
+              role="status"
+              aria-live="polite"
+            >
+              <span className="text-sm font-medium">
+                {selectedWorkspaceIds.size} workspace(s) selected
+              </span>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setSelectedWorkspaceIds(new Set())}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedWorkspaceIds(new Set())}
+                  aria-label="Clear workspace selection"
+                >
                   Clear
                 </Button>
                 <Button
@@ -328,8 +395,9 @@ export function AdminToolsPage() {
                   size="sm"
                   onClick={() => setShowBulkDisable(true)}
                   disabled={bulkDisableMutation.isPending}
+                  aria-label="Bulk disable selected workspaces"
                 >
-                  <Ban className="mr-2 h-4 w-4" />
+                  <Ban className="mr-2 h-4 w-4" aria-hidden />
                   Bulk disable
                 </Button>
               </div>
@@ -338,7 +406,7 @@ export function AdminToolsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-primary" />
+                <Building2 className="h-5 w-5 text-primary" aria-hidden />
                 Workspaces Management
               </CardTitle>
               <CardDescription>
@@ -347,7 +415,34 @@ export function AdminToolsPage() {
             </CardHeader>
             <CardContent>
               {workspacesLoading ? (
-                <Skeleton className="h-64" />
+                <div className="space-y-4" role="status" aria-label="Loading workspaces">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </div>
+              ) : workspacesError ? (
+                <Alert variant="destructive" className="max-w-full">
+                  <AlertCircle className="h-4 w-4" aria-hidden />
+                  <AlertTitle>Failed to load workspaces</AlertTitle>
+                  <AlertDescription>
+                    Unable to fetch workspace data. Please try again later or check your connection.
+                  </AlertDescription>
+                </Alert>
+              ) : (workspaces ?? []).length === 0 ? (
+                <div
+                  className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-muted">
+                    <Building2 className="h-7 w-7 text-muted-foreground" aria-hidden />
+                  </div>
+                  <p className="mt-6 text-lg font-semibold text-foreground">No workspaces found</p>
+                  <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                    Workspaces will appear here once they are created. Check back later or verify
+                    your admin filters.
+                  </p>
+                </div>
               ) : (
                 <AdminDataTable<Workspace>
                   columns={workspaceColumns}
@@ -379,7 +474,19 @@ export function AdminToolsPage() {
               </CardHeader>
               <CardContent>
                 {disputesLoading ? (
-                  <Skeleton className="h-32" />
+                  <div className="space-y-4" role="status" aria-label="Loading disputes">
+                    {[1, 2, 3].map((i) => (
+                      <Skeleton key={i} className="h-10 w-full" />
+                    ))}
+                  </div>
+                ) : disputesError ? (
+                  <Alert variant="destructive" className="max-w-full">
+                    <AlertCircle className="h-4 w-4" aria-hidden />
+                    <AlertTitle>Failed to load disputes</AlertTitle>
+                    <AlertDescription>
+                      Unable to fetch dispute data. Please try again later.
+                    </AlertDescription>
+                  </Alert>
                 ) : disputes && disputes.length > 0 ? (
                   <Table>
                     <TableHeader>
@@ -413,6 +520,7 @@ export function AdminToolsPage() {
                                     value={resolveNotes}
                                     onChange={(e) => setResolveNotes(e.target.value)}
                                     className="h-8 w-32"
+                                    aria-label="Resolution notes for dispute"
                                   />
                                   <Button
                                     size="sm"
@@ -425,6 +533,7 @@ export function AdminToolsPage() {
                                       setResolveNotes('')
                                     }}
                                     disabled={!resolveNotes.trim() || resolveMutation.isPending}
+                                    aria-label={`Resolve dispute for ${d.workspace_name ?? d.workspace_id}`}
                                   >
                                     Resolve
                                   </Button>
@@ -432,6 +541,7 @@ export function AdminToolsPage() {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setSelectedDispute(null)}
+                                    aria-label="Cancel resolve dispute"
                                   >
                                     Cancel
                                   </Button>
@@ -442,6 +552,7 @@ export function AdminToolsPage() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setSelectedDispute(d.id)}
+                                    aria-label={`Resolve dispute for ${d.workspace_name ?? d.workspace_id}`}
                                   >
                                     Resolve
                                   </Button>
@@ -455,6 +566,7 @@ export function AdminToolsPage() {
                                       })
                                     }
                                     disabled={escalateMutation.isPending}
+                                    aria-label={`Escalate dispute for ${d.workspace_name ?? d.workspace_id}`}
                                   >
                                     Escalate
                                   </Button>
@@ -486,7 +598,19 @@ export function AdminToolsPage() {
               </CardHeader>
               <CardContent>
                 {billingLoading ? (
-                  <Skeleton className="h-32" />
+                  <div className="space-y-4" role="status" aria-label="Loading billing exceptions">
+                    {[1, 2, 3].map((i) => (
+                      <Skeleton key={i} className="h-10 w-full" />
+                    ))}
+                  </div>
+                ) : billingError ? (
+                  <Alert variant="destructive" className="max-w-full">
+                    <AlertCircle className="h-4 w-4" aria-hidden />
+                    <AlertTitle>Failed to load billing exceptions</AlertTitle>
+                    <AlertDescription>
+                      Unable to fetch billing data. Please try again later.
+                    </AlertDescription>
+                  </Alert>
                 ) : billingExceptions && billingExceptions.length > 0 ? (
                   <Table>
                     <TableHeader>
@@ -515,11 +639,12 @@ export function AdminToolsPage() {
                           </TableCell>
                           <TableCell className="text-right">
                             {b.status === 'pending' && (
-                              <div className="flex justify-end gap-1">
+                              <div className="flex justify-end gap-1" role="group" aria-label={`Actions for billing exception ${b.account_id}`}>
                                 <Button
                                   size="sm"
                                   onClick={() => approveMutation.mutate(b.id)}
                                   disabled={approveMutation.isPending}
+                                  aria-label={`Approve billing exception for ${b.account_id}`}
                                 >
                                   Approve
                                 </Button>
@@ -528,6 +653,7 @@ export function AdminToolsPage() {
                                   size="sm"
                                   onClick={() => rejectMutation.mutate(b.id)}
                                   disabled={rejectMutation.isPending}
+                                  aria-label={`Reject billing exception for ${b.account_id}`}
                                 >
                                   Reject
                                 </Button>
@@ -560,14 +686,30 @@ export function AdminToolsPage() {
                 </CardTitle>
                 <CardDescription>View and manage support escalations</CardDescription>
               </div>
-              <Button size="sm" onClick={() => setShowCreateEscalation(true)}>
-                <TicketPlus className="mr-2 h-4 w-4" />
+              <Button
+                size="sm"
+                onClick={() => setShowCreateEscalation(true)}
+                aria-label="Create new escalation"
+              >
+                <TicketPlus className="mr-2 h-4 w-4" aria-hidden />
                 Create Escalation
               </Button>
             </CardHeader>
             <CardContent>
               {escalationsLoading ? (
-                <Skeleton className="h-48" />
+                <div className="space-y-4" role="status" aria-label="Loading escalations">
+                  {[1, 2, 3, 4].map((i) => (
+                    <Skeleton key={i} className="h-10 w-full" />
+                  ))}
+                </div>
+              ) : escalationsError ? (
+                <Alert variant="destructive" className="max-w-full">
+                  <AlertCircle className="h-4 w-4" aria-hidden />
+                  <AlertTitle>Failed to load escalations</AlertTitle>
+                  <AlertDescription>
+                    Unable to fetch escalation data. Please try again later.
+                  </AlertDescription>
+                </Alert>
               ) : escalations && escalations.length > 0 ? (
                 <Table>
                   <TableHeader>
@@ -606,11 +748,20 @@ export function AdminToolsPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <TicketPlus className="h-12 w-12 text-muted-foreground" />
+                <div
+                  className="flex flex-col items-center justify-center py-12 text-center"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <TicketPlus className="h-12 w-12 text-muted-foreground" aria-hidden />
                   <p className="mt-4 font-medium">No escalations</p>
                   <p className="text-sm text-muted-foreground">Create an escalation to get started</p>
-                  <Button className="mt-4" size="sm" onClick={() => setShowCreateEscalation(true)}>
+                  <Button
+                    className="mt-4"
+                    size="sm"
+                    onClick={() => setShowCreateEscalation(true)}
+                    aria-label="Create first escalation"
+                  >
                     Create Escalation
                   </Button>
                 </div>
