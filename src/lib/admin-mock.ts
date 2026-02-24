@@ -57,6 +57,7 @@ export const mockEscalations: Escalation[] = [
 export const mockDashboardSummary: DashboardSummary = {
   accounts: {
     total_active_workspaces: 1247,
+    total_active_users: 3420,
     trial_signups: 89,
     plan_distribution: [
       { plan: 'free', count: 420 },

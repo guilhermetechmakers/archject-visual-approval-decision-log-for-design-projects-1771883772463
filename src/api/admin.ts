@@ -52,6 +52,8 @@ export interface AdminUsersFilters {
   role?: string
   workspace_id?: string
   search?: string
+  activity_from?: string
+  activity_to?: string
 }
 
 export interface AdminAuditFilters {
@@ -61,13 +63,22 @@ export interface AdminAuditFilters {
   limit?: number
 }
 
-export async function fetchAdminDashboardSummary(): Promise<DashboardSummary> {
+export interface AdminDashboardFilters {
+  range?: '7d' | '30d' | '90d'
+  account?: string
+  region?: string
+}
+
+export async function fetchAdminDashboardSummary(
+  filters?: AdminDashboardFilters
+): Promise<DashboardSummary> {
   if (USE_MOCK) {
     await delay(400)
     return mockDashboardSummary
   }
   try {
-    return await api.get<DashboardSummary>('/admin/dashboard/summary')
+    const params = new URLSearchParams(filters as Record<string, string>).toString()
+    return await api.get<DashboardSummary>(`/admin/dashboard/summary?${params}`)
   } catch {
     return mockDashboardSummary
   }
@@ -119,8 +130,10 @@ export async function fetchAdminUsers(filters?: AdminUsersFilters): Promise<Admi
   if (USE_MOCK) {
     await delay(300)
     let result = [...mockUsers]
-    if (filters?.status) result = result.filter((u) => u.status === filters!.status)
-    if (filters?.role) result = result.filter((u) => u.role === filters!.role)
+    if (filters?.status && filters.status !== 'all')
+      result = result.filter((u) => u.status === filters!.status)
+    if (filters?.role && filters.role !== 'all')
+      result = result.filter((u) => u.role === filters!.role)
     if (filters?.search) {
       const q = (filters.search ?? '').toLowerCase()
       result = result.filter(
@@ -420,4 +433,45 @@ export async function postAdminForceLogout(userId: string): Promise<void> {
     return
   }
   await api.post(`/admin/users/${userId}/force-logout`, {})
+}
+
+export async function postMaintenanceWindow(params: {
+  action: 'start' | 'stop'
+  message?: string
+  durationMinutes?: number
+}): Promise<void> {
+  if (USE_MOCK) {
+    await delay(400)
+    return
+  }
+  await api.post('/admin/maintenance-window', params)
+}
+
+export async function postImpersonationRevoke(sessionId?: string): Promise<void> {
+  if (USE_MOCK) {
+    await delay(300)
+    return
+  }
+  await api.post('/admin/impersonation/revoke', sessionId ? { session_id: sessionId } : {})
+}
+
+export async function postComplianceExport(data: {
+  scope: string[]
+  format: 'csv' | 'json' | 'pdf'
+}): Promise<ExportJob> {
+  if (USE_MOCK) {
+    await delay(500)
+    return {
+      id: `ex_${Date.now()}`,
+      type: 'compliance',
+      scope: data.scope.join(','),
+      status: 'pending',
+      created_at: new Date().toISOString(),
+    }
+  }
+  return api.post<ExportJob>('/admin/exports', {
+    type: 'compliance',
+    scope: data.scope,
+    format: data.format,
+  })
 }

@@ -8,7 +8,9 @@ import { Menu } from 'lucide-react'
 import { AdminNav } from './admin-nav'
 import { AdminSideNav } from './admin-side-nav'
 import { AdminHeader } from './admin-header'
+import { ImpersonationBanner } from './impersonation-banner'
 import { Button } from '@/components/ui/button'
+import { ImpersonationProvider } from '@/contexts/impersonation-context'
 import {
   Sheet,
   SheetContent,
@@ -21,15 +23,18 @@ export function AdminLayout() {
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Desktop: left sidebar */}
-      <AdminSideNav
-        collapsed={sideNavCollapsed}
-        onToggle={() => setSideNavCollapsed((c) => !c)}
-        className="hidden md:flex"
-      />
-      {/* Mobile: sheet overlay */}
-      <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+    <ImpersonationProvider>
+      <div className="flex h-screen flex-col overflow-hidden bg-background">
+        <ImpersonationBanner />
+        <div className="flex flex-1 overflow-hidden">
+          {/* Desktop: left sidebar */}
+          <AdminSideNav
+            collapsed={sideNavCollapsed}
+            onToggle={() => setSideNavCollapsed((c) => !c)}
+            className="hidden md:flex"
+          />
+          {/* Mobile: sheet overlay */}
+          <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
         <SheetContent side="left" className="w-64 p-0">
           <SheetHeader className="border-b border-border p-4">
             <SheetTitle>Admin</SheetTitle>
@@ -62,6 +67,8 @@ export function AdminLayout() {
           <Outlet />
         </main>
       </div>
-    </div>
+        </div>
+      </div>
+    </ImpersonationProvider>
   )
 }

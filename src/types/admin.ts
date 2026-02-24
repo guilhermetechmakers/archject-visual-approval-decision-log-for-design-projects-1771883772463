@@ -134,6 +134,7 @@ export interface Escalation {
 export interface DashboardSummary {
   accounts: {
     total_active_workspaces: number
+    total_active_users?: number
     trial_signups: number
     plan_distribution: { plan: string; count: number }[]
     churn_rate: number

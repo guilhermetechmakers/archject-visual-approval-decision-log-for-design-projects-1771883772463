@@ -1,12 +1,13 @@
 /**
- * Admin - User Management - workspace list with impersonate, escalate, export, audit.
+ * Admin - User Management - workspace and user list with impersonate, escalate, export, audit.
  */
 
 import * as React from 'react'
-import { UserCog, Download, AlertCircle, Eye } from 'lucide-react'
+import { UserCog, Download, AlertCircle, Eye, Building2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   AdminDataTable,
   ImpersonationModal,
@@ -18,19 +19,23 @@ import {
   WorkspaceFiltersPanel,
   WorkspaceDetailDrawer,
 } from '@/components/admin'
+import { useImpersonation } from '@/contexts/impersonation-context'
+import { UserFiltersPanel } from '@/components/admin/user-filters-panel'
 import type { ColumnDef } from '@/components/admin/admin-data-table'
 import {
   useAdminWorkspaces,
+  useAdminUsers,
   useWorkspaceImpersonate,
   useWorkspaceDisable,
   useWorkspaceExport,
   useWorkspaceRetention,
   useCreateEscalation,
 } from '@/hooks/use-admin'
-import type { Workspace } from '@/types/admin'
+import type { Workspace, AdminUser } from '@/types/admin'
 import { Badge } from '@/components/ui/badge'
-import type { AdminWorkspacesFilters } from '@/api/admin'
+import type { AdminWorkspacesFilters, AdminUsersFilters } from '@/api/admin'
 import type { WorkspaceFilters } from '@/components/admin/workspace-filters-panel'
+import type { UserFilters } from '@/components/admin/user-filters-panel'
 
 const statusVariant: Record<string, 'default' | 'success' | 'warning' | 'destructive'> = {
   active: 'success',
@@ -66,6 +71,13 @@ const defaultFilters: WorkspaceFilters = {
   domain: '',
 }
 
+const defaultUserFilters: UserFilters = {
+  search: '',
+  status: 'all',
+  role: 'all',
+  lastActivity: 'all',
+}
+
 function toApiFilters(f: WorkspaceFilters): AdminWorkspacesFilters {
   return {
     search: f.search.trim() || undefined,
@@ -75,8 +87,17 @@ function toApiFilters(f: WorkspaceFilters): AdminWorkspacesFilters {
   }
 }
 
+function toUserApiFilters(f: UserFilters): AdminUsersFilters {
+  return {
+    search: f.search.trim() || undefined,
+    status: f.status === 'all' ? undefined : f.status,
+    role: f.role === 'all' ? undefined : f.role,
+  }
+}
+
 export function AdminUsersPage() {
   const [filters, setFilters] = React.useState<WorkspaceFilters>(defaultFilters)
+  const [userFilters, setUserFilters] = React.useState<UserFilters>(defaultUserFilters)
   const [selectedWorkspace, setSelectedWorkspace] = React.useState<Workspace | null>(null)
   const [detailDrawerOpen, setDetailDrawerOpen] = React.useState(false)
   const [impersonateWorkspace, setImpersonateWorkspace] = React.useState<Workspace | null>(null)
@@ -87,6 +108,8 @@ export function AdminUsersPage() {
   const [escalationWorkspace, setEscalationWorkspace] = React.useState<Workspace | null>(null)
 
   const { data: workspaces, isLoading } = useAdminWorkspaces(toApiFilters(filters))
+  const { data: users, isLoading: usersLoading } = useAdminUsers(toUserApiFilters(userFilters))
+  const { startSession } = useImpersonation()
   const impersonateMutation = useWorkspaceImpersonate()
   const disableMutation = useWorkspaceDisable()
   const exportMutation = useWorkspaceExport()
@@ -95,7 +118,23 @@ export function AdminUsersPage() {
 
   const handleImpersonateConfirm = (reason: string) => {
     if (!impersonateWorkspace) return
-    impersonateMutation.mutate({ workspaceId: impersonateWorkspace.id, reason })
+    impersonateMutation.mutate(
+      { workspaceId: impersonateWorkspace.id, reason },
+      {
+        onSuccess: (data) => {
+          startSession({
+            sessionId: data.token,
+            targetUserId: impersonateWorkspace.owner_user_id ?? '',
+            targetWorkspaceId: impersonateWorkspace.id,
+            targetWorkspaceName: impersonateWorkspace.name,
+            targetUserName: impersonateWorkspace.owner_name ?? undefined,
+            startedAt: new Date().toISOString(),
+            reason,
+          })
+          setImpersonateWorkspace(null)
+        },
+      }
+    )
   }
 
   const handleDisableConfirm = (reason: string) => {
@@ -227,48 +266,132 @@ export function AdminUsersPage() {
     },
   ]
 
+  const userColumns: ColumnDef<AdminUser>[] = [
+    {
+      id: 'user',
+      header: 'User',
+      accessor: (row) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-7 w-7">
+            <AvatarFallback className="text-xs">
+              {getInitials(row.name, row.email)}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-medium">{row.name ?? row.email}</p>
+            <p className="text-xs text-muted-foreground">{row.email}</p>
+          </div>
+        </div>
+      ),
+    },
+    { id: 'role', header: 'Role', accessor: (row) => <span className="capitalize">{row.role}</span> },
+    {
+      id: 'status',
+      header: 'Status',
+      accessor: (row) => (
+        <Badge variant={statusVariant[row.status] ?? 'default'}>{row.status}</Badge>
+      ),
+    },
+    {
+      id: 'last_login',
+      header: 'Last Activity',
+      accessor: (row) => formatDate(row.last_login),
+    },
+  ]
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-foreground">User Management</h1>
         <p className="mt-1 text-muted-foreground">
-          View and intervene in customer workspaces, impersonate for support, escalate issues.
+          View and intervene in customer workspaces and users. Impersonate for support, escalate issues.
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserCog className="h-5 w-5 text-primary" />
-                Workspaces
-              </CardTitle>
-              <CardDescription>
-                Workspace list with actions: impersonate, escalate, export, view details.
-              </CardDescription>
-              <WorkspaceFiltersPanel
-                filters={filters}
-                onFiltersChange={setFilters}
-                onReset={() => setFilters(defaultFilters)}
-                className="mt-4"
-              />
-            </CardHeader>
-            <CardContent>
-              <AdminDataTable<Workspace>
-                columns={columns}
-                data={workspaces ?? []}
-                isLoading={isLoading}
-                emptyMessage="No workspaces found"
-                getRowId={(row) => row.id}
-              />
-            </CardContent>
-          </Card>
-        </div>
-        <div>
-          <AuditLogPanel defaultExpanded={true} />
-        </div>
-      </div>
+      <Tabs defaultValue="workspaces" className="space-y-6">
+        <TabsList className="flex flex-wrap h-auto gap-1 p-1 rounded-full bg-secondary">
+          <TabsTrigger value="workspaces" className="rounded-full">
+            <Building2 className="mr-2 h-4 w-4" />
+            Workspaces
+          </TabsTrigger>
+          <TabsTrigger value="users" className="rounded-full">
+            <Users className="mr-2 h-4 w-4" />
+            Users
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="workspaces" className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserCog className="h-5 w-5 text-primary" />
+                    Workspaces
+                  </CardTitle>
+                  <CardDescription>
+                    Workspace list with actions: impersonate, escalate, export, view details.
+                  </CardDescription>
+                  <WorkspaceFiltersPanel
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                    onReset={() => setFilters(defaultFilters)}
+                    className="mt-4"
+                  />
+                </CardHeader>
+                <CardContent>
+                  <AdminDataTable<Workspace>
+                    columns={columns}
+                    data={workspaces ?? []}
+                    isLoading={isLoading}
+                    emptyMessage="No workspaces found"
+                    getRowId={(row) => row.id}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div>
+              <AuditLogPanel defaultExpanded={true} />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Users
+                  </CardTitle>
+                  <CardDescription>
+                    User list with status, role, last activity. Search and filter by status, role.
+                  </CardDescription>
+                  <UserFiltersPanel
+                    filters={userFilters}
+                    onFiltersChange={setUserFilters}
+                    onReset={() => setUserFilters(defaultUserFilters)}
+                    className="mt-4"
+                  />
+                </CardHeader>
+                <CardContent>
+                  <AdminDataTable<AdminUser>
+                    columns={userColumns}
+                    data={users ?? []}
+                    isLoading={usersLoading}
+                    emptyMessage="No users found"
+                    getRowId={(row) => row.id}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div>
+              <AuditLogPanel defaultExpanded={true} />
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <ImpersonationModal
         open={!!impersonateWorkspace}

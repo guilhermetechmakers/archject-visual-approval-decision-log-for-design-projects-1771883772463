@@ -3,6 +3,7 @@
  */
 
 import * as React from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   UserMinus,
   UserCheck,
@@ -94,7 +95,16 @@ const escalationPriorityVariant: Record<string, 'default' | 'success' | 'warning
   critical: 'destructive',
 }
 
+const VALID_TABS = ['users', 'workspaces', 'billing', 'escalations'] as const
+
 export function AdminToolsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabParam = searchParams.get('tab')
+  const activeTab =
+    tabParam && VALID_TABS.includes(tabParam as (typeof VALID_TABS)[number])
+      ? tabParam
+      : 'users'
+
   const [resolveNotes, setResolveNotes] = React.useState('')
   const [selectedDispute, setSelectedDispute] = React.useState<string | null>(null)
   const [selectedWorkspaceIds, setSelectedWorkspaceIds] = React.useState<Set<string>>(new Set())
@@ -252,7 +262,11 @@ export function AdminToolsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="users" className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setSearchParams({ tab: v })}
+        className="space-y-6"
+      >
         <TabsList className="flex flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="users" className="rounded-full">
             <UserCheck className="mr-2 h-4 w-4" />

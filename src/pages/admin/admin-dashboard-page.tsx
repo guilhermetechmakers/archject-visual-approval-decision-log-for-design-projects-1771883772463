@@ -2,6 +2,7 @@
  * Admin Dashboard - overview with accounts, health, support, usage, alerts, escalations.
  */
 
+import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import {
   AccountsOverviewCard,
@@ -13,13 +14,35 @@ import {
   RecentEscalationsPanel,
   TopTenantsPanel,
   SecurityEventsPanel,
+  AdminDashboardKpiTiles,
+  DashboardFilters,
 } from '@/components/admin'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useAdminDashboardSummary } from '@/hooks/use-admin'
 import { Skeleton } from '@/components/ui/skeleton'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, Calendar } from 'lucide-react'
+import type { AdminDashboardFilters } from '@/api/admin'
+
+const DATE_RANGE_OPTIONS = [
+  { value: '7d', label: 'Last 7 days' },
+  { value: '30d', label: 'Last 30 days' },
+  { value: '90d', label: 'Last 90 days' },
+] as const
 
 export function AdminDashboardPage() {
-  const { data, isLoading, error, refetch } = useAdminDashboardSummary()
+  const [dateRange, setDateRange] = React.useState<AdminDashboardFilters['range']>('30d')
+  const [filters, setFilters] = React.useState({
+    dateRange: '30d',
+    region: 'all',
+    accountTier: 'all',
+  })
+  const { data, isLoading, error, refetch } = useAdminDashboardSummary({ range: dateRange })
 
   if (isLoading) {
     return (
@@ -53,13 +76,35 @@ export function AdminDashboardPage() {
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Select
+            value={dateRange}
+            onValueChange={(v) => setDateRange(v as AdminDashboardFilters['range'])}
+          >
+            <SelectTrigger className="w-[160px]">
+              <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DATE_RANGE_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <QuickActionsRail />
+
+      <DashboardFilters filters={filters} onFiltersChange={setFilters} />
+
+      <AdminDashboardKpiTiles data={data} />
 
       {data.alerts && data.alerts.length > 0 && (
         <AlertsPanel alerts={data.alerts} />

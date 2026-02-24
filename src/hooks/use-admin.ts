@@ -4,7 +4,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { AdminWorkspacesFilters, AdminUsersFilters, AdminAuditFilters } from '@/api/admin'
+import type {
+  AdminWorkspacesFilters,
+  AdminUsersFilters,
+  AdminAuditFilters,
+  AdminDashboardFilters,
+} from '@/api/admin'
+import type { DashboardSummary } from '@/types/admin'
 import {
   fetchAdminDashboardSummary,
   fetchAdminWorkspaces,
@@ -34,6 +40,8 @@ import {
   postBillingExceptionReject,
   patchFeatureToggle,
   postCreateExport,
+  postImpersonationRevoke,
+  postMaintenanceWindow,
 } from '@/api/admin'
 
 export const ADMIN_QUERY_KEYS = {
@@ -50,10 +58,10 @@ export const ADMIN_QUERY_KEYS = {
   escalations: ['admin', 'escalations'] as const,
 }
 
-export function useAdminDashboardSummary() {
-  return useQuery({
-    queryKey: ADMIN_QUERY_KEYS.summary,
-    queryFn: fetchAdminDashboardSummary,
+export function useAdminDashboardSummary(filters?: AdminDashboardFilters) {
+  return useQuery<DashboardSummary>({
+    queryKey: [...ADMIN_QUERY_KEYS.summary, filters],
+    queryFn: () => fetchAdminDashboardSummary(filters),
     staleTime: 30 * 1000,
   })
 }
@@ -409,6 +417,60 @@ export function useCreateExport() {
     },
     onError: (err: Error) => {
       toast.error(err.message || 'Failed to create export')
+    },
+  })
+}
+
+export function useComplianceExport() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (params: { scope: string; format: string }) => {
+      const scopeStr = params.scope === 'all' ? 'users,workspaces,audit_logs' : params.scope
+      return postCreateExport('compliance', scopeStr)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.exportJobs })
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.auditLogs })
+      toast.success('Compliance export queued. Download link will be available when ready.')
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to create compliance export')
+    },
+  })
+}
+
+export function useMaintenanceWindow() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (params: {
+      action: 'start' | 'stop'
+      message?: string
+      durationMinutes?: number
+    }) => postMaintenanceWindow(params),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.summary })
+      toast.success(
+        variables.action === 'start'
+          ? 'Maintenance window started'
+          : 'Maintenance window stopped'
+      )
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to update maintenance window')
+    },
+  })
+}
+
+export function useImpersonationRevoke() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => postImpersonationRevoke(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.auditLogs })
+      toast.success('Impersonation ended')
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to revoke impersonation')
     },
   })
 }
