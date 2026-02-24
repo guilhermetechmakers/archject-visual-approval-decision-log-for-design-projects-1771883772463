@@ -13,6 +13,7 @@ import {
   Ban,
   Download,
   Database,
+  LogOut,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,6 +29,14 @@ import {
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   AdminDataTable,
   DisableWorkspaceModal,
@@ -53,6 +62,7 @@ import {
   useBulkWorkspaceDisable,
   useUserSuspend,
   useUserActivate,
+  useAdminForceLogout,
 } from '@/hooks/use-admin'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Workspace, AdminUser } from '@/types/admin'
@@ -93,6 +103,7 @@ export function AdminToolsPage() {
   const [exportWorkspace, setExportWorkspace] = React.useState<Workspace | null>(null)
   const [retentionWorkspace, setRetentionWorkspace] = React.useState<Workspace | null>(null)
   const [showBulkDisable, setShowBulkDisable] = React.useState(false)
+  const [forceLogoutUser, setForceLogoutUser] = React.useState<AdminUser | null>(null)
 
   const { data: disputes, isLoading: disputesLoading } = useAdminDisputes()
   const { data: billingExceptions, isLoading: billingLoading } = useAdminBillingExceptions()
@@ -111,6 +122,7 @@ export function AdminToolsPage() {
   const bulkDisableMutation = useBulkWorkspaceDisable()
   const suspendUserMutation = useUserSuspend()
   const activateUserMutation = useUserActivate()
+  const forceLogoutMutation = useAdminForceLogout()
 
   const handleBulkDisableConfirm = (reason: string) => {
     if (selectedWorkspaceIds.size === 0 || !reason.trim()) return
@@ -155,13 +167,14 @@ export function AdminToolsPage() {
       id: 'actions',
       header: '',
       accessor: (row) => (
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {row.status === 'suspended' ? (
             <Button
               size="sm"
               variant="outline"
               onClick={() => activateUserMutation.mutate(row.id)}
               disabled={activateUserMutation.isPending}
+              aria-label={`Activate ${row.email}`}
             >
               <UserCheck className="mr-1 h-4 w-4" />
               Activate
@@ -172,11 +185,22 @@ export function AdminToolsPage() {
               variant="outline"
               onClick={() => suspendUserMutation.mutate(row.id)}
               disabled={suspendUserMutation.isPending || row.role === 'owner'}
+              aria-label={`Suspend ${row.email}`}
             >
               <UserMinus className="mr-1 h-4 w-4" />
               Suspend
             </Button>
           )}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-destructive hover:bg-destructive/10"
+            onClick={() => setForceLogoutUser(row)}
+            aria-label={`Force sign-out ${row.email}`}
+            title="Sign out from all devices"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       ),
     },
@@ -629,6 +653,34 @@ export function AdminToolsPage() {
         }}
         isLoading={createEscalationMutation.isPending}
       />
+
+      <Dialog open={!!forceLogoutUser} onOpenChange={(open) => !open && setForceLogoutUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Force sign-out</DialogTitle>
+            <DialogDescription>
+              This will sign out {forceLogoutUser?.name ?? forceLogoutUser?.email ?? 'this user'} from all devices. They will need to sign in again.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setForceLogoutUser(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (forceLogoutUser) {
+                  forceLogoutMutation.mutate(forceLogoutUser.id)
+                  setForceLogoutUser(null)
+                }
+              }}
+              disabled={forceLogoutMutation.isPending}
+            >
+              {forceLogoutMutation.isPending ? 'Signing out...' : 'Sign out everywhere'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {showBulkDisable && (
         <DisableWorkspaceModal

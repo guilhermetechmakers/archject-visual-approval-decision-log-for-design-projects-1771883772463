@@ -26,6 +26,7 @@ import {
   postBulkWorkspaceDisable,
   postUserSuspend,
   postUserActivate,
+  postAdminForceLogout,
   postUsersBulkUpdate,
   postDisputeResolve,
   postDisputeEscalate,
@@ -271,6 +272,20 @@ export function useUserActivate() {
     },
     onError: (err: Error) => {
       toast.error(err.message || 'Failed to activate user')
+    },
+  })
+}
+
+export function useAdminForceLogout() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: postAdminForceLogout,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.auditLogs })
+      toast.success('User signed out from all devices')
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to force sign-out')
     },
   })
 }

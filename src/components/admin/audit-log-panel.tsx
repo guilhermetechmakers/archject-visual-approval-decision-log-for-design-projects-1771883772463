@@ -33,6 +33,9 @@ const ACTION_LABELS: Record<string, string> = {
   workspace_export: 'Data export triggered',
   workspace_retention: 'Retention policy set',
   escalation_create: 'Escalation created',
+  token_revoke: 'Token revoked',
+  force_logout: 'Force sign-out',
+  session_revoke: 'Session revoked',
 }
 
 function formatTimestamp(ts: string) {

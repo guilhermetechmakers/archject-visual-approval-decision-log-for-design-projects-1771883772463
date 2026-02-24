@@ -58,6 +58,7 @@ export interface AdminAuditFilters {
   actor_id?: string
   workspace_id?: string
   action_type?: string
+  limit?: number
 }
 
 export async function fetchAdminDashboardSummary(): Promise<DashboardSummary> {
@@ -411,4 +412,12 @@ export async function postCreateExport(type: string, scope: string): Promise<Exp
     }
   }
   return api.post<ExportJob>('/admin/exports', { type, scope })
+}
+
+export async function postAdminForceLogout(userId: string): Promise<void> {
+  if (USE_MOCK) {
+    await delay(300)
+    return
+  }
+  await api.post(`/admin/users/${userId}/force-logout`, {})
 }

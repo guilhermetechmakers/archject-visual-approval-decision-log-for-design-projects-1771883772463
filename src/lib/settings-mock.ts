@@ -75,8 +75,27 @@ export const MOCK_API_KEYS: ApiKey[] = [
 ]
 
 export const MOCK_SESSIONS: Session[] = [
-  { id: 'sess_1', device: 'Chrome on macOS', location: 'San Francisco, CA', lastUsed: '2025-02-23T10:00:00Z', current: true },
-  { id: 'sess_2', device: 'Safari on iPhone', location: 'San Francisco, CA', lastUsed: '2025-02-22T18:30:00Z' },
+  {
+    id: 'sess_1',
+    device: 'Chrome on macOS',
+    location: 'San Francisco, CA',
+    lastUsed: '2025-02-23T10:00:00Z',
+    current: true,
+    os: 'macOS 14',
+    browser: 'Chrome 121',
+    ipAddress: '192.168.1.1',
+    deviceName: 'MacBook Pro',
+  },
+  {
+    id: 'sess_2',
+    device: 'Safari on iPhone',
+    location: 'San Francisco, CA',
+    lastUsed: '2025-02-22T18:30:00Z',
+    os: 'iOS 17',
+    browser: 'Safari',
+    ipAddress: '192.168.1.2',
+    deviceName: 'iPhone 15',
+  },
 ]
 
 export const MOCK_DATA_EXPORTS: DataExport[] = [

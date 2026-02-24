@@ -50,7 +50,7 @@ export function SystemHealthPanel({ data, className }: SystemHealthPanelProps) {
         </Badge>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
           <div>
             <p className="text-xs text-muted-foreground">Uptime</p>
             <p className="text-lg font-semibold">{data.uptime_pct}%</p>
@@ -67,6 +67,25 @@ export function SystemHealthPanel({ data, className }: SystemHealthPanelProps) {
             <p className="text-xs text-muted-foreground">Backlog</p>
             <p className="text-lg font-semibold">{data.backlog_size}</p>
           </div>
+          {data.redis_health && (
+            <div>
+              <p className="text-xs text-muted-foreground">Redis</p>
+              <p
+                className={cn(
+                  'text-lg font-semibold',
+                  data.redis_health === 'healthy' && 'text-success',
+                  data.redis_health === 'degraded' && 'text-warning',
+                  data.redis_health === 'unavailable' && 'text-destructive'
+                )}
+              >
+                {data.redis_health === 'healthy'
+                  ? 'Healthy'
+                  : data.redis_health === 'degraded'
+                    ? 'Degraded'
+                    : 'Unavailable'}
+              </p>
+            </div>
+          )}
         </div>
         <div className="h-32">
           <ResponsiveContainer width="100%" height="100%">

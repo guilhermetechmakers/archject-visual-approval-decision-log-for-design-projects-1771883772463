@@ -166,6 +166,15 @@ export function useRevokeSession() {
   })
 }
 
+export function useRevokeAllSessionsExceptCurrent() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (exceptSessionId?: string) =>
+      settingsApi.revokeAllSessionsExceptCurrent(exceptSessionId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'sessions'] }),
+  })
+}
+
 export function useSettingsDataExports() {
   return useQuery({
     queryKey: [...SETTINGS_KEYS, 'data-exports'],

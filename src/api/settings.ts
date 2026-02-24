@@ -80,7 +80,11 @@ export const settingsApi = {
 
   getSessions: () => api.get<Session[]>('/settings/sessions'),
   revokeSession: (id: string) =>
-    api.post<void>(`/settings/sessions/revoke/${id}`),
+    api.delete<void>(`/settings/sessions/${id}`),
+  revokeAllSessionsExceptCurrent: (exceptSessionId?: string) => {
+    const qs = exceptSessionId ? `?exceptSessionId=${encodeURIComponent(exceptSessionId)}` : ''
+    return api.delete<void>(`/settings/sessions${qs}`)
+  },
 
   getConnectedAccounts: () =>
     api.get<{ id: string; provider: string; email?: string; connected: boolean }[]>('/settings/connected-accounts'),

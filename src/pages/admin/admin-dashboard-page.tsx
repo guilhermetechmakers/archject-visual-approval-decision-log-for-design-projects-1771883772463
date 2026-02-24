@@ -12,6 +12,7 @@ import {
   AlertsPanel,
   RecentEscalationsPanel,
   TopTenantsPanel,
+  SecurityEventsPanel,
 } from '@/components/admin'
 import { useAdminDashboardSummary } from '@/hooks/use-admin'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -69,6 +70,10 @@ export function AdminDashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <SystemHealthPanel data={data.system_health} />
         <SupportQueuePanel summary={data.support_queue} />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SecurityEventsPanel defaultExpanded />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

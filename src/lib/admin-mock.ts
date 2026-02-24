@@ -71,6 +71,7 @@ export const mockDashboardSummary: DashboardSummary = {
     api_latency_ms: 42,
     errors_last_24h: 12,
     backlog_size: 3,
+    redis_health: 'healthy',
   },
   usage: {
     traffic_24h: 1250000,
@@ -104,6 +105,7 @@ export const mockSystemHealthHistory: SystemHealth[] = Array.from(
       api_latency_ms: 35 + Math.random() * 30,
       errors_last_24h: Math.floor(Math.random() * 20),
       backlog_size: Math.floor(Math.random() * 10),
+      redis_health: 'healthy' as const,
     }
   }
 )
@@ -321,6 +323,28 @@ export const mockAuditLogs: AdminAuditLog[] = [
     timestamp: '2025-02-23T10:15:00Z',
     payload: { workspace_id: 'ws-1', reason: 'Support ticket #12345' },
     after_state: { workspace_id: 'ws-1' },
+  },
+  {
+    id: 'al-token-1',
+    admin_id: 'admin-1',
+    actor_id: 'admin-1',
+    action: 'token_revoke',
+    action_type: 'token_revoke',
+    target_type: 'user',
+    target_id: 'usr-4',
+    timestamp: '2025-02-23T09:45:00Z',
+    payload: { reason: 'Security incident' },
+  },
+  {
+    id: 'al-token-2',
+    admin_id: 'admin-1',
+    actor_id: 'admin-1',
+    action: 'force_logout',
+    action_type: 'force_logout',
+    target_type: 'user',
+    target_id: 'usr-3',
+    timestamp: '2025-02-23T09:30:00Z',
+    payload: { sessions_revoked: 2 },
   },
   {
     id: 'al-2',

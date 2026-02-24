@@ -80,6 +80,8 @@ export interface SystemHealth {
   api_latency_ms: number
   errors_last_24h: number
   backlog_size: number
+  /** Redis health for token blacklist/revocation store */
+  redis_health?: 'healthy' | 'degraded' | 'unavailable'
 }
 
 export interface FeatureToggle {

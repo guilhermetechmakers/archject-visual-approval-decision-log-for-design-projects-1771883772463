@@ -100,6 +100,12 @@ export interface Session {
   location: string
   lastUsed: string
   current?: boolean
+  /** Device details for display */
+  os?: string
+  browser?: string
+  ipAddress?: string
+  userAgent?: string
+  deviceName?: string
 }
 
 export interface DataExport {
