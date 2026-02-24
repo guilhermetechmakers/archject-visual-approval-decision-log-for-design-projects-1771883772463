@@ -149,6 +149,12 @@ export function DashboardOverview() {
               All projects
             </Button>
           </Link>
+          <Link to="/dashboard/search">
+            <Button variant="secondary" size="sm" className="transition-all hover:scale-[1.02]">
+              <Search className="mr-2 h-4 w-4" />
+              Search
+            </Button>
+          </Link>
           <Link to="/dashboard/decisions">
             <Button variant="secondary" size="sm" className="transition-all hover:scale-[1.02]">
               <FileText className="mr-2 h-4 w-4" />

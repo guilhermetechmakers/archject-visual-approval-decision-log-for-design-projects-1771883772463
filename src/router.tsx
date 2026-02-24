@@ -16,6 +16,7 @@ import { ProjectsPage } from '@/pages/dashboard/projects'
 import { CreateProjectPage } from '@/pages/dashboard/create-project-page'
 import { ProjectWorkspacePage } from '@/pages/dashboard/project-workspace'
 import { DecisionsListPage } from '@/pages/dashboard/decisions-list-page'
+import { SearchPage } from '@/pages/dashboard/search-page'
 import { TemplatesLibraryPage } from '@/pages/dashboard/templates-library-page'
 import { DecisionsPage } from '@/pages/dashboard/decisions'
 import { DecisionDetailPage } from '@/pages/dashboard/decision-detail'
@@ -142,6 +143,7 @@ export const router = createBrowserRouter([
         ),
         children: [
           { index: true, element: <DashboardOverview /> },
+          { path: 'search', element: <SearchPage /> },
           { path: 'analytics', element: <AnalyticsDashboardPage /> },
           { path: 'analytics/drilldown', element: <AnalyticsDrilldownPage /> },
           { path: 'projects', element: <ProjectsPage /> },

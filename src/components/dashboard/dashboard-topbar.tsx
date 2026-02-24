@@ -1,8 +1,7 @@
-import * as React from 'react'
-import { Search, ChevronDown, Settings, LogOut } from 'lucide-react'
+import { ChevronDown, Settings, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { GlobalSearchBar } from '@/components/search'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -39,19 +38,11 @@ export function DashboardTopbar({
   const { logout } = useAuth()
   const { data } = useDashboardData(workspaceId ?? undefined)
   const { data: workspaces = [] } = useWorkspaces()
-  const [searchValue, setSearchValue] = React.useState('')
 
   const user = data?.user
   const workspace = data?.workspace
   const currentWorkspaceId = workspaceId ?? workspace?.id
   const userId = data?.user?.id
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchValue.trim()) {
-      window.location.href = `/dashboard/decisions?q=${encodeURIComponent(searchValue.trim())}`
-    }
-  }
 
   return (
     <header
@@ -61,20 +52,9 @@ export function DashboardTopbar({
       )}
     >
       <div className="flex flex-1 items-center gap-4">
-        <form onSubmit={handleSearch} className="relative hidden flex-1 max-w-md md:block">
-          <Search
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-          <Input
-            type="search"
-            placeholder="Search projects, decisions, files..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="pl-9"
-            aria-label="Global search"
-          />
-        </form>
+        <div className="hidden flex-1 max-w-md md:block">
+          <GlobalSearchBar placeholder="Search projects, decisions, files..." />
+        </div>
       </div>
 
       <div className="flex items-center gap-2">

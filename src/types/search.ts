@@ -44,7 +44,7 @@ export interface SearchFilterFacet {
 }
 
 export interface SearchQueryParams {
-  query: string
+  query?: string
   filters?: SearchFilterFacet[]
   page?: number
   pageSize?: number

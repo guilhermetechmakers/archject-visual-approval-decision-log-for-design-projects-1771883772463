@@ -208,9 +208,7 @@ export function ProjectWorkspacePage() {
                   />
                 </div>
                 <div className="mt-6">
-                  <SearchFilterPanel
-                    onSearch={(q) => toast.info(`Search: ${q}`)}
-                  />
+                  <SearchFilterPanel projectId={projectId} />
                 </div>
                 <div className="mt-6">
                   <ExportsPanel
@@ -283,7 +281,7 @@ export function ProjectWorkspacePage() {
           {activeTab === 'activity' && (
             <div className="grid gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2">
-                <SearchFilterPanel />
+                <SearchFilterPanel projectId={projectId} />
                 <div className="mt-6">
                   <ActivitySidebar activity={activity} />
                 </div>

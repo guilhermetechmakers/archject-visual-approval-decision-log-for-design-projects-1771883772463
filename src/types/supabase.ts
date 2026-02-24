@@ -629,9 +629,119 @@ export interface Database {
           is_active?: boolean
         }
       }
+      saved_searches: {
+        Row: {
+          id: string
+          user_id: string
+          workspace_id: string | null
+          name: string
+          query: string
+          filters: Json
+          is_shared: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          workspace_id?: string | null
+          name: string
+          query?: string
+          filters?: Json
+          is_shared?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          workspace_id?: string | null
+          name?: string
+          query?: string
+          filters?: Json
+          is_shared?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      search_audit_log: {
+        Row: {
+          id: string
+          user_id: string | null
+          query: string | null
+          filters: Json
+          result_count: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          query?: string | null
+          filters?: Json
+          result_count?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          query?: string | null
+          filters?: Json
+          result_count?: number | null
+          created_at?: string
+        }
+      }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      search_unified: {
+        Args: {
+          p_query: string
+          p_entity_types: string[] | null
+          p_project_id: string | null
+          p_status: string[] | null
+          p_page: number
+          p_page_size: number
+          p_sort_field: string
+          p_sort_order: string
+        }
+        Returns: {
+          id: string
+          entity_type: string
+          project_id: string
+          project_name: string | null
+          title: string
+          excerpt: string
+          status: string
+          created_at: string
+          updated_at: string
+          author_id: string | null
+          href: string
+        }[]
+      }
+      search_unified_count: {
+        Args: {
+          p_query: string
+          p_entity_types: string[] | null
+          p_project_id: string | null
+          p_status: string[] | null
+        }
+        Returns: number
+      }
+      search_autocomplete: {
+        Args: {
+          p_query: string
+          p_entity_types: string[] | null
+          p_limit: number
+        }
+        Returns: {
+          id: string
+          entity_type: string
+          title: string
+          excerpt: string
+          href: string
+        }[]
+      }
+    }
     Enums: {
       workspace_role: 'owner' | 'admin' | 'editor' | 'viewer'
       workspace_status: 'active' | 'pending'

@@ -12,11 +12,13 @@ import {
   ChevronRight,
   Shield,
   HelpCircle,
+  Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/dashboard/search', icon: Search, label: 'Search' },
   { to: '/dashboard/profile', icon: User, label: 'Profile' },
   { to: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -17,14 +18,16 @@ export interface SearchFilterPanelProps {
   onFilterChange?: (filters: Record<string, unknown>) => void
   placeholder?: string
   className?: string
+  /** When set, search navigates to /dashboard/search with projectId */
+  projectId?: string
 }
 
 const scopes = [
   { value: 'all', label: 'All' },
-  { value: 'projects', label: 'Projects' },
-  { value: 'decisions', label: 'Decisions' },
-  { value: 'files', label: 'Files' },
-  { value: 'comments', label: 'Comments' },
+  { value: 'project', label: 'Projects' },
+  { value: 'decision', label: 'Decisions' },
+  { value: 'file', label: 'Files' },
+  { value: 'comment', label: 'Comments' },
 ]
 
 const statusFilters: { value: DecisionStatus | 'all'; label: string }[] = [
@@ -40,7 +43,9 @@ export function SearchFilterPanel({
   onFilterChange,
   placeholder = 'Search projects, decisions, files, comments...',
   className,
+  projectId,
 }: SearchFilterPanelProps) {
+  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [scope, setScope] = useState('all')
   const [status, setStatus] = useState<string>('all')
@@ -48,9 +53,17 @@ export function SearchFilterPanel({
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      onSearch?.(query, scope)
+      if (onSearch) {
+        onSearch(query, scope)
+      } else if (query.trim()) {
+        const params = new URLSearchParams({ q: query.trim() })
+        if (scope !== 'all') params.set('type', scope)
+        if (status !== 'all') params.set('status', status)
+        if (projectId) params.set('project', projectId)
+        navigate(`/dashboard/search?${params}`)
+      }
     },
-    [query, scope, onSearch]
+    [query, scope, status, projectId, navigate, onSearch]
   )
 
   const handleStatusChange = useCallback(
@@ -63,7 +76,7 @@ export function SearchFilterPanel({
 
   return (
     <div className={cn('space-y-4', className)}>
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -87,12 +100,6 @@ export function SearchFilterPanel({
             ))}
           </SelectContent>
         </Select>
-        <Button type="submit" size="sm">
-          Search
-        </Button>
-      </form>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-muted-foreground">Filter:</span>
         <Select value={status} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-[160px]">
             <SelectValue />
@@ -105,7 +112,10 @@ export function SearchFilterPanel({
             ))}
           </SelectContent>
         </Select>
-      </div>
+        <Button type="submit" size="sm" className="rounded-full">
+          Search
+        </Button>
+      </form>
     </div>
   )
 }
