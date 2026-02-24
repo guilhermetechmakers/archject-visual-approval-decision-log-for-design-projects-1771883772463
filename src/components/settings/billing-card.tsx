@@ -46,7 +46,7 @@ export function BillingCard({ embedded = false }: BillingCardProps) {
         role="alert"
       >
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-          <AlertCircle className="h-6 w-6 text-destructive" aria-hidden />
+          <AlertCircle className="h-5 w-5 shrink-0 text-destructive" aria-hidden />
         </div>
         <div className="space-y-1">
           <p className="font-medium text-foreground">Unable to load billing</p>
@@ -134,7 +134,7 @@ export function BillingCard({ embedded = false }: BillingCardProps) {
           className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted/20 p-6 text-center"
           role="status"
         >
-          <Receipt className="h-8 w-8 text-muted-foreground" aria-hidden />
+          <Receipt className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
           <p className="text-sm font-medium text-foreground">No invoices yet</p>
           <p className="text-xs text-muted-foreground">
             Invoices will appear here after your first billing cycle.
@@ -144,9 +144,9 @@ export function BillingCard({ embedded = false }: BillingCardProps) {
 
       <Button asChild className="w-full sm:w-auto">
         <Link to="/dashboard/billing" className="inline-flex items-center gap-2">
-          <FileText className="h-4 w-4" aria-hidden />
+          <FileText className="h-4 w-4 shrink-0" aria-hidden />
           Manage billing
-          <ArrowRight className="h-4 w-4" aria-hidden />
+          <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
         </Link>
       </Button>
     </div>
@@ -160,7 +160,7 @@ export function BillingCard({ embedded = false }: BillingCardProps) {
     <Card className="rounded-xl border border-border shadow-card transition-all duration-200 hover:shadow-card-hover">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5 text-primary" aria-hidden />
+          <CreditCard className="h-5 w-5 shrink-0 text-primary" aria-hidden />
           <CardTitle>Billing & subscription</CardTitle>
         </div>
         <CardDescription>
