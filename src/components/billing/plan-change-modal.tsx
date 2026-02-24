@@ -147,6 +147,8 @@ export function PlanChangeModal({
           <Button
             onClick={handleConfirm}
             disabled={!selectedPlanId || isCurrentPlan || confirmMutation.isPending}
+            aria-label={confirmMutation.isPending ? 'Updating plan' : 'Confirm plan change'}
+            aria-busy={confirmMutation.isPending}
           >
             {confirmMutation.isPending ? 'Updating…' : 'Confirm change'}
           </Button>

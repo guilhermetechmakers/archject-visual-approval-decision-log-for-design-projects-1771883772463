@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Download, FileText, FileSpreadsheet, FileJson } from 'lucide-react'
+import { Download, FileText, FileSpreadsheet, FileJson, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -10,9 +10,15 @@ import {
 import { toast } from 'sonner'
 import { useExportBilling } from '@/hooks/use-billing'
 
-export function ExportButton() {
+interface ExportButtonProps {
+  /** Accessible label for the export trigger button */
+  'aria-label'?: string
+}
+
+export function ExportButton({ 'aria-label': ariaLabel = 'Export billing data' }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false)
   const exportBilling = useExportBilling()
+  const isPending = isExporting || exportBilling.isPending
 
   const handleExport = async (format: 'pdf' | 'csv' | 'json') => {
     setIsExporting(true)
@@ -48,23 +54,29 @@ export function ExportButton() {
         <Button
           variant="outline"
           size="sm"
-          disabled={isExporting || exportBilling.isPending}
+          disabled={isPending}
+          aria-label={isPending ? 'Exporting billing data' : ariaLabel}
+          aria-busy={isPending}
         >
-          <Download className="h-4 w-4" />
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          ) : (
+            <Download className="h-4 w-4" aria-hidden />
+          )}
           Export
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => handleExport('pdf')}>
-          <FileText className="h-4 w-4" />
+      <DropdownMenuContent align="end" aria-label="Export format options">
+        <DropdownMenuItem onClick={() => handleExport('pdf')} aria-label="Export as PDF">
+          <FileText className="h-4 w-4" aria-hidden />
           Export as PDF
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleExport('csv')}>
-          <FileSpreadsheet className="h-4 w-4" />
+        <DropdownMenuItem onClick={() => handleExport('csv')} aria-label="Export as CSV">
+          <FileSpreadsheet className="h-4 w-4" aria-hidden />
           Export as CSV
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleExport('json')}>
-          <FileJson className="h-4 w-4" />
+        <DropdownMenuItem onClick={() => handleExport('json')} aria-label="Export as JSON">
+          <FileJson className="h-4 w-4" aria-hidden />
           Export as JSON
         </DropdownMenuItem>
       </DropdownMenuContent>

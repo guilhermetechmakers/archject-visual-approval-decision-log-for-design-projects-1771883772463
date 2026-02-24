@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAddPaymentMethod, useCreateSetupIntent } from '@/hooks/use-billing'
+import { DEFAULT_PRIMARY_HEX } from '@/lib/design-tokens'
 
 const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null
@@ -229,7 +230,7 @@ export function AddPaymentMethodDialog({
               clientSecret,
               appearance: {
                 theme: 'stripe',
-                variables: { colorPrimary: '#195C4A', borderRadius: '8px' },
+                variables: { colorPrimary: DEFAULT_PRIMARY_HEX, borderRadius: '8px' },
               },
             }}
           >

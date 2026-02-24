@@ -62,8 +62,9 @@ export function PaymentMethodSection() {
                       size="sm"
                       onClick={() => setAddModalOpen(true)}
                       className="transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                      aria-label="Add or update payment method"
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="h-4 w-4" aria-hidden />
                       Update
                     </Button>
                   </TooltipTrigger>
@@ -81,8 +82,9 @@ export function PaymentMethodSection() {
               <Button
                 className="mt-4"
                 onClick={() => setAddModalOpen(true)}
+                aria-label="Add payment method"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4" aria-hidden />
                 Add payment method
               </Button>
             </div>

@@ -96,9 +96,9 @@ export function RecentInvoicesCard({ onViewAll }: RecentInvoicesCardProps) {
           </div>
         )}
         {invoices.length > 0 && onViewAll && (
-          <Button variant="outline" className="mt-4 w-full" onClick={onViewAll}>
+          <Button variant="outline" className="mt-4 w-full" onClick={onViewAll} aria-label="View all invoices">
             View all invoices
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </Button>
         )}
       </CardContent>

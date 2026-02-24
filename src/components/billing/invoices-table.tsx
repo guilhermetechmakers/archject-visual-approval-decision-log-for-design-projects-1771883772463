@@ -121,16 +121,17 @@ export function InvoicesTable() {
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
               <Input
                 placeholder="Search invoices…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
+                aria-label="Search invoices by number or ID"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectTrigger className="w-full sm:w-[140px]" aria-label="Filter invoices by status">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -184,22 +185,24 @@ export function InvoicesTable() {
                 <p className="text-sm text-muted-foreground">
                   Page {page} of {totalPages} ({total} invoices)
                 </p>
-                <div className="flex gap-2">
+                <div className="flex gap-2" role="navigation" aria-label="Invoice pagination">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={!hasPrev}
+                    aria-label="Go to previous page"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-4 w-4" aria-hidden />
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={!hasNext}
+                    aria-label="Go to next page"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4" aria-hidden />
                   </Button>
                 </div>
               </div>

@@ -117,11 +117,11 @@ function AddOnCard({
             </span>
           </span>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={onFullCheckout}>
+            <Button size="sm" variant="outline" onClick={onFullCheckout} aria-label={`Checkout ${addon.name}`}>
               Checkout
             </Button>
-            <Button size="sm" onClick={onPurchase}>
-              <ShoppingCart className="h-4 w-4" />
+            <Button size="sm" onClick={onPurchase} aria-label={`Buy ${addon.name}`}>
+              <ShoppingCart className="h-4 w-4" aria-hidden />
               Buy
             </Button>
           </div>

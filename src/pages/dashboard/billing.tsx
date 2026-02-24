@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Download, Settings, ArrowRight, CreditCard, FileText, Package, History, Loader2 } from 'lucide-react'
+import { Download, Settings, ArrowRight, CreditCard, FileText, Package, History, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
   CurrentPlanCard,
   PlanChangeModal,
@@ -19,7 +21,7 @@ export function BillingPage() {
   const [planModalOpen, setPlanModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
   const exportBilling = useExportBilling()
-  const { data: subscription } = useBillingSubscription()
+  const { data: subscription, isLoading, isError, error } = useBillingSubscription()
   const isExporting = exportBilling.isPending
 
   const handleExport = async (format: 'pdf' | 'csv') => {
@@ -27,7 +29,7 @@ export function BillingPage() {
       const result = await exportBilling.mutateAsync(format)
       if (result?.download_url) {
         window.open(result.download_url, '_blank')
-        toast.success('Export ready')
+        toast.success('Billing data exported successfully')
       } else {
         toast.success('Export initiated. Download will start when backend is configured.')
       }
@@ -94,7 +96,17 @@ export function BillingPage() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      {isError && (
+        <Alert variant="destructive" role="alert">
+          <AlertCircle className="h-4 w-4" aria-hidden />
+          <AlertTitle>Unable to load billing data</AlertTitle>
+          <AlertDescription>
+            {error instanceof Error ? error.message : 'Something went wrong. Please try again later.'}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" aria-label="Billing sections">
         <TabsList
           className="inline-flex h-10 items-center justify-center rounded-pill bg-secondary p-1"
           aria-label="Billing sections"
@@ -126,9 +138,19 @@ export function BillingPage() {
         </TabsList>
 
         <TabsContent value="overview" className="mt-0 space-y-6">
-          <CurrentPlanCard onChangePlan={() => setPlanModalOpen(true)} />
-          <PaymentMethodSection />
-          <RecentInvoicesCard onViewAll={() => setActiveTab('invoices')} />
+          {isLoading ? (
+            <div className="space-y-6" role="status" aria-live="polite" aria-label="Loading billing overview">
+              <Skeleton className="h-64 w-full rounded-2xl" />
+              <Skeleton className="h-40 w-full rounded-2xl" />
+              <Skeleton className="h-48 w-full rounded-2xl" />
+            </div>
+          ) : (
+            <>
+              <CurrentPlanCard onChangePlan={() => setPlanModalOpen(true)} />
+              <PaymentMethodSection />
+              <RecentInvoicesCard onViewAll={() => setActiveTab('invoices')} />
+            </>
+          )}
         </TabsContent>
 
         <TabsContent value="invoices" className="mt-0 space-y-6">
@@ -139,7 +161,7 @@ export function BillingPage() {
                 View, search, and download all your invoices
               </p>
             </div>
-            <ExportButton />
+            <ExportButton aria-label="Export invoice history" />
           </div>
           <InvoicesTable />
         </TabsContent>

@@ -172,9 +172,10 @@ export function CurrentPlanCard({ onChangePlan }: CurrentPlanCardProps) {
         <Button
           onClick={onChangePlan}
           className="w-full sm:w-auto transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          aria-label="Change subscription plan"
         >
           Change plan
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4" aria-hidden />
         </Button>
       </CardContent>
     </Card>
