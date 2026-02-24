@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react'
 import {
   EditDecisionHeader,
   MetadataEditor,
@@ -10,6 +11,9 @@ import {
   ReissueSharePanel,
   QuickPreviewPanel,
 } from '@/components/edit-decision'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useProjectWorkspace } from '@/hooks/use-workspace'
 import {
   useVersionedDecision,
@@ -33,7 +37,13 @@ function EditDecisionContent() {
   const navigate = useNavigate()
   const { project } = useProjectWorkspace(projectId ?? '')
 
-  const { data: decision, isLoading } = useVersionedDecision(decisionId ?? '')
+  const {
+    data: decision,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useVersionedDecision(decisionId ?? '')
   const { data: versions = [] } = useDecisionVersions(decisionId ?? '')
   const { data: auditEntries = [], isLoading: auditLoading } = useAuditLog(
     decisionId ?? '',
@@ -180,30 +190,140 @@ function EditDecisionContent() {
 
   if (!projectId || !decisionId) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-muted-foreground">Project or decision not found</p>
-        <Link
-          to="/dashboard/projects"
-          className="mt-4 text-primary hover:underline"
-        >
-          Back to projects
-        </Link>
-      </div>
+      <Card
+        className="flex flex-col items-center justify-center py-16"
+        role="region"
+        aria-label="Project or decision not found"
+      >
+        <CardContent className="flex flex-col items-center gap-4">
+          <p className="text-muted-foreground">Project or decision not found</p>
+          <Button asChild variant="default" size="sm">
+            <Link
+              to="/dashboard/projects"
+              aria-label="Back to projects list"
+              className="inline-flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              Back to projects
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Card
+        className="flex flex-col items-center justify-center py-16"
+        role="alert"
+        aria-label="Error loading decision"
+      >
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-center gap-2 text-destructive">
+            <AlertTriangle className="h-6 w-6" aria-hidden />
+            <span className="font-semibold">Failed to load decision</span>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center text-center">
+          <p className="text-muted-foreground">
+            {error instanceof Error ? error.message : 'Something went wrong. Please try again.'}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="mt-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            aria-label="Retry loading decision"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" aria-hidden />
+            Retry
+          </Button>
+        </CardContent>
+      </Card>
     )
   }
 
   if (isLoading || !decision) {
     return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-8 w-48 rounded bg-secondary" />
-        <div className="h-32 rounded-xl bg-secondary" />
-        <div className="h-64 rounded-xl bg-secondary" />
+      <div
+        className="space-y-6 animate-fade-in"
+        role="status"
+        aria-busy="true"
+        aria-label="Loading decision"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-8 w-40" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-3/4 max-w-md" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-full" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-5 w-40" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-5 w-36" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-48 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-5 w-28" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-40 w-full" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-5 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-24 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div
+      className="space-y-6 animate-fade-in"
+      role="main"
+      aria-label="Edit decision"
+    >
       <EditDecisionHeader
         decision={displayDecision ?? decision}
         projectId={projectId}
