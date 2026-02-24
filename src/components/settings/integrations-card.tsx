@@ -254,16 +254,15 @@ function FieldMappingEditor({
 
   useEffect(() => {
     if (mappings.length > 0) {
-      setLocalMappings(
-        mappings.map((m) => ({
-          archjectField: m.archjectField,
-          externalField: m.externalField,
-          dataType: m.dataType,
-          required: m.required,
-        }))
-      )
+      const next = mappings.map((m) => ({
+        archjectField: m.archjectField,
+        externalField: m.externalField,
+        dataType: m.dataType,
+        required: m.required,
+      }))
+      queueMicrotask(() => setLocalMappings(next))
     } else if (!isLoading) {
-      setLocalMappings([])
+      queueMicrotask(() => setLocalMappings([]))
     }
   }, [mappings, isLoading])
 

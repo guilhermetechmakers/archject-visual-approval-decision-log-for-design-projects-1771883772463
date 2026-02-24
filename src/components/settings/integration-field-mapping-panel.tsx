@@ -81,17 +81,16 @@ export function IntegrationFieldMappingPanel({
 
   useEffect(() => {
     if (mappings) {
-      setLocalMappings(
-        mappings.map((m) => ({
-          archjectField: m.archjectField,
-          externalField: m.externalField,
-          dataType: m.dataType,
-          required: m.required,
-          transformationScript: m.transformationScript ?? undefined,
-        }))
-      )
+      const next = mappings.map((m) => ({
+        archjectField: m.archjectField,
+        externalField: m.externalField,
+        dataType: m.dataType,
+        required: m.required,
+        transformationScript: m.transformationScript ?? undefined,
+      }))
+      queueMicrotask(() => setLocalMappings(next))
     } else {
-      setLocalMappings([])
+      queueMicrotask(() => setLocalMappings([]))
     }
   }, [mappings])
 

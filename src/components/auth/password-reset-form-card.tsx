@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { PasswordStrengthIndicator } from './password-strength'
 import { ErrorBanner } from './error-banner'
 import { SecurityNotePanel } from './security-note-panel'
-import { PASSWORD_POLICY } from './password-strength'
+import { PASSWORD_POLICY } from '@/lib/password-strength'
 import { cn } from '@/lib/utils'
 
 const schema = z

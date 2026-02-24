@@ -2,6 +2,7 @@
  * Auth context - supports Supabase Auth when configured, falls back to mock/API auth.
  * Provides session, login, register, Google OAuth, logout, and role-based state.
  */
+/* eslint-disable react-refresh/only-export-components -- context file exports provider + hooks */
 
 import * as React from 'react'
 import { useNavigate } from 'react-router-dom'

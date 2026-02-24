@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- context file exports provider + hook */
 import * as React from 'react'
 import type {
   DecisionEditorState,

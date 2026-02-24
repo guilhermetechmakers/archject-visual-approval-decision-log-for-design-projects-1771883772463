@@ -9,11 +9,8 @@ export { WorkspaceFlowPanel } from './workspace-flow-panel'
 export { SecurityHintsPanel } from './security-hints-panel'
 export { EmailVerificationBanner } from './email-verification-banner'
 export { FooterNav } from './footer-nav'
-export {
-  PasswordStrengthIndicator,
-  getPasswordStrength,
-  PASSWORD_POLICY,
-} from './password-strength'
+export { PasswordStrengthIndicator } from './password-strength'
+export { PASSWORD_POLICY, getPasswordStrength } from '@/lib/password-strength'
 export { EnterpriseSSOPanel } from './enterprise-sso-panel'
 export { ErrorBanner } from './error-banner'
 export { SecurityNotePanel } from './security-note-panel'

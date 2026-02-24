@@ -2,6 +2,7 @@
  * React Query hooks for Project Workspace data
  * Uses Supabase when configured, falls back to REST API or mock
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Supabase client used with dynamic table access */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'

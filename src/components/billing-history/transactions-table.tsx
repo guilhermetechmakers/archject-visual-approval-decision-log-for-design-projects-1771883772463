@@ -186,7 +186,7 @@ export function TransactionsTable({
     [sortBy, sortOrder, onSortChange]
   )
 
-  const SortIcon = ({ column }: { column: 'date' | 'type' | 'amount' }) => {
+  const renderSortIcon = (column: 'date' | 'type' | 'amount') => {
     if (sortBy !== column) return null
     return sortOrder === 'asc' ? (
       <ChevronUp className="h-4 w-4" />
@@ -243,7 +243,7 @@ export function TransactionsTable({
                           className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
                         >
                           Date
-                          <SortIcon column="date" />
+                          {renderSortIcon('date')}
                         </button>
                       </TableHead>
                       <TableHead>
@@ -253,7 +253,7 @@ export function TransactionsTable({
                           className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
                         >
                           Type
-                          <SortIcon column="type" />
+                          {renderSortIcon('type')}
                         </button>
                       </TableHead>
                       <TableHead>Description</TableHead>
@@ -264,7 +264,7 @@ export function TransactionsTable({
                           className="flex items-center gap-1 font-medium hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
                         >
                           Amount
-                          <SortIcon column="amount" />
+                          {renderSortIcon('amount')}
                         </button>
                       </TableHead>
                       <TableHead>Status</TableHead>

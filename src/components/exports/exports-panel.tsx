@@ -86,7 +86,7 @@ export function ExportsPanel({
           if (url && data.status === 'completed') {
             const a = document.createElement('a')
             a.href = url
-            a.download = `decision-log-${Date.now()}.${selectedFormat.toLowerCase()}`
+            a.download = `decision-log-${data.exportId ?? 'export'}.${selectedFormat.toLowerCase()}`
             a.click()
             onExportComplete?.(data.exportId, selectedFormat)
           }
@@ -95,10 +95,10 @@ export function ExportsPanel({
     )
   }
 
-  const handleDownload = (url: string, format: string) => {
+  const handleDownload = (url: string, format: string, exportId?: string) => {
     const a = document.createElement('a')
     a.href = url
-    a.download = `decision-log-${Date.now()}.${format.toLowerCase()}`
+    a.download = `decision-log-${exportId ?? 'export'}.${format.toLowerCase()}`
     a.click()
   }
 
@@ -191,7 +191,7 @@ export function ExportsPanel({
                       variant="outline"
                       size="sm"
                       className="w-fit rounded-full"
-                      onClick={() => handleDownload(exp.artifact_url!, exp.format)}
+                      onClick={() => handleDownload(exp.artifact_url!, exp.format, exp.id)}
                     >
                       <Download className="mr-2 h-4 w-4" />
                       Download

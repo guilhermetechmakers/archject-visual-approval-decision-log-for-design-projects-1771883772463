@@ -28,15 +28,17 @@ export function BrandingCard() {
   const branding: Partial<import('@/types/settings').WorkspaceBranding> = workspace?.branding ?? {}
 
   useEffect(() => {
-    if (workspace?.branding) {
-      if (branding.logoUrl) setLogoUrl(branding.logoUrl)
-      if (branding.accentColor) setAccentColor(branding.accentColor)
-      if (branding.domainPrefix) setDomainPrefix(branding.domainPrefix)
-      if (branding.headerText) setHeaderText(branding.headerText)
-      if (branding.footerText) setFooterText(branding.footerText)
-      if (branding.customCss) setCustomCss(branding.customCss)
-    }
-  }, [workspace?.id])
+    if (!workspace?.branding) return
+    const b = workspace.branding
+    queueMicrotask(() => {
+      if (b.logoUrl) setLogoUrl(b.logoUrl)
+      if (b.accentColor) setAccentColor(b.accentColor)
+      if (b.domainPrefix) setDomainPrefix(b.domainPrefix)
+      if (b.headerText) setHeaderText(b.headerText)
+      if (b.footerText) setFooterText(b.footerText)
+      if (b.customCss) setCustomCss(b.customCss)
+    })
+  }, [workspace?.id, workspace?.branding])
 
   const displayLogoUrl = logoUrl || branding.logoUrl || ''
   const displayAccent = accentColor || branding.accentColor || '#195C4A'

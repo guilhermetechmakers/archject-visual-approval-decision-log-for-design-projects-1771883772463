@@ -3,6 +3,7 @@
  * Session is stored in sessionStorage for persistence across refreshes.
  * All impersonation events are audited.
  */
+/* eslint-disable react-refresh/only-export-components -- context file exports provider + hooks */
 
 import * as React from 'react'
 

@@ -64,10 +64,14 @@ export function FilterBar({
   const [searchInput, setSearchInput] = useState(filters.search ?? '')
   const [filtersExpanded, setFiltersExpanded] = useState(false)
   const filtersRef = useRef(filters)
-  filtersRef.current = filters
 
   useEffect(() => {
-    setSearchInput(filters.search ?? '')
+    filtersRef.current = filters
+  }, [filters])
+
+  useEffect(() => {
+    const q = filters.search ?? ''
+    queueMicrotask(() => setSearchInput(q))
   }, [filters.search])
 
   useEffect(() => {

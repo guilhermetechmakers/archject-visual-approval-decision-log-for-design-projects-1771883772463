@@ -2,6 +2,7 @@
  * BrandingContext - Centralized theming state (branding tokens) propagated
  * to client portal, project workspace, and all client-facing views.
  */
+/* eslint-disable react-refresh/only-export-components -- context file exports provider + hooks + utils */
 
 import {
   createContext,
@@ -100,7 +101,8 @@ export function BrandingProvider({
 
   useEffect(() => {
     if (tokensFromWorkspace && Object.keys(tokensFromWorkspace).length > 0) {
-      setState(tokensToState(tokensFromWorkspace))
+      const next = tokensToState(tokensFromWorkspace)
+      queueMicrotask(() => setState(next))
     }
   }, [tokensFromWorkspace])
 

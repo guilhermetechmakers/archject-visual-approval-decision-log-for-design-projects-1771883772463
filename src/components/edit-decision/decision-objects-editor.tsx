@@ -19,7 +19,7 @@ export function DecisionObjectsEditor({
 }: DecisionObjectsEditorProps) {
   const addObject = () => {
     const newObject: DecisionObject = {
-      id: `obj-${Date.now()}`,
+      id: `obj-${crypto.randomUUID()}`,
       decision_id: decisionId,
       title: 'New Decision Object',
       description: null,
@@ -51,13 +51,14 @@ export function DecisionObjectsEditor({
 
   const duplicateObject = (index: number) => {
     const src = objects[index]
+    const baseId = crypto.randomUUID()
     const copy: DecisionObject = {
       ...src,
-      id: `obj-${Date.now()}`,
+      id: `obj-${baseId}`,
       order_index: objects.length,
       options: src.options.map((o, i) => ({
         ...o,
-        id: `opt-${Date.now()}-${i}`,
+        id: `opt-${baseId}-${i}`,
         order_index: i,
       })),
       created_at: new Date().toISOString(),

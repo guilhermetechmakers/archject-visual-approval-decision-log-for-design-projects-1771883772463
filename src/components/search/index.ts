@@ -1,9 +1,7 @@
 export { GlobalSearchBar } from './global-search-bar'
 export type { GlobalSearchBarProps } from './global-search-bar'
-export {
-  FacetedFilterPanel,
-  buildFacetSectionsFromResults,
-} from './faceted-filter-panel'
+export { FacetedFilterPanel } from './faceted-filter-panel'
+export { buildFacetSectionsFromResults } from '@/lib/facet-utils'
 export type {
   FacetedFilterPanelProps,
   FacetSection,

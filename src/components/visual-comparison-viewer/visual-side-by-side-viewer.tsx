@@ -37,28 +37,23 @@ export function VisualSideBySideViewer({
   const [paneZooms, setPaneZooms] = useState<Record<number, number>>({})
   const [panePans, setPanePans] = useState<Record<number, { x: number; y: number }>>({})
 
-  const resolvedPaneCount =
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  )
+
+  useEffect(() => {
+    if (layout !== 'adaptive') return
+    const update = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [layout])
+
+  const paneCount =
     typeof layout === 'number'
       ? Math.min(layout, 4)
       : layout === 'adaptive'
-        ? (typeof window !== 'undefined' && window.innerWidth < 768 ? 2 : 4)
+        ? (windowWidth < 768 ? 2 : 4)
         : 4
-
-  const [paneCount, setPaneCount] = useState(resolvedPaneCount)
-
-  useEffect(() => {
-    if (typeof layout === 'number') {
-      setPaneCount(Math.min(layout, 4))
-      return
-    }
-    if (layout === 'adaptive') {
-      const update = () => setPaneCount(window.innerWidth < 768 ? 2 : 4)
-      update()
-      window.addEventListener('resize', update)
-      return () => window.removeEventListener('resize', update)
-    }
-    setPaneCount(4)
-  }, [layout])
   const visibleOptions = options.slice(activeIndex, activeIndex + paneCount)
   const canPrev = activeIndex > 0
   const canNext = activeIndex + paneCount < options.length

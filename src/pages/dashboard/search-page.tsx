@@ -11,8 +11,8 @@ import {
   FacetedFilterPanel,
   SearchResultsGrid,
   SavedSearchesPanel,
-  buildFacetSectionsFromResults,
 } from '@/components/search'
+import { buildFacetSectionsFromResults } from '@/lib/facet-utils'
 import {
   useSearchQuery,
   useCreateSavedSearch,
