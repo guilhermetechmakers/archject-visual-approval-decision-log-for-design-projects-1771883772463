@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, KeyRound } from 'lucide-react'
+import { Eye, EyeOff, KeyRound, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -58,6 +58,7 @@ export function PasswordChangeCard() {
         newPassword: data.newPassword,
         confirmPassword: data.confirmPassword,
       })
+      toast.success('Password updated successfully')
       reset()
     } catch (e) {
       if (isApiError(e)) {
@@ -188,10 +189,19 @@ export function PasswordChangeCard() {
 
           <Button
             type="submit"
-            className="w-full rounded-pill"
+            className="w-full rounded-pill transition-all duration-200 hover:scale-[1.02] hover:shadow-card-hover"
             disabled={isSubmitting}
+            aria-busy={isSubmitting}
+            aria-label={isSubmitting ? 'Updating password' : 'Update password'}
           >
-            {isSubmitting ? 'Updating...' : 'Update password'}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                Updating...
+              </>
+            ) : (
+              'Update password'
+            )}
           </Button>
         </form>
       </CardContent>

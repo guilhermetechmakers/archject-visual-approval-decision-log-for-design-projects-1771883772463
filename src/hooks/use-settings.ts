@@ -249,6 +249,15 @@ export function useSettingsAuditLogs(params?: { limit?: number; offset?: number 
   })
 }
 
+/** Audit logs without fallback - exposes isError for inline error feedback */
+export function useSettingsAuditLogsStrict(params?: { limit?: number; offset?: number }) {
+  return useQuery({
+    queryKey: [...SETTINGS_KEYS, 'audit-logs-strict', params],
+    queryFn: () => settingsApi.getAuditLogs(params),
+    retry: 1,
+  })
+}
+
 export function useSettingsTeam() {
   return useQuery({
     queryKey: [...SETTINGS_KEYS, 'team'],
