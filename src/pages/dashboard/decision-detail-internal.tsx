@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   DecisionHeader,
-  SideBySideViewer,
   OptionCard,
   CommentsThread,
   ApprovalHistoryPanel,
@@ -11,7 +10,17 @@ import {
   FileManagementPanel,
   ClientLinkModal,
 } from '@/components/decision-detail'
+import {
+  VisualSideBySideViewer,
+  toComparisonOptions,
+  toComparisonAnnotations,
+} from '@/components/visual-comparison-viewer'
 import { useDecisionDetail } from '@/hooks/use-decision-detail'
+import {
+  useAnnotations,
+  useCreateAnnotation,
+  useDeleteAnnotation,
+} from '@/hooks/use-annotations'
 import {
   useCreateShareLink,
   useRevokeApproval,
@@ -36,6 +45,9 @@ export function DecisionDetailInternalPage() {
   const revokeApproval = useRevokeApproval(decisionId ?? '')
   const createComment = useCreateComment(decisionId ?? '')
   const updateOptionRecommended = useUpdateOptionRecommended(decisionId ?? '')
+  const { data: annotationsData } = useAnnotations(decisionId ?? undefined)
+  const createAnnotation = useCreateAnnotation(decisionId ?? '')
+  const deleteAnnotation = useDeleteAnnotation(decisionId ?? '')
 
   const [shareModalOpen, setShareModalOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
@@ -45,6 +57,19 @@ export function DecisionDetailInternalPage() {
   const comments = detail?.comments ?? []
   const approvals = detail?.approvals ?? []
   const files = detail?.files ?? []
+  const annotations = annotationsData ?? []
+  const comparisonOptions = toComparisonOptions(options)
+  const comparisonAnnotations = toComparisonAnnotations(
+    annotations.map((a) => ({
+      id: a.id,
+      mediaId: a.assetId ?? a.optionId ?? '',
+      optionId: a.optionId ?? undefined,
+      type: a.type,
+      data: a.data,
+      createdAt: a.createdAt,
+    })),
+    options
+  )
 
   const handleShareClick = useCallback(() => {
     setShareModalOpen(true)
@@ -109,6 +134,38 @@ export function DecisionDetailInternalPage() {
     [createComment]
   )
 
+  const handleAddAnnotation = useCallback(
+    async (
+      optionId: string,
+      mediaId: string,
+      data: {
+        shape: 'point' | 'rectangle' | 'area' | 'freehand'
+        coordinates: { x: number; y: number; width?: number; height?: number }
+        points?: [number, number][]
+        note?: string
+        color?: string
+      }
+    ) => {
+      await createAnnotation.mutateAsync({
+        optionId,
+        assetId: mediaId,
+        type: data.shape === 'freehand' ? 'freehand' : 'shape',
+        shape: data.shape,
+        data: {
+          coordinates: data.coordinates,
+          points: data.points,
+          color: data.color,
+        },
+      })
+    },
+    [createAnnotation]
+  )
+
+  const handleDeleteAnnotation = useCallback(
+    (annotationId: string) => deleteAnnotation.mutate(annotationId),
+    [deleteAnnotation]
+  )
+
   if (!projectId || !decisionId) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
@@ -146,7 +203,15 @@ export function DecisionDetailInternalPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <SideBySideViewer options={options} />
+          <VisualSideBySideViewer
+            options={comparisonOptions}
+            annotations={comparisonAnnotations}
+            layout="adaptive"
+            syncPanZoom
+            canAnnotate
+            onAnnotate={handleAddAnnotation}
+            onDeleteAnnotation={handleDeleteAnnotation}
+          />
 
           <CommentsThread
             comments={comments}

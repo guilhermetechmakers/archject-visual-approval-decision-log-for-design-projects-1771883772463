@@ -5,12 +5,16 @@ import {
   BrandedHeader,
   ShareExportBar,
   VerificationModal,
-  VisualSideBySideViewer,
   OptionCard,
   CommentThread,
   NotificationTray,
   OperationSuccessModal,
 } from '@/components/client-portal'
+import {
+  VisualSideBySideViewer,
+  toComparisonOptionsFromClientPortal,
+  toComparisonAnnotationsFromClientPortal,
+} from '@/components/visual-comparison-viewer'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -97,15 +101,19 @@ export function ClientPortalPage() {
   )
 
   const handleAddAnnotation = useCallback(
-    async (optionId: string, mediaId: string, annotationData: unknown) => {
-      const d = annotationData as {
-        shape: 'point' | 'rectangle' | 'area'
+    async (
+      optionId: string,
+      mediaId: string,
+      annotationData: {
+        shape: 'point' | 'rectangle' | 'area' | 'freehand'
         coordinates: { x: number; y: number; width?: number; height?: number }
+        points?: [number, number][]
         note?: string
         color?: string
       }
+    ) => {
       try {
-        await addAnnotation({ optionId, mediaId, annotationData: d })
+        await addAnnotation({ optionId, mediaId, annotationData })
       } catch {
         setLocalAnnotations((prev) => [
           ...prev,
@@ -113,10 +121,10 @@ export function ClientPortalPage() {
             id: `local-${Date.now()}`,
             optionId,
             mediaId,
-            shape: d.shape,
-            coordinates: d.coordinates,
-            note: d.note,
-            color: d.color,
+            shape: annotationData.shape,
+            coordinates: annotationData.coordinates,
+            note: annotationData.note,
+            color: annotationData.color,
             createdAt: new Date().toISOString(),
           },
         ])
@@ -204,8 +212,11 @@ export function ClientPortalPage() {
 
           <section className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <VisualSideBySideViewer
-              options={data.options}
-              annotations={allAnnotations}
+              options={toComparisonOptionsFromClientPortal(data.options)}
+              annotations={toComparisonAnnotationsFromClientPortal(allAnnotations)}
+              layout="adaptive"
+              syncPanZoom
+              canAnnotate
               selectedOptionId={selectedOptionId}
               onSelectOption={setSelectedOptionId}
               onAnnotate={handleAddAnnotation}

@@ -31,8 +31,9 @@ export interface ClientPortalAnnotation {
   id: string
   optionId: string
   mediaId: string
-  shape: 'point' | 'rectangle' | 'area'
+  shape: 'point' | 'rectangle' | 'area' | 'freehand'
   coordinates: { x: number; y: number; width?: number; height?: number }
+  points?: [number, number][]
   note?: string
   color?: string
   createdAt: string
@@ -102,8 +103,9 @@ export interface AnnotationPayload {
   optionId: string
   mediaId: string
   annotationData: {
-    shape: 'point' | 'rectangle' | 'area'
+    shape: 'point' | 'rectangle' | 'area' | 'freehand'
     coordinates: { x: number; y: number; width?: number; height?: number }
+    points?: [number, number][]
     note?: string
     color?: string
   }
