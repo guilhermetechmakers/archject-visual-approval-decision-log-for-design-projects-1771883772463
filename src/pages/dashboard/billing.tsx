@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Download, Settings, ArrowRight, CreditCard, FileText, Package, History } from 'lucide-react'
+import { Download, Settings, ArrowRight, CreditCard, FileText, Package, History, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   CurrentPlanCard,
@@ -20,6 +20,7 @@ export function BillingPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const exportBilling = useExportBilling()
   const { data: subscription } = useBillingSubscription()
+  const isExporting = exportBilling.isPending
 
   const handleExport = async (format: 'pdf' | 'csv') => {
     try {
@@ -31,7 +32,7 @@ export function BillingPage() {
         toast.success('Export initiated. Download will start when backend is configured.')
       }
     } catch {
-      toast.success('Export initiated. Download will start when backend is configured.')
+      // Error feedback handled by useExportBilling's onError (toast.error)
     }
   }
 
@@ -48,8 +49,8 @@ export function BillingPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard/billing/history">
-              <History className="h-4 w-4" />
+            <Link to="/dashboard/billing/history" aria-label="View transaction history">
+              <History className="h-4 w-4" aria-hidden />
               Transaction history
             </Link>
           </Button>
@@ -57,51 +58,69 @@ export function BillingPage() {
             variant="outline"
             size="sm"
             onClick={() => handleExport('pdf')}
-            disabled={exportBilling.isPending}
+            disabled={isExporting}
+            aria-label={isExporting ? 'Exporting billing data as PDF' : 'Export billing data as PDF'}
+            aria-busy={isExporting}
           >
-            <Download className="h-4 w-4" />
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Download className="h-4 w-4" aria-hidden />
+            )}
             Export PDF
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleExport('csv')}
-            disabled={exportBilling.isPending}
+            disabled={isExporting}
+            aria-label={isExporting ? 'Exporting billing data as CSV' : 'Export billing data as CSV'}
+            aria-busy={isExporting}
           >
-            <Download className="h-4 w-4" />
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Download className="h-4 w-4" aria-hidden />
+            )}
             Export CSV
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard/settings/billing">
-              <Settings className="h-4 w-4" />
+            <Link to="/dashboard/settings/billing" aria-label="Open billing settings">
+              <Settings className="h-4 w-4" aria-hidden />
               Settings
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </Button>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="inline-flex h-10 items-center justify-center rounded-xl bg-secondary p-1">
+        <TabsList
+          className="inline-flex h-10 items-center justify-center rounded-pill bg-secondary p-1"
+          aria-label="Billing sections"
+        >
           <TabsTrigger
             value="overview"
-            className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="rounded-pill px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            aria-label="View billing overview"
           >
-            <CreditCard className="h-4 w-4 sm:mr-2" />
+            <CreditCard className="h-4 w-4 sm:mr-2" aria-hidden />
             Overview
           </TabsTrigger>
           <TabsTrigger
             value="invoices"
-            className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="rounded-pill px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            aria-label="View invoice history"
           >
-            <FileText className="h-4 w-4 sm:mr-2" />
+            <FileText className="h-4 w-4 sm:mr-2" aria-hidden />
             Invoices
           </TabsTrigger>
           <TabsTrigger
             value="addons"
-            className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="rounded-pill px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            aria-label="View add-ons"
           >
-            <Package className="h-4 w-4 sm:mr-2" />
+            <Package className="h-4 w-4 sm:mr-2" aria-hidden />
             Add-ons
           </TabsTrigger>
         </TabsList>
