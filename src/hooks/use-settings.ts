@@ -187,6 +187,15 @@ export function useSettingsSessions() {
   })
 }
 
+/** Sessions without fallback - exposes isError for error state UI */
+export function useSettingsSessionsStrict() {
+  return useQuery({
+    queryKey: [...SETTINGS_KEYS, 'sessions-strict'],
+    queryFn: () => settingsApi.getSessions(),
+    retry: 1,
+  })
+}
+
 export function useConnectedAccounts() {
   return useQuery({
     queryKey: [...SETTINGS_KEYS, 'connected-accounts'],
@@ -198,7 +207,10 @@ export function useRevokeSession() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: settingsApi.revokeSession,
-    onSuccess: () => qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'sessions'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'sessions'] })
+      qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'sessions-strict'] })
+    },
   })
 }
 
@@ -207,7 +219,10 @@ export function useRevokeAllSessionsExceptCurrent() {
   return useMutation({
     mutationFn: (exceptSessionId?: string) =>
       settingsApi.revokeAllSessionsExceptCurrent(exceptSessionId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'sessions'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'sessions'] })
+      qc.invalidateQueries({ queryKey: [...SETTINGS_KEYS, 'sessions-strict'] })
+    },
   })
 }
 

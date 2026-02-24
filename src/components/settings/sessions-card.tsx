@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
   Smartphone,
+  AlertCircle,
 } from 'lucide-react'
 import {
   Card,
@@ -22,6 +23,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -32,12 +35,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
-  useSettingsSessions,
+  useSettingsSessionsStrict,
   useRevokeSession,
   useRevokeAllSessionsExceptCurrent,
 } from '@/hooks/use-settings'
 import { useAuth } from '@/contexts/auth-context'
-import { Shimmer } from '@/components/loading/shimmer'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { Session } from '@/types/settings'
@@ -58,22 +60,22 @@ function formatRelativeTime(dateStr: string): string {
 
 function SessionSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="status" aria-label="Loading sessions">
       {[1, 2, 3].map((i) => (
-        <div
+        <Card
           key={i}
           className="flex items-center justify-between rounded-xl border border-border p-4"
         >
           <div className="flex items-center gap-3">
-            <Shimmer className="h-10 w-10 shrink-0 rounded-lg" aria-hidden />
+            <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
             <div className="space-y-2">
-              <Shimmer className="h-4 w-32" aria-hidden />
-              <Shimmer className="h-3 w-24" aria-hidden />
-              <Shimmer className="h-3 w-20" aria-hidden />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-20" />
             </div>
           </div>
-          <Shimmer className="h-9 w-20 rounded-md" aria-hidden />
-        </div>
+          <Skeleton className="h-9 w-20 rounded-md" />
+        </Card>
       ))}
     </div>
   )
@@ -81,13 +83,23 @@ function SessionSkeleton() {
 
 function EmptySessionsState({ onSignOut }: { onSignOut?: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-secondary/30 py-12 px-6 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-        <Monitor className="h-7 w-7 text-muted-foreground" aria-hidden />
+    <Card
+      className={cn(
+        'flex flex-col items-center justify-center border border-dashed border-border',
+        'bg-secondary/30 py-12 px-6 text-center',
+        'transition-all duration-200'
+      )}
+    >
+      <div
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-muted"
+        aria-hidden
+      >
+        <Monitor className="h-7 w-7 text-muted-foreground" />
       </div>
       <p className="mt-4 font-medium text-foreground">No active sessions</p>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        When you sign in from a device, it will appear here. You can revoke access from any device at any time.
+        When you sign in from a device, it will appear here. You can revoke
+        access from any device at any time.
       </p>
       {onSignOut && (
         <Button variant="outline" size="sm" className="mt-4" onClick={onSignOut}>
@@ -95,7 +107,7 @@ function EmptySessionsState({ onSignOut }: { onSignOut?: () => void }) {
           Sign out
         </Button>
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -113,7 +125,7 @@ function SessionRow({
   const hasDetails = session.os || session.browser || session.ipAddress
 
   return (
-    <div
+    <Card
       className={cn(
         'rounded-xl border border-border p-4 transition-all duration-200',
         'hover:border-border/80 hover:shadow-sm'
@@ -133,9 +145,9 @@ function SessionRow({
             <div className="flex items-center gap-2">
               <p className="font-medium text-foreground">{deviceLabel}</p>
               {session.current && (
-                <span className="rounded-full bg-success/20 px-2 py-0.5 text-xs font-medium text-success">
+                <Badge variant="success" className="rounded-full text-success">
                   Current
-                </span>
+                </Badge>
               )}
             </div>
             <p className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -202,13 +214,60 @@ function SessionRow({
           )}
         </div>
       )}
-    </div>
+    </Card>
+  )
+}
+
+function ErrorSessionsState({
+  onRetry,
+  isRetrying,
+}: {
+  onRetry: () => void
+  isRetrying: boolean
+}) {
+  return (
+    <Card
+      className={cn(
+        'flex flex-col items-center justify-center border border-destructive/30',
+        'bg-destructive/5 py-12 px-6 text-center',
+        'transition-all duration-200'
+      )}
+    >
+      <div
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10"
+        aria-hidden
+      >
+        <AlertCircle className="h-7 w-7 text-destructive" />
+      </div>
+      <p className="mt-4 font-medium text-foreground">Failed to load sessions</p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        We couldn&apos;t load your active sessions. Please try again.
+      </p>
+      <Button
+        variant="outline"
+        size="sm"
+        className="mt-4"
+        onClick={onRetry}
+        disabled={isRetrying}
+      >
+        {isRetrying ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : null}
+        Retry
+      </Button>
+    </Card>
   )
 }
 
 export function SessionsCard() {
   const { logout } = useAuth()
-  const { data: sessions, isLoading } = useSettingsSessions()
+  const {
+    data: sessions,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useSettingsSessionsStrict()
   const revokeMutation = useRevokeSession()
   const revokeAllMutation = useRevokeAllSessionsExceptCurrent()
   const [revokeId, setRevokeId] = useState<string | null>(null)
@@ -287,6 +346,11 @@ export function SessionsCard() {
         <CardContent>
           {isLoading ? (
             <SessionSkeleton />
+          ) : isError ? (
+            <ErrorSessionsState
+              onRetry={() => refetch()}
+              isRetrying={isFetching}
+            />
           ) : items.length === 0 ? (
             <EmptySessionsState onSignOut={logout} />
           ) : (
