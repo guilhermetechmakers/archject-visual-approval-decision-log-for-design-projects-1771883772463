@@ -55,9 +55,7 @@ export function GoogleOAuthButton({
   const handleClick = React.useCallback(async () => {
     setIsLoading(true)
     try {
-      // Mock: simulate Google OAuth - in production, use Google Identity Services
-      const mockIdToken = `mock_google_${btoa(JSON.stringify({ email: 'user@example.com', sub: 'google_123' }))}`
-      await googleSignIn(mockIdToken, redirectTo)
+      await googleSignIn(redirectTo)
     } catch (e) {
       if (isApiError(e)) {
         toast.error(e.message ?? 'Sign in failed')
@@ -76,7 +74,7 @@ export function GoogleOAuthButton({
       type="button"
       variant="outline"
       className={cn(
-        'w-full h-11 rounded-lg border-border bg-background hover:bg-secondary transition-all duration-200',
+        'w-full h-11 rounded-lg border-border bg-background hover:bg-secondary transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]',
         className
       )}
       onClick={handleClick}

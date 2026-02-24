@@ -14,6 +14,7 @@ export {
   getPasswordStrength,
   PASSWORD_POLICY,
 } from './password-strength'
+export { EnterpriseSSOPanel } from './enterprise-sso-panel'
 export { ErrorBanner } from './error-banner'
 export { SecurityNotePanel } from './security-note-panel'
 export { SuccessStateCard } from './success-state-card'
@@ -23,6 +24,7 @@ export { PasswordResetFormCard } from './password-reset-form-card'
 export type { PasswordResetFormData } from './password-reset-form-card'
 export { PasswordResetGuard } from './password-reset-guard'
 export { ProtectedRoute } from './protected-route'
+export { AdminRoleRoute } from './admin-role-route'
 export {
   StatusIcon,
   TokenExpiryHint,

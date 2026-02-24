@@ -97,3 +97,7 @@ export const MOCK_TEAM: TeamMember[] = [
   { id: 'tm_1', workspaceId: 'ws_1', userId: 'user_1', email: 'jane@studio.com', name: 'Jane Smith', role: 'admin', scopes: ['*'] },
   { id: 'tm_2', workspaceId: 'ws_1', userId: 'user_2', email: 'john@studio.com', name: 'John Doe', role: 'editor', scopes: ['decisions', 'files'] },
 ]
+
+export const MOCK_CONNECTED_ACCOUNTS: { id: string; provider: string; email?: string; connected: boolean }[] = [
+  { id: 'oauth_1', provider: 'google', email: 'user@studio.com', connected: false },
+]

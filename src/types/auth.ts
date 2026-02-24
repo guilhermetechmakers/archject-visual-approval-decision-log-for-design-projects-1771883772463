@@ -22,6 +22,8 @@ export interface AuthSession {
   userId: string
   workspaceId: string | null
   emailVerified: boolean
+  role?: 'admin' | 'owner' | 'editor' | 'viewer'
+  isAdmin?: boolean
 }
 
 export interface RegisterRequest {
@@ -49,6 +51,7 @@ export interface LoginResponse {
   userId: string
   workspaceId: string | null
   emailVerified: boolean
+  isAdmin?: boolean
 }
 
 export interface GoogleSignInRequest {

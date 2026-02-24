@@ -59,31 +59,35 @@ export function setStoredToken(token: string | null, rememberMe?: boolean): void
 }
 
 /** Mock implementation for development/demo */
-async function mockRegister(_data: RegisterRequest): Promise<RegisterResponse> {
+async function mockRegister(data: RegisterRequest): Promise<RegisterResponse> {
   await new Promise((r) => setTimeout(r, 600))
   const userId = `user_${Date.now()}`
   const workspaceId = `ws_${Date.now()}`
-  const token = `mock_${btoa(JSON.stringify({ userId, workspaceId }))}`
+  const isAdmin = data.email?.toLowerCase().includes('admin@') ?? false
+  const token = `mock_${btoa(JSON.stringify({ userId, workspaceId, isAdmin }))}`
   setStoredToken(token, false)
   return {
     userId,
     workspaceId,
     requiresEmailVerification: true,
     token,
-  }
+    isAdmin,
+  } as RegisterResponse & { isAdmin?: boolean }
 }
 
 async function mockLogin(data: LoginRequest): Promise<LoginResponse> {
   await new Promise((r) => setTimeout(r, 500))
   const userId = `user_${Date.now()}`
   const workspaceId = `ws_${Date.now()}`
-  const token = `mock_${btoa(JSON.stringify({ userId, workspaceId }))}`
+  const isAdmin = data.email?.toLowerCase().includes('admin@') ?? false
+  const token = `mock_${btoa(JSON.stringify({ userId, workspaceId, isAdmin }))}`
   setStoredToken(token, data.rememberMe)
   return {
     token,
     userId,
     workspaceId,
     emailVerified: true,
+    isAdmin,
   }
 }
 
@@ -91,13 +95,15 @@ async function mockGoogleSignIn(_data: GoogleSignInRequest): Promise<LoginRespon
   await new Promise((r) => setTimeout(r, 500))
   const userId = `user_oauth_${Date.now()}`
   const workspaceId = `ws_${Date.now()}`
-  const token = `mock_${btoa(JSON.stringify({ userId, workspaceId }))}`
+  const isAdmin = _data.idToken?.includes('admin') ?? false
+  const token = `mock_${btoa(JSON.stringify({ userId, workspaceId, isAdmin }))}`
   setStoredToken(token, true)
   return {
     token,
     userId,
     workspaceId,
     emailVerified: true,
+    isAdmin,
   }
 }
 

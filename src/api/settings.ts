@@ -82,6 +82,11 @@ export const settingsApi = {
   revokeSession: (id: string) =>
     api.post<void>(`/settings/sessions/revoke/${id}`),
 
+  getConnectedAccounts: () =>
+    api.get<{ id: string; provider: string; email?: string; connected: boolean }[]>('/settings/connected-accounts'),
+  unlinkAccount: (provider: string) =>
+    api.post<void>(`/settings/connected-accounts/unlink/${provider}`),
+
   enable2FA: (method: 'sms' | 'authenticator', data?: Record<string, unknown>) =>
     api.post<{ success: boolean }>('/settings/2fa/enable', { method, ...(data ?? {}) }),
   disable2FA: (data?: unknown) =>

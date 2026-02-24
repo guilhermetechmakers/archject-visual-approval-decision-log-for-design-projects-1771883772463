@@ -8,6 +8,7 @@ import {
   GoogleOAuthButton,
   SecurityHintsPanel,
   EmailVerificationBanner,
+  EnterpriseSSOPanel,
 } from '@/components/auth'
 import type { AuthTabValue } from '@/components/auth'
 import { useAuth } from '@/contexts/auth-context'
@@ -109,6 +110,9 @@ export function AuthLoginPage() {
         </div>
       </div>
       <GoogleOAuthButton mode="login" disabled={isSubmitting} />
+      <div className="mt-4">
+        <EnterpriseSSOPanel />
+      </div>
     </div>
   )
 
@@ -131,6 +135,9 @@ export function AuthLoginPage() {
         </div>
       </div>
       <GoogleOAuthButton mode="signup" disabled={isSubmitting} />
+      <div className="mt-4">
+        <EnterpriseSSOPanel />
+      </div>
       <SecurityHintsPanel />
     </div>
   )

@@ -17,6 +17,7 @@ import {
   MOCK_RETENTION,
   MOCK_AUDIT_LOGS,
   MOCK_TEAM,
+  MOCK_CONNECTED_ACCOUNTS,
 } from '@/lib/settings-mock'
 
 const SETTINGS_KEYS = ['settings'] as const
@@ -147,6 +148,13 @@ export function useSettingsSessions() {
   return useQuery({
     queryKey: [...SETTINGS_KEYS, 'sessions'],
     queryFn: () => withFallback(() => settingsApi.getSessions(), MOCK_SESSIONS),
+  })
+}
+
+export function useConnectedAccounts() {
+  return useQuery({
+    queryKey: [...SETTINGS_KEYS, 'connected-accounts'],
+    queryFn: () => withFallback(() => settingsApi.getConnectedAccounts(), MOCK_CONNECTED_ACCOUNTS),
   })
 }
 

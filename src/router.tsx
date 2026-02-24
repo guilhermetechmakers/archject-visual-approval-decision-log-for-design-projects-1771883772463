@@ -3,11 +3,12 @@ import { RootLayout } from '@/components/layout/root-layout'
 import { LandingPage } from '@/pages/landing'
 import { DemoRequestPage } from '@/pages/demo-request'
 import { AuthLoginPage } from '@/pages/auth/auth-login-page'
+import { AuthCallbackPage } from '@/pages/auth/auth-callback-page'
 import { PasswordResetPage } from '@/pages/auth/password-reset-page'
 import { ResetPasswordRoute } from '@/pages/auth/reset-password-route'
 import { PasswordResetConfirmPage } from '@/pages/auth/password-reset-confirm-page'
 import { EmailVerificationPage } from '@/pages/auth/email-verification-page'
-import { PasswordResetGuard, ProtectedRoute } from '@/components/auth'
+import { PasswordResetGuard, ProtectedRoute, AdminRoleRoute } from '@/components/auth'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DashboardOverview } from '@/pages/dashboard/overview'
 import { ProjectsPage } from '@/pages/dashboard/projects'
@@ -21,6 +22,7 @@ import { EditDecisionPage } from '@/pages/dashboard/edit-decision-page'
 import { DecisionDetailInternalPage } from '@/pages/dashboard/decision-detail-internal'
 import { FilesLibraryPage } from '@/pages/dashboard/files-library-page'
 import { TeamPage } from '@/pages/dashboard/team'
+import { ProfilePage } from '@/pages/dashboard/profile-page'
 import { SettingsLayout } from '@/components/layout/settings-layout'
 import { SettingsOverview } from '@/pages/dashboard/settings/settings-overview'
 import { SettingsAccount } from '@/pages/dashboard/settings/settings-account'
@@ -59,6 +61,7 @@ export const router = createBrowserRouter([
       { path: '/', element: <LandingPage /> },
       { path: '/auth/login', element: <AuthLoginPage /> },
       { path: '/auth/signup', element: <AuthLoginPage /> },
+      { path: '/auth/callback', element: <AuthCallbackPage /> },
       {
         path: '/auth/password-reset',
         element: (
@@ -100,7 +103,9 @@ export const router = createBrowserRouter([
         path: '/admin',
         element: (
           <ProtectedRoute>
-            <AdminLayout />
+            <AdminRoleRoute>
+              <AdminLayout />
+            </AdminRoleRoute>
           </ProtectedRoute>
         ),
         children: [
@@ -133,6 +138,7 @@ export const router = createBrowserRouter([
           { path: 'decisions/new', element: <CreateDecisionPlaceholder /> },
           { path: 'decisions/:id', element: <DecisionDetailPage /> },
           { path: 'team', element: <TeamPage /> },
+          { path: 'profile', element: <ProfilePage /> },
           {
             path: 'settings',
             element: <SettingsLayout />,
