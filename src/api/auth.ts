@@ -237,18 +237,75 @@ export const authApi = {
   verifyEmail: (data: VerifyEmailRequest): Promise<{ success: boolean }> =>
     USE_MOCK ? mockVerifyEmail(data) : api.post<{ success: boolean }>('/auth/verify-email', data),
 
-  resendVerification: (data: { email: string }): Promise<{ success: boolean }> =>
-    USE_MOCK ? mockResendVerification(data) : api.post<{ success: boolean }>('/auth/resend-verification', data),
+  sendVerificationEmail: async (userId: string): Promise<{ success: boolean }> => {
+    if (USE_MOCK) return { success: true }
+    if (isSupabaseConfigured && supabase) {
+      const { data: res, error } = await supabase.functions.invoke('auth-send-verification-email', {
+        body: { userId },
+      })
+      if (error) {
+        const msg = (error as { message?: string }).message ?? 'Failed to send verification email'
+        throw { message: msg }
+      }
+      const ok = (res as { success?: boolean } | null)?.success !== false
+      return { success: ok }
+    }
+    return { success: true }
+  },
 
-  verifyToken: (data: VerifyTokenRequest): Promise<VerifyTokenResponse> =>
-    USE_MOCK ? mockVerifyToken(data) : api.post<VerifyTokenResponse>('/auth/verify-token', data),
+  resendVerification: async (data: { email: string }): Promise<{ success: boolean }> => {
+    if (USE_MOCK) return mockResendVerification(data)
+    if (isSupabaseConfigured && supabase) {
+      const { error } = await supabase.functions.invoke('auth-send-verification', {
+        body: { email: data.email },
+      })
+      if (error) {
+        const msg = (error as { message?: string }).message ?? 'Failed to resend verification email'
+        throw { message: msg }
+      }
+      return { success: true }
+    }
+    return api.post<{ success: boolean }>('/auth/resend-verification', data)
+  },
 
-  resendVerificationToken: (
+  verifyToken: async (data: VerifyTokenRequest): Promise<VerifyTokenResponse> => {
+    if (USE_MOCK) return mockVerifyToken(data)
+    if (isSupabaseConfigured && supabase) {
+      const { data: res, error } = await supabase.functions.invoke('auth-verify-token', {
+        body: { token: data.token },
+      })
+      if (error) {
+        throw { message: (error as { message?: string }).message ?? 'Verification failed.' }
+      }
+      const out = res as VerifyTokenResponse | null
+      return out ?? { success: false, verified: false, message: 'Verification failed.' }
+    }
+    return api.post<VerifyTokenResponse>('/auth/verify-token', data)
+  },
+
+  resendVerificationToken: async (
     data: ResendVerificationTokenRequest
-  ): Promise<ResendVerificationTokenResponse> =>
-    USE_MOCK
-      ? mockResendVerificationToken(data)
-      : api.post<ResendVerificationTokenResponse>('/auth/resend-verification', data),
+  ): Promise<ResendVerificationTokenResponse> => {
+    if (USE_MOCK) return mockResendVerificationToken(data)
+    if (isSupabaseConfigured && supabase) {
+      const { data: res, error } = await supabase.functions.invoke('auth-send-verification', {
+        body: { email: data.email, token: data.token },
+      })
+      if (error) {
+        const err = error as { message?: string; context?: { body?: { cooldownSeconds?: number; message?: string } }; status?: number }
+        const msg = err?.context?.body?.message ?? err?.message ?? 'Failed to resend verification email'
+        const cooldown = err?.context?.body?.cooldownSeconds
+        const apiErr: ApiError = { message: msg }
+        if (typeof cooldown === 'number') apiErr.cooldownSeconds = cooldown
+        else if (err?.status === 429) apiErr.cooldownSeconds = 900
+        throw apiErr
+      }
+      const out = res as ResendVerificationTokenResponse | null
+      if (out) return out
+      return { success: true, cooldownSeconds: 900, message: 'Verification email sent.' }
+    }
+    return api.post<ResendVerificationTokenResponse>('/auth/resend-verification', data)
+  },
 
   createWorkspace: (data: CreateWorkspaceRequest) =>
     api.post<{ id: string; name: string }>('/workspaces/create', data),

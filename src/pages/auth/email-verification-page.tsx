@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useLocation } from 'react-router-dom'
 import { AuthContainer } from '@/components/auth'
 import {
   StatusIcon,
@@ -12,23 +12,32 @@ import { parseTokenFromSearchParams } from '@/lib/verification-token-parser'
 import { authApi, isApiError } from '@/api/auth'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
-type VerificationStatus = 'idle' | 'verifying' | 'success' | 'error'
+type VerificationStatus = 'idle' | 'verifying' | 'success' | 'error' | 'pending'
 
 export function EmailVerificationPage() {
   const [searchParams] = useSearchParams()
+  const location = useLocation()
+  const emailFromState = (location.state as { email?: string } | null)?.email ?? null
   const [verificationStatus, setVerificationStatus] =
     useState<VerificationStatus>('idle')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [cooldownSeconds, setCooldownSeconds] = useState(0)
   const [isResending, setIsResending] = useState(false)
   const [token, setToken] = useState<string | null>(null)
+  const [resendEmail, setResendEmail] = useState(emailFromState ?? '')
 
   const parseAndValidateToken = useCallback(() => {
     const result = parseTokenFromSearchParams(searchParams)
     if (result.isValid && result.token) {
       setToken(result.token)
       return result.token
+    }
+    if (result.error === 'Token is required' || !searchParams.get('token')) {
+      setVerificationStatus('pending')
+      return null
     }
     setVerificationStatus('error')
     setErrorMessage(result.error ?? 'Verification link is invalid or expired.')
@@ -80,9 +89,15 @@ export function EmailVerificationPage() {
 
   const handleResend = async () => {
     if (cooldownSeconds > 0 || isResending) return
+    const emailToUse = resendEmail.trim() || emailFromState
+    if (!emailToUse && !token) {
+      toast.error('Please enter your email to resend the verification link.')
+      return
+    }
     setIsResending(true)
     try {
       const res = await authApi.resendVerificationToken({
+        email: emailToUse || undefined,
         token: token ?? undefined,
       })
       if (res.success) {
@@ -95,10 +110,10 @@ export function EmailVerificationPage() {
     } catch (e) {
       if (isApiError(e)) {
         toast.error(e.message ?? 'Failed to resend')
-        if (e.status === 429 && typeof e.cooldownSeconds === 'number') {
+        if (typeof e.cooldownSeconds === 'number') {
           setCooldownSeconds(e.cooldownSeconds)
         } else if (e.status === 429) {
-          setCooldownSeconds(60)
+          setCooldownSeconds(900)
         }
       } else {
         toast.error('Failed to resend verification email')
@@ -115,7 +130,9 @@ export function EmailVerificationPage() {
         ? 'success'
         : verificationStatus === 'error'
           ? 'error'
-          : 'neutral'
+          : verificationStatus === 'pending'
+            ? 'neutral'
+            : 'neutral'
 
   return (
     <AuthContainer
@@ -146,7 +163,8 @@ export function EmailVerificationPage() {
               'border-destructive/30 bg-destructive/5 hover:shadow-card-hover',
             verificationStatus === 'verifying' &&
               'border-border bg-secondary/30',
-            verificationStatus === 'idle' && 'border-border bg-card'
+            (verificationStatus === 'idle' || verificationStatus === 'pending') &&
+              'border-border bg-card'
           )}
         >
           <div className="flex items-start gap-4">
@@ -183,6 +201,18 @@ export function EmailVerificationPage() {
                   </p>
                 </>
               )}
+              {verificationStatus === 'pending' && (
+                <>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Check your email
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {emailFromState
+                      ? `We've sent a verification link to ${emailFromState}. Click the link to verify your account and unlock full workspace features.`
+                      : "We've sent a verification link to your email. Click the link to verify your account. If you didn't receive it, enter your email below to resend."}
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -193,8 +223,22 @@ export function EmailVerificationPage() {
             <DashboardCTA verified={true} className="animate-fade-in" />
           )}
 
-          {verificationStatus === 'error' && (
+          {(verificationStatus === 'pending' || verificationStatus === 'error') && (
             <>
+              {!emailFromState && (
+                <div className="space-y-2">
+                  <Label htmlFor="resend-email">Email address</Label>
+                  <Input
+                    id="resend-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={resendEmail}
+                    onChange={(e) => setResendEmail(e.target.value)}
+                    className="rounded-lg"
+                    aria-required="true"
+                  />
+                </div>
+              )}
               <ResendVerificationControl
                 onResend={handleResend}
                 isResending={isResending}

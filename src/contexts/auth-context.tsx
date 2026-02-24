@@ -236,6 +236,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
         if (error) throw { message: error.message }
         const requiresEmailVerification = !signUpData.session && !!signUpData.user
+        if (requiresEmailVerification && signUpData.user) {
+          try {
+            await authApi.sendVerificationEmail(signUpData.user.id)
+          } catch {
+            // Non-blocking: verification email may still be retried on verify page
+          }
+          navigate('/auth/verify', { replace: true, state: { email: data.email } })
+          return { requiresEmailVerification: true }
+        }
         if (signUpData.session && signUpData.user) {
           const authSession = supabaseSessionToAuth(signUpData.session)
           if (!authSession) {
@@ -279,10 +288,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           emailVerified: !res.requiresEmailVerification,
           isAdmin: (res as { isAdmin?: boolean }).isAdmin,
         })
-        if (!res.requiresEmailVerification) {
-          navigate('/dashboard', { replace: true })
+        if (res.requiresEmailVerification) {
+          navigate('/auth/verify', { replace: true, state: { email: data.email } })
+          return { requiresEmailVerification: true }
         }
-        return { requiresEmailVerification: res.requiresEmailVerification }
+        navigate('/dashboard', { replace: true })
+        return { requiresEmailVerification: false }
       }
     },
     [navigate]

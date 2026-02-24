@@ -179,7 +179,7 @@ export interface Database {
           details?: Json | null
         }
       }
-      verification_tokens: {
+      email_verification_tokens: {
         Row: {
           id: string
           user_id: string

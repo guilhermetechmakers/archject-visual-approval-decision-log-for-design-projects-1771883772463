@@ -8,7 +8,8 @@ import { PasswordResetPage } from '@/pages/auth/password-reset-page'
 import { ResetPasswordRoute } from '@/pages/auth/reset-password-route'
 import { PasswordResetConfirmPage } from '@/pages/auth/password-reset-confirm-page'
 import { EmailVerificationPage } from '@/pages/auth/email-verification-page'
-import { PasswordResetGuard, ProtectedRoute, AdminRoleRoute } from '@/components/auth'
+import { VerifyRedirect } from '@/pages/auth/verify-redirect'
+import { PasswordResetGuard, ProtectedRoute, VerifiedRoute, AdminRoleRoute } from '@/components/auth'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { DashboardOverview } from '@/pages/dashboard/overview'
 import { ProjectsPage } from '@/pages/dashboard/projects'
@@ -86,7 +87,8 @@ export const router = createBrowserRouter([
           </PasswordResetGuard>
         ),
       },
-      { path: '/verify', element: <EmailVerificationPage /> },
+      { path: '/auth/verify', element: <EmailVerificationPage /> },
+      { path: '/verify', element: <VerifyRedirect /> },
       { path: '/demo-request', element: <DemoRequestPage /> },
       { path: '/privacy', element: <PrivacyPage /> },
       { path: '/privacy-policy', element: <PrivacyPage /> },
@@ -119,9 +121,9 @@ export const router = createBrowserRouter([
       {
         path: '/dashboard',
         element: (
-          <ProtectedRoute>
+          <VerifiedRoute>
             <DashboardLayout />
-          </ProtectedRoute>
+          </VerifiedRoute>
         ),
         children: [
           { index: true, element: <DashboardOverview /> },
