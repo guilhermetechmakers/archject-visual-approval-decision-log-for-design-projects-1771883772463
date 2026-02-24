@@ -1,6 +1,7 @@
 /**
  * Compliance Export Modal - manual data export with scope selection.
  * Supports CSV, JSON, PDF-ready formats for compliance requests.
+ * Design: Archject design system (shadow-card, design tokens, 8px spacing).
  */
 
 import * as React from 'react'
@@ -21,7 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Download } from 'lucide-react'
+import { Download, Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const EXPORT_SCOPES = [
   { value: 'users', label: 'Users' },
@@ -41,6 +43,8 @@ interface ComplianceExportModalProps {
   onOpenChange: (open: boolean) => void
   onConfirm: (scope: string, format: string) => void
   isLoading?: boolean
+  /** Optional error message to display inline (e.g. when export fails) */
+  error?: string | null
 }
 
 export function ComplianceExportModal({
@@ -48,6 +52,7 @@ export function ComplianceExportModal({
   onOpenChange,
   onConfirm,
   isLoading = false,
+  error = null,
 }: ComplianceExportModalProps) {
   const [scope, setScope] = React.useState<string>('audit_logs')
   const [format, setFormat] = React.useState<string>('json')
@@ -69,22 +74,40 @@ export function ComplianceExportModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Download className="h-5 w-5 text-primary" />
+      <DialogContent
+        className={cn(
+          'max-w-lg shadow-card animate-fade-in sm:max-w-md',
+          'p-6 sm:p-8'
+        )}
+        aria-labelledby="compliance-export-title"
+        aria-describedby="compliance-export-description"
+      >
+        <DialogHeader className="text-left">
+          <DialogTitle
+            id="compliance-export-title"
+            className="flex items-center gap-2 text-lg font-semibold text-foreground"
+          >
+            <Download className="h-5 w-5 shrink-0 text-primary" aria-hidden />
             Compliance Export
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription
+            id="compliance-export-description"
+            className="text-sm text-muted-foreground"
+          >
             Generate a controlled data export for compliance requests. Select scope and format.
             Export activity is logged and access-controlled.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="export-scope">Data Scope</Label>
-            <Select value={scope} onValueChange={setScope}>
-              <SelectTrigger id="export-scope">
+            <Label htmlFor="export-scope" className="text-foreground">
+              Data Scope
+            </Label>
+            <Select value={scope} onValueChange={setScope} disabled={isLoading}>
+              <SelectTrigger
+                id="export-scope"
+                aria-label="Select data scope for export (Users, Workspaces, Audit Logs, or All)"
+              >
                 <SelectValue placeholder="Select scope" />
               </SelectTrigger>
               <SelectContent>
@@ -97,9 +120,14 @@ export function ComplianceExportModal({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="export-format">Format</Label>
-            <Select value={format} onValueChange={setFormat}>
-              <SelectTrigger id="export-format">
+            <Label htmlFor="export-format" className="text-foreground">
+              Format
+            </Label>
+            <Select value={format} onValueChange={setFormat} disabled={isLoading}>
+              <SelectTrigger
+                id="export-format"
+                aria-label="Select export format (CSV, JSON, or PDF-ready bundle)"
+              >
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
               <SelectContent>
@@ -111,12 +139,34 @@ export function ComplianceExportModal({
               </SelectContent>
             </Select>
           </div>
+          {error ? (
+            <div
+              role="alert"
+              className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+              aria-live="assertive"
+            >
+              {error}
+            </div>
+          ) : null}
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isLoading}>
+        <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={isLoading}
+            aria-label="Cancel and close dialog"
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={isLoading}>
+          <Button
+            onClick={handleConfirm}
+            disabled={isLoading}
+            aria-label={isLoading ? 'Generating export' : 'Generate compliance export'}
+            aria-busy={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 shrink-0 animate-spin" aria-hidden />
+            ) : null}
             {isLoading ? 'Generating...' : 'Generate Export'}
           </Button>
         </DialogFooter>
