@@ -36,6 +36,7 @@ import { SettingsBilling } from '@/pages/dashboard/settings/settings-billing'
 import { BillingPage } from '@/pages/dashboard/billing'
 import { BillingHistoryPage } from '@/pages/dashboard/billing-history'
 import { CheckoutPage } from '@/pages/dashboard/checkout'
+import { OperationSuccessPage } from '@/pages/operation-success-page'
 import { AnalyticsDashboardPage } from '@/pages/dashboard/analytics-dashboard-page'
 import { AnalyticsDrilldownPage } from '@/pages/dashboard/analytics-drilldown-page'
 import { ClientPortalPage } from '@/pages/client-portal'
@@ -152,6 +153,7 @@ export const router = createBrowserRouter([
           { path: 'billing/history', element: <BillingHistoryPage /> },
           { path: 'billing', element: <BillingPage /> },
           { path: 'checkout', element: <CheckoutPage /> },
+          { path: 'success', element: <OperationSuccessPage /> },
           { path: 'help', element: <HelpPage /> },
         ],
       },

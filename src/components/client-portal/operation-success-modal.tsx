@@ -73,8 +73,13 @@ export function OperationSuccessModal({
     onOpenChange(false)
   }
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) onClose?.()
+    onOpenChange(nextOpen)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         className={cn('max-w-md text-center', className)}
         aria-describedby="success-description"

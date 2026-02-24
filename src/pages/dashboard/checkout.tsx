@@ -9,7 +9,6 @@ import {
   InvoiceOptionPanel,
   SummaryActions,
 } from '@/components/checkout'
-import { OperationSuccessModal } from '@/components/client-portal/operation-success-modal'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { useBillingPlans, useBillingAddOns } from '@/hooks/use-billing'
@@ -39,11 +38,6 @@ export function CheckoutPage() {
     code: string
     discountAmount: number
   } | null>(null)
-  const [successModalOpen, setSuccessModalOpen] = useState(false)
-  const [successType, setSuccessType] = useState<'payment_completed' | 'invoice_created'>(
-    'payment_completed'
-  )
-
   const { data: plans } = useBillingPlans()
   const { data: addons } = useBillingAddOns()
   const createPaymentIntent = useCreatePaymentIntent()
@@ -134,8 +128,7 @@ export function CheckoutPage() {
         },
         {
           onSuccess: () => {
-            setSuccessType('invoice_created')
-            setSuccessModalOpen(true)
+            redirectToSuccessPage('invoice_created')
           },
         }
       )
@@ -155,8 +148,7 @@ export function CheckoutPage() {
       },
       {
         onSuccess: () => {
-          setSuccessType('payment_completed')
-          setSuccessModalOpen(true)
+          redirectToSuccessPage('payment_completed')
         },
       }
     )
@@ -166,9 +158,13 @@ export function CheckoutPage() {
     setPaymentMethod('invoice')
   }
 
-  const handleSuccessClose = () => {
-    setSuccessModalOpen(false)
-    navigate('/dashboard/billing')
+  const redirectToSuccessPage = (type: 'payment_completed' | 'invoice_created') => {
+    const params = new URLSearchParams({
+      type,
+      redirect: '/dashboard/billing',
+      tip: 'Go to Billing to manage your subscription, view invoices, and update payment methods.',
+    })
+    navigate(`/dashboard/success?${params.toString()}`)
   }
 
   const couponStatus =
@@ -291,19 +287,6 @@ export function CheckoutPage() {
         </div>
       </div>
 
-      <OperationSuccessModal
-        open={successModalOpen}
-        onOpenChange={setSuccessModalOpen}
-        type={successType}
-        title={successType === 'invoice_created' ? 'Invoice requested' : 'Payment successful'}
-        description={
-          successType === 'invoice_created'
-            ? 'Your invoice has been created and will be sent to your email.'
-            : 'Your payment was processed successfully. Thank you for your subscription.'
-        }
-        nextSteps="Go to Billing to manage your subscription, view invoices, and update payment methods."
-        onClose={handleSuccessClose}
-      />
     </div>
   )
 }
