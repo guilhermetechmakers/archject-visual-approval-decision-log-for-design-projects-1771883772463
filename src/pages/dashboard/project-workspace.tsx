@@ -18,6 +18,7 @@ import {
   DecisionLogExporter,
   WebhookTaskingCenter,
   IntegrationsHub,
+  IntegrationActivityWidget,
   DecisionsList,
   type WorkspaceTab,
   type CreateDecisionFormData,
@@ -244,6 +245,9 @@ export function ProjectWorkspacePage() {
                 </div>
                 <div className="mt-6">
                   <IntegrationsHub projectId={projectId} />
+                </div>
+                <div className="mt-6">
+                  <IntegrationActivityWidget projectId={projectId} />
                 </div>
               </div>
               <div>

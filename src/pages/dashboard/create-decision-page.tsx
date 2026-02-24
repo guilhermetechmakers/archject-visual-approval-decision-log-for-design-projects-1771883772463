@@ -11,6 +11,7 @@ import {
   DecisionEditorApprovalRules,
   DecisionEditorAssigneeReminders,
   DecisionEditorTriggers,
+  DecisionEditorIntegrations,
   DecisionEditorReview,
 } from '@/components/decision-editor'
 import { useProjectWorkspace } from '@/hooks/use-workspace'
@@ -262,10 +263,13 @@ function CreateDecisionContent() {
             <div className="space-y-6">
               <DecisionEditorAssigneeReminders
                 teamMembers={team}
-                onNext={() => setStep('review')}
+                onNext={() => setStep('integrations')}
               />
               <DecisionEditorTriggers onTestTrigger={handleTestTrigger} />
             </div>
+          )}
+          {step === 'integrations' && (
+            <DecisionEditorIntegrations onNext={() => setStep('review')} />
           )}
           {step === 'review' && (
             <DecisionEditorReview

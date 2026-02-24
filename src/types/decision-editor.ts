@@ -112,6 +112,7 @@ export type DecisionEditorStep =
   | 'comparison'
   | 'approval'
   | 'assignee'
+  | 'integrations'
   | 'review'
 
 export const EDITOR_STEPS: { id: DecisionEditorStep; label: string }[] = [
@@ -120,5 +121,6 @@ export const EDITOR_STEPS: { id: DecisionEditorStep; label: string }[] = [
   { id: 'comparison', label: 'Side-by-Side Builder' },
   { id: 'approval', label: 'Approval Rules' },
   { id: 'assignee', label: 'Assignee & Reminders' },
+  { id: 'integrations', label: 'Integrations' },
   { id: 'review', label: 'Review & Publish' },
 ]

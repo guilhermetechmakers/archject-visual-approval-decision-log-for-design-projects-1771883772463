@@ -66,6 +66,7 @@ export function DecisionEditorProvider({
       if (targetStep === 'comparison') return state.options.length > 0
       if (targetStep === 'approval') return true
       if (targetStep === 'assignee') return true
+      if (targetStep === 'integrations') return true
       if (targetStep === 'review') return state.title.length > 0
       return false
     },
