@@ -1,0 +1,1552 @@
+⚠️ CRITICAL EXECUTION RULES - READ FIRST ⚠️
+❌ NEVER run: npm run dev, npm start, yarn dev, pnpm dev, or ANY development server
+❌ NEVER run: long-running processes, servers, or commands that don't exit
+❌ NEVER test the application by starting it
+✅ ALLOWED: npm install, npm run build, npm run test (if needed)
+✅ YOUR TASK: Create/modify files only, then STOP and EXIT immediately
+⚠️ The MCP server handles all testing and validation separately
+
+You are an expert full-stack developer proficient in TypeScript, React, Next.js, and modern UI/UX frameworks (Tailwind CSS, Shadcn UI, Radix UI).
+
+=== DESIGN REFERENCE (MANDATORY) ===
+# Modern Design Best Practices
+
+## Philosophy
+
+Create unique, memorable experiences while maintaining consistency through modern design principles. Every project should feel distinct yet professional, innovative yet intuitive.
+
+---
+
+## Landing Pages & Marketing Sites
+
+### Hero Sections
+**Go beyond static backgrounds:**
+- Animated gradients with subtle movement
+- Particle systems or geometric shapes floating
+- Interactive canvas backgrounds (Three.js, WebGL)
+- Video backgrounds with proper fallbacks
+- Parallax scrolling effects
+- Gradient mesh animations
+- Morphing blob animations
+
+
+### Layout Patterns
+**Use modern grid systems:**
+- Bento grids (asymmetric card layouts)
+- Masonry layouts for varied content
+- Feature sections with diagonal cuts or curves
+- Overlapping elements with proper z-index
+- Split-screen designs with scroll-triggered reveals
+
+**Avoid:** Traditional 3-column equal grids
+
+### Scroll Animations
+**Engage users as they scroll:**
+- Fade-in and slide-up animations for sections
+- Scroll-triggered parallax effects
+- Progress indicators for long pages
+- Sticky elements that transform on scroll
+- Horizontal scroll sections for portfolios
+- Text reveal animations (word by word, letter by letter)
+- Number counters animating into view
+
+**Avoid:** Static pages with no scroll interaction
+
+### Call-to-Action Areas
+**Make CTAs impossible to miss:**
+- Gradient buttons with hover effects
+- Floating action buttons with micro-interactions
+- Animated borders or glowing effects
+- Scale/lift on hover
+- Interactive elements that respond to mouse position
+- Pulsing indicators for primary actions
+
+---
+
+## Dashboard Applications
+
+### Layout Structure
+**Always use collapsible side navigation:**
+- Sidebar that can collapse to icons only
+- Smooth transition animations between states
+- Persistent navigation state (remember user preference)
+- Mobile: drawer that slides in/out
+- Desktop: sidebar with expand/collapse toggle
+- Icons visible even when collapsed
+
+**Structure:**
+```
+/dashboard (layout wrapper with sidebar)
+  /dashboard/overview
+  /dashboard/analytics
+  /dashboard/settings
+  /dashboard/users
+  /dashboard/projects
+```
+
+All dashboard pages should be nested inside the dashboard layout, not separate routes.
+
+### Data Tables
+**Modern table design:**
+- Sticky headers on scroll
+- Row hover states with subtle elevation
+- Sortable columns with clear indicators
+- Pagination with items-per-page control
+- Search/filter with instant feedback
+- Selection checkboxes with bulk actions
+- Responsive: cards on mobile, table on desktop
+- Loading skeletons, not spinners
+- Empty states with illustrations or helpful text
+
+**Use modern table libraries:**
+- TanStack Table (React Table v8)
+- AG Grid for complex data
+- Data Grid from MUI (if using MUI)
+
+### Charts & Visualizations
+**Use the latest charting libraries:**
+- Recharts (for React, simple charts)
+- Chart.js v4 (versatile, well-maintained)
+- Apache ECharts (advanced, interactive)
+- D3.js (custom, complex visualizations)
+- Tremor (for dashboards, built on Recharts)
+
+**Chart best practices:**
+- Animated transitions when data changes
+- Interactive tooltips with detailed info
+- Responsive sizing
+- Color scheme matching design system
+- Legend placement that doesn't obstruct data
+- Loading states while fetching data
+
+### Dashboard Cards
+**Metric cards should stand out:**
+- Gradient backgrounds or colored accents
+- Trend indicators (↑ ↓ with color coding)
+- Sparkline charts for historical data
+- Hover effects revealing more detail
+- Icon representing the metric
+- Comparison to previous period
+
+---
+
+## Color & Visual Design
+
+### Color Palettes
+**Create depth with gradients:**
+- Primary gradient (not just solid primary color)
+- Subtle background gradients
+- Gradient text for headings
+- Gradient borders on cards
+- Elevated surfaces for depth
+
+**Color usage:**
+- 60-30-10 rule (dominant, secondary, accent)
+- Consistent semantic colors (success, warning, error)
+- Accessible contrast ratios (WCAG AA minimum)
+
+### Typography
+**Create hierarchy through contrast:**
+- Large, bold headings (48-72px for heroes)
+- Clear size differences between levels
+- Variable font weights (300, 400, 600, 700)
+- Letter spacing for small caps
+- Line height 1.5-1.7 for body text
+- Inter, Poppins, or DM Sans for modern feel
+
+### Shadows & Depth
+**Layer UI elements:**
+- Multi-layer shadows for realistic depth
+- Colored shadows matching element color
+- Elevated states on hover
+- Neumorphism for special elements (sparingly)
+
+---
+
+## Interactions & Micro-animations
+
+### Button Interactions
+**Every button should react:**
+- Scale slightly on hover (1.02-1.05)
+- Lift with shadow on hover
+- Ripple effect on click
+- Loading state with spinner or progress
+- Disabled state clearly visible
+- Success state with checkmark animation
+
+### Card Interactions
+**Make cards feel alive:**
+- Lift on hover with increased shadow
+- Subtle border glow on hover
+- Tilt effect following mouse (3D transform)
+- Smooth transitions (200-300ms)
+- Click feedback for interactive cards
+
+### Form Interactions
+**Guide users through forms:**
+- Input focus states with border color change
+- Floating labels that animate up
+- Real-time validation with inline messages
+- Success checkmarks for valid inputs
+- Error states with shake animation
+- Password strength indicators
+- Character count for text areas
+
+### Page Transitions
+**Smooth between views:**
+- Fade + slide for page changes
+- Skeleton loaders during data fetch
+- Optimistic UI updates
+- Stagger animations for lists
+- Route transition animations
+
+---
+
+## Mobile Responsiveness
+
+### Mobile-First Approach
+**Design for mobile, enhance for desktop:**
+- Touch targets minimum 44x44px
+- Generous padding and spacing
+- Sticky bottom navigation on mobile
+- Collapsible sections for long content
+- Swipeable cards and galleries
+- Pull-to-refresh where appropriate
+
+### Responsive Patterns
+**Adapt layouts intelligently:**
+- Hamburger menu → full nav bar
+- Card grid → stack on mobile
+- Sidebar → drawer
+- Multi-column → single column
+- Data tables → card list
+- Hide/show elements based on viewport
+
+---
+
+## Loading & Empty States
+
+### Loading States
+**Never leave users wondering:**
+- Skeleton screens matching content layout
+- Progress bars for known durations
+- Animated placeholders
+- Spinners only for short waits (<3s)
+- Stagger loading for multiple elements
+- Shimmer effects on skeletons
+
+### Empty States
+**Make empty states helpful:**
+- Illustrations or icons
+- Helpful copy explaining why it's empty
+- Clear CTA to add first item
+- Examples or suggestions
+- No "no data" text alone
+
+---
+
+## Unique Elements to Stand Out
+
+### Distinctive Features
+**Add personality:**
+- Custom cursor effects on landing pages
+- Animated page numbers or section indicators
+- Unusual hover effects (magnification, distortion)
+- Custom scrollbars
+- Glassmorphism for overlays
+- Animated SVG icons
+- Typewriter effects for hero text
+- Confetti or celebration animations for actions
+
+### Interactive Elements
+**Engage users:**
+- Drag-and-drop interfaces
+- Sliders and range controls
+- Toggle switches with animations
+- Progress steps with animations
+- Expandable/collapsible sections
+- Tabs with slide indicators
+- Image comparison sliders
+- Interactive demos or playgrounds
+
+---
+
+## Consistency Rules
+
+### Maintain Consistency
+**What should stay consistent:**
+- Spacing scale (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- Border radius values
+- Animation timing (200ms, 300ms, 500ms)
+- Color system (primary, secondary, accent, neutrals)
+- Typography scale
+- Icon style (outline vs filled)
+- Button styles across the app
+- Form element styles
+
+### What Can Vary
+**Project-specific customization:**
+- Color palette (different colors, same system)
+- Layout creativity (grids, asymmetry)
+- Illustration style
+- Animation personality
+- Feature-specific interactions
+- Hero section design
+- Card styling variations
+- Background patterns or textures
+
+---
+
+## Technical Excellence
+
+### Performance
+- Optimize images (WebP, lazy loading)
+- Code splitting for faster loads
+- Debounce search inputs
+- Virtualize long lists
+- Minimize re-renders
+- Use proper memoization
+
+### Accessibility
+- Keyboard navigation throughout
+- ARIA labels where needed
+- Focus indicators visible
+- Screen reader friendly
+- Sufficient color contrast
+- Respect reduced motion preferences
+
+---
+
+## Key Principles
+
+1. **Be Bold** - Don't be afraid to try unique layouts and interactions
+2. **Be Consistent** - Use the same patterns for similar functions
+3. **Be Responsive** - Design works beautifully on all devices
+4. **Be Fast** - Animations are smooth, loading is quick
+5. **Be Accessible** - Everyone can use what you build
+6. **Be Modern** - Use current design trends and technologies
+7. **Be Unique** - Each project should have its own personality
+8. **Be Intuitive** - Users shouldn't need instructions
+
+
+---
+
+# Project-Specific Customizations
+
+**IMPORTANT: This section contains the specific design requirements for THIS project. The guidelines above are universal best practices - these customizations below take precedence for project-specific decisions.**
+
+## User Design Requirements
+
+- Ensure all skeletons use the same color families and shimmer treatment as other components.
+- Maintain glassy, calm aesthetics with soft shadows, rounded corners, and ample white space.
+- Use the accent colors for progress/status cues only when appropriate within skeletons (e.g., a fake progress bar color might reflect the in-progress yellow/orange palette).
+- Keep interactions subtle; avoid distracting animations beyond the shimmer.
+
+---
+
+## Visual Style (Recap)
+
+Color Palette:
+- Primary: #FFFFFF
+- Secondary: #F5F6FA, #F7F8FA
+- Accent: #195C4A (deep green), #7BE495 (bright green), #FFE8A3 (soft yellow), #FFDCA8 (muted orange), #FF6C6C (light red)
+- Text: #23272F (dark gray), #6B7280 (medium gray)
+- Subtle shadows/borders: #E6E8F0, #D1D5DB
+
+Typography & Layout:
+- Font: Inter / SF Pro / Manrope family
+- Weights: 400, 500, 600
+- Layout: 24-32px container padding, 16-24px gaps, 8px increments
+- Card Design: White background, shadows, 12-16px radius, generous internal padding (≥24px)
+
+Key Design Elements:
+- Card, Navigation, Data Visualization, Interactive Elements, Micro-interactions
+- Focus on clarity, accessibility, mobile-first, and trust-building visuals
+
+---
+
+Generate the complete, detailed prompt now:
+- Provide structured sections as above.
+- Include explicit prop definitions, example usage snippets, and recommended test cases.
+- Include implementation notes that a developer can directly translate into code or a tool-driven build.
+
+## Implementation Notes
+
+When implementing this project:
+
+1. **Follow Universal Guidelines**: Use the design best practices documented above as your foundation
+2. **Apply Project Customizations**: Implement the specific design requirements stated in the "User Design Requirements" section
+3. **Priority Order**: Project-specific requirements override universal guidelines when there's a conflict
+4. **Color System**: Extract and implement color values as CSS custom properties in RGB format
+5. **Typography**: Define font families, sizes, and weights based on specifications
+6. **Spacing**: Establish consistent spacing scale following the design system
+7. **Components**: Style all Shadcn components to match the design aesthetic
+8. **Animations**: Use Motion library for transitions matching the design personality
+9. **Responsive Design**: Ensure mobile-first responsive implementation
+
+## Implementation Checklist
+
+- [ ] Review universal design guidelines above
+- [ ] Extract project-specific color palette and define CSS variables
+- [ ] Configure Tailwind theme with custom colors
+- [ ] Set up typography system (fonts, sizes, weights)
+- [ ] Define spacing and sizing scales
+- [ ] Create component variants matching design
+- [ ] Implement responsive breakpoints
+- [ ] Add animations and transitions
+- [ ] Ensure accessibility standards
+- [ ] Validate against user design requirements
+
+---
+
+**Remember: Always reference this file for design decisions. Do not use generic or placeholder designs.**
+
+
+*IMPORTANT*: For every page or component refer to # Modern Design Best Practices
+
+## Philosophy
+
+Create unique, memorable experiences while maintaining consistency through modern design principles. Every project should feel distinct yet professional, innovative yet intuitive.
+
+---
+
+## Landing Pages & Marketing Sites
+
+### Hero Sections
+**Go beyond static backgrounds:**
+- Animated gradients with subtle movement
+- Particle systems or geometric shapes floating
+- Interactive canvas backgrounds (Three.js, WebGL)
+- Video backgrounds with proper fallbacks
+- Parallax scrolling effects
+- Gradient mesh animations
+- Morphing blob animations
+
+
+### Layout Patterns
+**Use modern grid systems:**
+- Bento grids (asymmetric card layouts)
+- Masonry layouts for varied content
+- Feature sections with diagonal cuts or curves
+- Overlapping elements with proper z-index
+- Split-screen designs with scroll-triggered reveals
+
+**Avoid:** Traditional 3-column equal grids
+
+### Scroll Animations
+**Engage users as they scroll:**
+- Fade-in and slide-up animations for sections
+- Scroll-triggered parallax effects
+- Progress indicators for long pages
+- Sticky elements that transform on scroll
+- Horizontal scroll sections for portfolios
+- Text reveal animations (word by word, letter by letter)
+- Number counters animating into view
+
+**Avoid:** Static pages with no scroll interaction
+
+### Call-to-Action Areas
+**Make CTAs impossible to miss:**
+- Gradient buttons with hover effects
+- Floating action buttons with micro-interactions
+- Animated borders or glowing effects
+- Scale/lift on hover
+- Interactive elements that respond to mouse position
+- Pulsing indicators for primary actions
+
+---
+
+## Dashboard Applications
+
+### Layout Structure
+**Always use collapsible side navigation:**
+- Sidebar that can collapse to icons only
+- Smooth transition animations between states
+- Persistent navigation state (remember user preference)
+- Mobile: drawer that slides in/out
+- Desktop: sidebar with expand/collapse toggle
+- Icons visible even when collapsed
+
+**Structure:**
+```
+/dashboard (layout wrapper with sidebar)
+  /dashboard/overview
+  /dashboard/analytics
+  /dashboard/settings
+  /dashboard/users
+  /dashboard/projects
+```
+
+All dashboard pages should be nested inside the dashboard layout, not separate routes.
+
+### Data Tables
+**Modern table design:**
+- Sticky headers on scroll
+- Row hover states with subtle elevation
+- Sortable columns with clear indicators
+- Pagination with items-per-page control
+- Search/filter with instant feedback
+- Selection checkboxes with bulk actions
+- Responsive: cards on mobile, table on desktop
+- Loading skeletons, not spinners
+- Empty states with illustrations or helpful text
+
+**Use modern table libraries:**
+- TanStack Table (React Table v8)
+- AG Grid for complex data
+- Data Grid from MUI (if using MUI)
+
+### Charts & Visualizations
+**Use the latest charting libraries:**
+- Recharts (for React, simple charts)
+- Chart.js v4 (versatile, well-maintained)
+- Apache ECharts (advanced, interactive)
+- D3.js (custom, complex visualizations)
+- Tremor (for dashboards, built on Recharts)
+
+**Chart best practices:**
+- Animated transitions when data changes
+- Interactive tooltips with detailed info
+- Responsive sizing
+- Color scheme matching design system
+- Legend placement that doesn't obstruct data
+- Loading states while fetching data
+
+### Dashboard Cards
+**Metric cards should stand out:**
+- Gradient backgrounds or colored accents
+- Trend indicators (↑ ↓ with color coding)
+- Sparkline charts for historical data
+- Hover effects revealing more detail
+- Icon representing the metric
+- Comparison to previous period
+
+---
+
+## Color & Visual Design
+
+### Color Palettes
+**Create depth with gradients:**
+- Primary gradient (not just solid primary color)
+- Subtle background gradients
+- Gradient text for headings
+- Gradient borders on cards
+- Elevated surfaces for depth
+
+**Color usage:**
+- 60-30-10 rule (dominant, secondary, accent)
+- Consistent semantic colors (success, warning, error)
+- Accessible contrast ratios (WCAG AA minimum)
+
+### Typography
+**Create hierarchy through contrast:**
+- Large, bold headings (48-72px for heroes)
+- Clear size differences between levels
+- Variable font weights (300, 400, 600, 700)
+- Letter spacing for small caps
+- Line height 1.5-1.7 for body text
+- Inter, Poppins, or DM Sans for modern feel
+
+### Shadows & Depth
+**Layer UI elements:**
+- Multi-layer shadows for realistic depth
+- Colored shadows matching element color
+- Elevated states on hover
+- Neumorphism for special elements (sparingly)
+
+---
+
+## Interactions & Micro-animations
+
+### Button Interactions
+**Every button should react:**
+- Scale slightly on hover (1.02-1.05)
+- Lift with shadow on hover
+- Ripple effect on click
+- Loading state with spinner or progress
+- Disabled state clearly visible
+- Success state with checkmark animation
+
+### Card Interactions
+**Make cards feel alive:**
+- Lift on hover with increased shadow
+- Subtle border glow on hover
+- Tilt effect following mouse (3D transform)
+- Smooth transitions (200-300ms)
+- Click feedback for interactive cards
+
+### Form Interactions
+**Guide users through forms:**
+- Input focus states with border color change
+- Floating labels that animate up
+- Real-time validation with inline messages
+- Success checkmarks for valid inputs
+- Error states with shake animation
+- Password strength indicators
+- Character count for text areas
+
+### Page Transitions
+**Smooth between views:**
+- Fade + slide for page changes
+- Skeleton loaders during data fetch
+- Optimistic UI updates
+- Stagger animations for lists
+- Route transition animations
+
+---
+
+## Mobile Responsiveness
+
+### Mobile-First Approach
+**Design for mobile, enhance for desktop:**
+- Touch targets minimum 44x44px
+- Generous padding and spacing
+- Sticky bottom navigation on mobile
+- Collapsible sections for long content
+- Swipeable cards and galleries
+- Pull-to-refresh where appropriate
+
+### Responsive Patterns
+**Adapt layouts intelligently:**
+- Hamburger menu → full nav bar
+- Card grid → stack on mobile
+- Sidebar → drawer
+- Multi-column → single column
+- Data tables → card list
+- Hide/show elements based on viewport
+
+---
+
+## Loading & Empty States
+
+### Loading States
+**Never leave users wondering:**
+- Skeleton screens matching content layout
+- Progress bars for known durations
+- Animated placeholders
+- Spinners only for short waits (<3s)
+- Stagger loading for multiple elements
+- Shimmer effects on skeletons
+
+### Empty States
+**Make empty states helpful:**
+- Illustrations or icons
+- Helpful copy explaining why it's empty
+- Clear CTA to add first item
+- Examples or suggestions
+- No "no data" text alone
+
+---
+
+## Unique Elements to Stand Out
+
+### Distinctive Features
+**Add personality:**
+- Custom cursor effects on landing pages
+- Animated page numbers or section indicators
+- Unusual hover effects (magnification, distortion)
+- Custom scrollbars
+- Glassmorphism for overlays
+- Animated SVG icons
+- Typewriter effects for hero text
+- Confetti or celebration animations for actions
+
+### Interactive Elements
+**Engage users:**
+- Drag-and-drop interfaces
+- Sliders and range controls
+- Toggle switches with animations
+- Progress steps with animations
+- Expandable/collapsible sections
+- Tabs with slide indicators
+- Image comparison sliders
+- Interactive demos or playgrounds
+
+---
+
+## Consistency Rules
+
+### Maintain Consistency
+**What should stay consistent:**
+- Spacing scale (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- Border radius values
+- Animation timing (200ms, 300ms, 500ms)
+- Color system (primary, secondary, accent, neutrals)
+- Typography scale
+- Icon style (outline vs filled)
+- Button styles across the app
+- Form element styles
+
+### What Can Vary
+**Project-specific customization:**
+- Color palette (different colors, same system)
+- Layout creativity (grids, asymmetry)
+- Illustration style
+- Animation personality
+- Feature-specific interactions
+- Hero section design
+- Card styling variations
+- Background patterns or textures
+
+---
+
+## Technical Excellence
+
+### Performance
+- Optimize images (WebP, lazy loading)
+- Code splitting for faster loads
+- Debounce search inputs
+- Virtualize long lists
+- Minimize re-renders
+- Use proper memoization
+
+### Accessibility
+- Keyboard navigation throughout
+- ARIA labels where needed
+- Focus indicators visible
+- Screen reader friendly
+- Sufficient color contrast
+- Respect reduced motion preferences
+
+---
+
+## Key Principles
+
+1. **Be Bold** - Don't be afraid to try unique layouts and interactions
+2. **Be Consistent** - Use the same patterns for similar functions
+3. **Be Responsive** - Design works beautifully on all devices
+4. **Be Fast** - Animations are smooth, loading is quick
+5. **Be Accessible** - Everyone can use what you build
+6. **Be Modern** - Use current design trends and technologies
+7. **Be Unique** - Each project should have its own personality
+8. **Be Intuitive** - Users shouldn't need instructions
+
+
+---
+
+# Project-Specific Customizations
+
+**IMPORTANT: This section contains the specific design requirements for THIS project. The guidelines above are universal best practices - these customizations below take precedence for project-specific decisions.**
+
+## User Design Requirements
+
+- Ensure all skeletons use the same color families and shimmer treatment as other components.
+- Maintain glassy, calm aesthetics with soft shadows, rounded corners, and ample white space.
+- Use the accent colors for progress/status cues only when appropriate within skeletons (e.g., a fake progress bar color might reflect the in-progress yellow/orange palette).
+- Keep interactions subtle; avoid distracting animations beyond the shimmer.
+
+---
+
+## Visual Style (Recap)
+
+Color Palette:
+- Primary: #FFFFFF
+- Secondary: #F5F6FA, #F7F8FA
+- Accent: #195C4A (deep green), #7BE495 (bright green), #FFE8A3 (soft yellow), #FFDCA8 (muted orange), #FF6C6C (light red)
+- Text: #23272F (dark gray), #6B7280 (medium gray)
+- Subtle shadows/borders: #E6E8F0, #D1D5DB
+
+Typography & Layout:
+- Font: Inter / SF Pro / Manrope family
+- Weights: 400, 500, 600
+- Layout: 24-32px container padding, 16-24px gaps, 8px increments
+- Card Design: White background, shadows, 12-16px radius, generous internal padding (≥24px)
+
+Key Design Elements:
+- Card, Navigation, Data Visualization, Interactive Elements, Micro-interactions
+- Focus on clarity, accessibility, mobile-first, and trust-building visuals
+
+---
+
+Generate the complete, detailed prompt now:
+- Provide structured sections as above.
+- Include explicit prop definitions, example usage snippets, and recommended test cases.
+- Include implementation notes that a developer can directly translate into code or a tool-driven build.
+
+## Implementation Notes
+
+When implementing this project:
+
+1. **Follow Universal Guidelines**: Use the design best practices documented above as your foundation
+2. **Apply Project Customizations**: Implement the specific design requirements stated in the "User Design Requirements" section
+3. **Priority Order**: Project-specific requirements override universal guidelines when there's a conflict
+4. **Color System**: Extract and implement color values as CSS custom properties in RGB format
+5. **Typography**: Define font families, sizes, and weights based on specifications
+6. **Spacing**: Establish consistent spacing scale following the design system
+7. **Components**: Style all Shadcn components to match the design aesthetic
+8. **Animations**: Use Motion library for transitions matching the design personality
+9. **Responsive Design**: Ensure mobile-first responsive implementation
+
+## Implementation Checklist
+
+- [ ] Review universal design guidelines above
+- [ ] Extract project-specific color palette and define CSS variables
+- [ ] Configure Tailwind theme with custom colors
+- [ ] Set up typography system (fonts, sizes, weights)
+- [ ] Define spacing and sizing scales
+- [ ] Create component variants matching design
+- [ ] Implement responsive breakpoints
+- [ ] Add animations and transitions
+- [ ] Ensure accessibility standards
+- [ ] Validate against user design requirements
+
+---
+
+**Remember: Always reference this file for design decisions. Do not use generic or placeholder designs.**
+ for bestpractices and # Password Management
+
+## Overview
+Build a secure, user-friendly Password Management system for Archject that includes:
+- Forgot password and password change flows with secure, time-limited, single-use reset tokens stored hashed in the database.
+- Email-based reset flow using a transactional email provider (SendGrid) with robust deliverability considerations.
+- Client-side and server-side password strength validation.
+- Audit logging of password reset events for compliance and traceability.
+- Integration with the existing project context: page_password_reset and page_auth, plus a unified login/signup page with support for email/password and Google OAuth, plus enterprise SSO/workspace flows.
+- A cohesive UI under the Archject design system with accessibility, responsive behavior, and a strong emphasis on clarity and trust.
+
+---
+
+## Components to Build
+
+1) Password Reset Token Service
+- Generate time-limited tokens (e.g., JWTs or opaque random tokens) with short TTL (e.g., 60 minutes).
+- Hash tokens before storing in DB; store metadata: user_id, token_hash, expires_at, used_at, created_at, device_info, ip_address (optional).
+- Endpoint to create a reset token for a user when they request a password reset.
+- Endpoint to validate and consume a token during password reset confirmation.
+- Audit events for token creation, validation, and consumption.
+
+2) Password Reset Email Workflow
+- Templated email content with secure link including a reset token reference (either token itself or a one-time reference ID).
+- Integration with SendGrid (or preferred transactional email service) with retry logic and rate limiting.
+- Email templates for: reset request confirmation, reset success, and reset failure/error notifications.
+
+3) Password Reset Pages (page_password_reset)
+- Request Reset Page: input email, optional tenant/workspace selection, immediate client-side validation.
+- Confirmation/Status Page: informs user to check email, with clear success and error states.
+- Digital receipt/log of reset request visible to user (optional, per policy).
+
+4) Login / Signup Page (page_auth)
+- Unified authentication surface supporting:
+  - Email/password sign-up and login flows.
+  - Google OAuth sign-in/sign-up with proper redirect URIs.
+  - Enterprise SSO / Workspace onboarding flow (SSO integration gateway, e.g., SAML/OIDC).
+- Clear flows for creating/choosing workspaces, inviting teammates, and onboarding to enterprise SSO if applicable.
+- Password management affordances (Forgot Password, Change Password) from the same page.
+- Client-side password strength meter and feedback.
+- Secure handling of tokens, sessions, and refresh flows.
+
+5) Password Change Page/Modal
+- Authenticated flow to change password from user settings.
+- Enforce current password verification (or session-based re-auth if long-lived).
+- Password strength validation client-side and server-side.
+- Audit logging of password change events (who changed, when, from where).
+
+6) Backend APIs and Data Layer
+- User accounts table: existing schema extended as needed for password_hash, password_last_changed, etc.
+- Password reset tokens table or equivalent fields on users (ideally a dedicated table: password_reset_tokens).
+- Email delivery integration layer (Saga/Worker for asynchronous sending).
+- Validation utilities for password strength (rules: length, complexity, common password checks, breach checks).
+- Audit log table/model capturing events: event_type, user_id, timestamp, metadata (ip, device, user_agent).
+- Rate limiting and abuse prevention for reset requests (per email/IP).
+
+7) Security & Compliance Modules
+- Password hashing: bcrypt or Argon2 with a proper cost factor.
+- Token storage: hashed tokens, with single-use enforcement via used_at field.
+- TLS enforcement, secure cookies, HttpOnly, SameSite attributes.
+- Encrypted fields at rest for sensitive data as per policy.
+- Monitoring and alerting hooks for failed reset attempts, floods, and anomalous activity.
+
+8) Validation & Testing
+- Unit tests for token generation/validation logic, password validators, and audit logging.
+- Integration tests for the end-to-end reset flow (request → email → token usage → password update).
+- Frontend validation tests for login/signup forms, password strength meters, and reset form.
+- Accessibility tests (ARIA labels, keyboard navigation).
+
+---
+
+## Implementation Requirements
+
+### Frontend
+- UI Components:
+  - Unified Auth Card: clean, card-based container with white background, subtle shadow, 12-16px corners, responsive behavior.
+  - Password Strength Meter: real-time feedback with color-coded indicators and policy hints.
+  - Token Input (for reset confirmation): hidden, secure handling; if using URL token, ensure token is not exposed in UI.
+  - Buttons: Pill-shaped primary actions with deep green (#195C4A); secondary actions with subdued backgrounds.
+  - Status Chips: green/yellow/red pills for success/warning/danger states.
+  - Form Fields: Rounded inputs (#F5F6FA background) with clear focus states and accessible labels.
+  - Card Variants: Consistent elevation, hover behavior, and 8px spacing grid increments.
+- Pages:
+  - page_auth: Unified login/signup with Google OAuth, workspace onboarding, and SSO prompts for enterprise.
+  - page_password_reset: Request reset form; success/error states; optional feedback on email delivery status.
+  - Password Change Page: Accessible only when authenticated; fields for current_password, new_password, confirm_password; strength meter and validation messages.
+- Workflows:
+  - Client-side: Validate email, required fields, password strength rules, confirm password match; enforce rate limiting hints (client-side).
+  - Server-side: Handle password reset, token verification, password changes; return clear, user-friendly error messages; emit audit events.
+- Accessibility:
+ 11+: WCAG 2.1 AA compliant; proper aria-labels, keyboard navigation, color contrast, focus indicators.
+
+### Backend
+- APIs:
+  - POST /auth/forgot-password
+    - Input: email, workspace_id (optional)
+    - Action: find user; generate token; store hashed token with expiry; enqueue email; respond with generic success message.
+  - POST /auth/reset-password
+    - Input: token, new_password, confirm_password
+    - Action: validate token (not expired, not used), validate password strength server-side, hash new password, set password_last_changed, mark token used, log audit, respond with success.
+  - POST /auth/change-password (authenticated)
+    - Input: current_password, new_password
+    - Action: verify current_password, validate new_password, update password, log audit.
+  - GET /auth/validate-reset-token?token=...
+    - Optional token validation endpoint for UI to pre-verify token state (disabled if not required).
+  - POST /auth/signup
+    - Sign-up flow with workspace creation, optional SSO hooks.
+  - POST /auth/login
+    - Standard login with email/password and OAuth tokens integration; refresh token issuance.
+- Data Models:
+  - users:
+    - id, email, password_hash, password_salt (if using salt), password_last_changed, active, workspace_id, created_at, updated_at, failed_login_attempts, is_2fa_enabled (if applicable)
+  - password_reset_tokens:
+    - id, user_id, token_hash, expires_at, used_at, created_at, created_by_ip, device_info, user_agent
+  - audit_logs:
+    - id, user_id, action_type (password_reset_requested, password_reset_used, password_changed, login_attempt, etc.), timestamp, ip_address, user_agent, metadata (JSON)
+  - workspaces/organizations: existing schema adjustments for workspace_id associations and SSO configurations
+- Security:
+  - Hashing: bcrypt or Argon2 for passwords; use a strong pepper if policy allows.
+  - Token hashing: store only hashed tokens (e.g., SHA-256) server-side; never store plaintext tokens.
+  - Token TTLs: short-lived (e.g., 60 minutes) with a single-use constraint.
+  - Email verification: domain allowlists, DKIM/SPF, bounced email handling.
+  - Rate limiting: protect forgot-password endpoint (per email/IP) to prevent abuse.
+- Email:
+  - SendGrid integration with templates:
+    - Reset Request: “Someone requested a password reset”
+    - Reset Confirmation: “Your password has been reset”
+  - Include safe non-flowing content and fallback messages if delivery fails.
+
+### Integration
+- Frontend to Backend:
+  - Unified auth page communicates with /auth endpoints; handles server responses with user-friendly messages.
+  - Password reset flow: Request form triggers forgot-password; UI polls or waits for email delivery signal; Reset page uses token from URL to submit new password to /auth/reset-password.
+- Security/SSO:
+  - Ensure Google OAuth tokens flow smoothly into /auth/login or /auth/signup paths.
+  - Enterprise SSO flows through page_auth, with explicit prompts for workspace + SSO enrollment.
+- Logging & Observability:
+  - Centralized audit events for password resets, password changes, and login anomalies.
+  - Error handling with structured responses for UI/UX consistency.
+
+---
+
+## User Experience Flow
+
+1) User Visits Unified Auth Page (page_auth)
+- Sees options: Sign up, Log in, Sign in with Google, Enterprise SSO (if configured), and a CTA to Forgot Password.
+- If new user selects Sign up, creates a new account and selects/creates a workspace.
+- If existing user selects Log in, enters email/password or uses Google OAuth.
+- If enterprise/SSO is required, user is guided through SSO enrollment or workspace association.
+
+2) Forgot Password
+- User clicks “Forgot Password” on page_auth.
+- Redirects to Password Reset Request within page_auth or page_password_reset flow.
+- User enters registered email (and optional workspace); client-side validates email format.
+- Backend creates a reset token, stores hashed token, and queues email to SendGrid.
+- UI shows a non-revealing success message: “If an account exists, you will receive a password reset email shortly.”
+- Email arrives with a secure link to the Password Reset Page (page_password_reset) containing a token.
+
+3) Password Reset Page (page_password_reset)
+- User clicks link with token, lands on the reset page.
+- Page validates token state (server-side) upon load or on submission.
+- User enters new password and confirmation.
+- Client-side validates password strength and matches confirmation; server-side re-validates.
+- On success, token is marked used; password is updated; audit log created; user is redirected to a confirmation screen or login with a success message.
+- On error (expired/invalid token), display clear error and guidance to request a new reset.
+
+4) Password Change (Authenticated)
+- User navigates to Settings > Password.
+- User enters current_password and new_password (and confirmation).
+- Client-side validates; server verifies current password, updates to new password, logs audit.
+- Show success message and provide a brief note about re-authentication if necessary.
+
+5) Post-Change Security & Notifications
+- Send optional email confirming password change.
+- If suspicious activity detected, trigger additional security prompts (2FA re-prompt, login from new device/IP).
+
+---
+
+## Technical Specifications
+
+Data Models
+- users:
+  - id (UUID)
+  - email (string, unique)
+  - password_hash (string)
+  - password_last_changed (timestamp)
+  - is_active (boolean)
+  - workspace_id (foreign key)
+  - created_at, updated_at
+  - failed_login_attempts (int)
+  - is_2fa_enabled (boolean, optional)
+- password_reset_tokens:
+  - id (UUID)
+  - user_id (foreign key -> users)
+  - token_hash (string)
+  - expires_at (timestamp)
+  - used_at (timestamp, nullable)
+  - created_at (timestamp)
+  - created_by_ip (string, optional)
+  - device_info (string, optional)
+  - user_agent (string, optional)
+- audit_logs:
+  - id (UUID)
+  - user_id (foreign key, nullable for unknown)
+  - action_type (enum: password_reset_requested, password_reset_used, password_changed, login_attempt, etc.)
+  - timestamp (timestamp)
+  - ip_address (string)
+  - user_agent (string)
+  - metadata (JSON)
+
+API Endpoints
+- POST /auth/forgot-password
+  - Body: { email, workspace_id? }
+  - Response: { message: "If an account exists, you will receive an email" } (generic)
+- POST /auth/reset-password
+  - Body: { token, new_password, confirm_password }
+  - Response: { message: "Password has been reset successfully" } or error details (generic for security)
+- POST /auth/change-password
+  - Protected route; Body: { current_password, new_password, confirm_password }
+  - Response: { message: "Password changed successfully" }
+- GET /auth/validate-reset-token?token=...
+  - Response: { valid: boolean, expires_at, used: boolean } (if implemented)
+- POST /auth/login
+  - Body: { email, password, remember_me? }
+  - Response: session token, user payload
+- POST /auth/signup
+  - Body: { email, password, workspace_id, ... }
+  - Response: user/session payload
+- OAuth flows endpoints as per provider strategy (Google)
+- Admin/SSO configuration endpoints (enterprise)
+
+Security
+- Password hashing: Argon2 recommended; fall back to bcrypt if necessary.
+- Token handling: store only token_hash (SHA-256) and expiration; enforce single-use via used_at.
+- Transport: TLS 1.2+; secure cookies (HttpOnly, Secure, SameSite=Lax/Strict).
+- Secrets: store in environment/config vault; rotate keys regularly.
+- Rate limiting: protect forgot-password and authentication endpoints.
+- Logging: redact sensitive fields; store audit logs with user_id, action, timestamp, IP, user agent.
+
+Validation
+- Client-side:
+  - Email format validation.
+  - Password strength: min length (12), must include upper/lowercase, number, and special character; disallow common passwords; optional breach-check integration.
+  - Password and confirm_password match.
+  - Workspace selection if required by enterprise flow.
+- Server-side:
+  - Re-validate all inputs; enforce security constraints; ensure token is valid and unused and not expired; ensure password meets policy.
+  - Ensure error responses do not reveal whether an email is registered (to prevent enumeration).
+
+Acceptance Criteria
+- [ ] End-to-end forgot password flow: token generation, email dispatch, token validation, password update, and audit logging succeed without exposing sensitive data.
+- [ ] Passwords are stored as hashed values with a strong algorithm; tokens are hashed in DB; tokens are single-use and time-limited.
+- [ ] Email delivery via SendGrid works with templates, including bounce handling and retries.
+- [ ] Frontend password strength meter provides live feedback; server enforces strength as well.
+- [ ] All password reset events are captured in audit_logs with appropriate metadata.
+- [ ] Unified login/signup page supports email/password and Google OAuth; enterprise SSO/workspace onboarding flows are accessible and robust.
+
+UI/UX Guidelines
+Apply the project's design system:
+- Visual language aligned with color palette, typography, and spacing described in the Visual Style section.
+- Cards with pure white background, soft shadows, rounded corners, and generous padding.
+- Top navigation and optional sidebars with accessible, large hit areas; active states use deep green (#195C4A).
+- Data visualization components (where present) use soft grids, muted axes, and non-intrusive color accents.
+- Interactive elements (buttons, inputs, tags) with smooth transitions and micro-interactions.
+- Mobile-first approach with responsive layouts and accessible controls.
+
+Visual Style Reference (reiterated)
+- Primary: #FFFFFF
+- Secondary: #F5F6FA, #F7F8FA
+- Accent: #195C4A (deep green), #7BE495 (bright green)
+- Status: #FFE8A3 (soft yellow), #FFDCA8 (orange), #FF6C6C (light red)
+- Text: #23272F (dark gray), #6B7280 (medium gray)
+- Shadows/borders: #E6E8F0, #D1D5DB
+- Typography: Inter/SF Pro/Manrope-like sans-serif; weights 400/500/600
+
+Connected Pages Context
+- page_password_reset exists to handle reset flows.
+- page_auth exists for unified authentication.
+- Ensure cohesive navigation between these pages with consistent styling and seamless transitions.
+
+Deliverables
+- Fully implemented frontend components and pages (page_auth, page_password_reset, password change UI).
+- Backend APIs with proper documentation (OpenAPI or similar) and clear error schemas.
+- Database migrations for password_reset_tokens and audit_logs.
+- Email templates and environment configuration for SendGrid.
+- Comprehensive tests (unit, integration, and end-to-end) validating flows and security.
+- Developer notes detailing deployment steps, environment variables, and rollback procedures.
+
+If you need this as a ready-to-run scaffold, I can provide code skeletons for the frontend (React/Vue), backend (Node/Express, or Python FastAPI), and database migrations aligned with your tech stack. for style.
+
+CRITICAL DESIGN REQUIREMENTS:
+- You MUST follow ALL design principles and patterns specified in the Design Reference above
+- Do NOT deviate from the design specifications without explicit user permission
+- Implement ALL visual design elements (colors, typography, spacing, shadows, animations) as specified
+- Follow the layout patterns and component designs exactly as documented
+- Ensure all interactions and micro-animations match the reference specifications
+
+CRITICAL TECHNICAL REQUIREMENTS:
+- React 18.3.1, React Router 6.30.1
+- Tailwind CSS v3 with tailwind.config.js and custom keyframes
+- @tailwindcss/typography plugin for rich text content
+- Tailwind CSS animations (NOT Motion library or framer-motion)
+- Sonner for toasts
+- Recharts for data visualization
+- Native fetch() with API utilities in src/lib/api.ts
+- Design system with CSS custom properties
+- Use RGB color values for theming
+- When Supabase is configured: use Edge Functions for LLM and server-only logic; never expose API keys in the client
+
+=== TASK ===
+# Password Management
+
+## Overview
+Build a secure, user-friendly Password Management system for Archject that includes:
+- Forgot password and password change flows with secure, time-limited, single-use reset tokens stored hashed in the database.
+- Email-based reset flow using a transactional email provider (SendGrid) with robust deliverability considerations.
+- Client-side and server-side password strength validation.
+- Audit logging of password reset events for compliance and traceability.
+- Integration with the existing project context: page_password_reset and page_auth, plus a unified login/signup page with support for email/password and Google OAuth, plus enterprise SSO/workspace flows.
+- A cohesive UI under the Archject design system with accessibility, responsive behavior, and a strong emphasis on clarity and trust.
+
+---
+
+## Components to Build
+
+1) Password Reset Token Service
+- Generate time-limited tokens (e.g., JWTs or opaque random tokens) with short TTL (e.g., 60 minutes).
+- Hash tokens before storing in DB; store metadata: user_id, token_hash, expires_at, used_at, created_at, device_info, ip_address (optional).
+- Endpoint to create a reset token for a user when they request a password reset.
+- Endpoint to validate and consume a token during password reset confirmation.
+- Audit events for token creation, validation, and consumption.
+
+2) Password Reset Email Workflow
+- Templated email content with secure link including a reset token reference (either token itself or a one-time reference ID).
+- Integration with SendGrid (or preferred transactional email service) with retry logic and rate limiting.
+- Email templates for: reset request confirmation, reset success, and reset failure/error notifications.
+
+3) Password Reset Pages (page_password_reset)
+- Request Reset Page: input email, optional tenant/workspace selection, immediate client-side validation.
+- Confirmation/Status Page: informs user to check email, with clear success and error states.
+- Digital receipt/log of reset request visible to user (optional, per policy).
+
+4) Login / Signup Page (page_auth)
+- Unified authentication surface supporting:
+  - Email/password sign-up and login flows.
+  - Google OAuth sign-in/sign-up with proper redirect URIs.
+  - Enterprise SSO / Workspace onboarding flow (SSO integration gateway, e.g., SAML/OIDC).
+- Clear flows for creating/choosing workspaces, inviting teammates, and onboarding to enterprise SSO if applicable.
+- Password management affordances (Forgot Password, Change Password) from the same page.
+- Client-side password strength meter and feedback.
+- Secure handling of tokens, sessions, and refresh flows.
+
+5) Password Change Page/Modal
+- Authenticated flow to change password from user settings.
+- Enforce current password verification (or session-based re-auth if long-lived).
+- Password strength validation client-side and server-side.
+- Audit logging of password change events (who changed, when, from where).
+
+6) Backend APIs and Data Layer
+- User accounts table: existing schema extended as needed for password_hash, password_last_changed, etc.
+- Password reset tokens table or equivalent fields on users (ideally a dedicated table: password_reset_tokens).
+- Email delivery integration layer (Saga/Worker for asynchronous sending).
+- Validation utilities for password strength (rules: length, complexity, common password checks, breach checks).
+- Audit log table/model capturing events: event_type, user_id, timestamp, metadata (ip, device, user_agent).
+- Rate limiting and abuse prevention for reset requests (per email/IP).
+
+7) Security & Compliance Modules
+- Password hashing: bcrypt or Argon2 with a proper cost factor.
+- Token storage: hashed tokens, with single-use enforcement via used_at field.
+- TLS enforcement, secure cookies, HttpOnly, SameSite attributes.
+- Encrypted fields at rest for sensitive data as per policy.
+- Monitoring and alerting hooks for failed reset attempts, floods, and anomalous activity.
+
+8) Validation & Testing
+- Unit tests for token generation/validation logic, password validators, and audit logging.
+- Integration tests for the end-to-end reset flow (request → email → token usage → password update).
+- Frontend validation tests for login/signup forms, password strength meters, and reset form.
+- Accessibility tests (ARIA labels, keyboard navigation).
+
+---
+
+## Implementation Requirements
+
+### Frontend
+- UI Components:
+  - Unified Auth Card: clean, card-based container with white background, subtle shadow, 12-16px corners, responsive behavior.
+  - Password Strength Meter: real-time feedback with color-coded indicators and policy hints.
+  - Token Input (for reset confirmation): hidden, secure handling; if using URL token, ensure token is not exposed in UI.
+  - Buttons: Pill-shaped primary actions with deep green (#195C4A); secondary actions with subdued backgrounds.
+  - Status Chips: green/yellow/red pills for success/warning/danger states.
+  - Form Fields: Rounded inputs (#F5F6FA background) with clear focus states and accessible labels.
+  - Card Variants: Consistent elevation, hover behavior, and 8px spacing grid increments.
+- Pages:
+  - page_auth: Unified login/signup with Google OAuth, workspace onboarding, and SSO prompts for enterprise.
+  - page_password_reset: Request reset form; success/error states; optional feedback on email delivery status.
+  - Password Change Page: Accessible only when authenticated; fields for current_password, new_password, confirm_password; strength meter and validation messages.
+- Workflows:
+  - Client-side: Validate email, required fields, password strength rules, confirm password match; enforce rate limiting hints (client-side).
+  - Server-side: Handle password reset, token verification, password changes; return clear, user-friendly error messages; emit audit events.
+- Accessibility:
+ 11+: WCAG 2.1 AA compliant; proper aria-labels, keyboard navigation, color contrast, focus indicators.
+
+### Backend
+- APIs:
+  - POST /auth/forgot-password
+    - Input: email, workspace_id (optional)
+    - Action: find user; generate token; store hashed token with expiry; enqueue email; respond with generic success message.
+  - POST /auth/reset-password
+    - Input: token, new_password, confirm_password
+    - Action: validate token (not expired, not used), validate password strength server-side, hash new password, set password_last_changed, mark token used, log audit, respond with success.
+  - POST /auth/change-password (authenticated)
+    - Input: current_password, new_password
+    - Action: verify current_password, validate new_password, update password, log audit.
+  - GET /auth/validate-reset-token?token=...
+    - Optional token validation endpoint for UI to pre-verify token state (disabled if not required).
+  - POST /auth/signup
+    - Sign-up flow with workspace creation, optional SSO hooks.
+  - POST /auth/login
+    - Standard login with email/password and OAuth tokens integration; refresh token issuance.
+- Data Models:
+  - users:
+    - id, email, password_hash, password_salt (if using salt), password_last_changed, active, workspace_id, created_at, updated_at, failed_login_attempts, is_2fa_enabled (if applicable)
+  - password_reset_tokens:
+    - id, user_id, token_hash, expires_at, used_at, created_at, created_by_ip, device_info, user_agent
+  - audit_logs:
+    - id, user_id, action_type (password_reset_requested, password_reset_used, password_changed, login_attempt, etc.), timestamp, ip_address, user_agent, metadata (JSON)
+  - workspaces/organizations: existing schema adjustments for workspace_id associations and SSO configurations
+- Security:
+  - Hashing: bcrypt or Argon2 for passwords; use a strong pepper if policy allows.
+  - Token hashing: store only hashed tokens (e.g., SHA-256) server-side; never store plaintext tokens.
+  - Token TTLs: short-lived (e.g., 60 minutes) with a single-use constraint.
+  - Email verification: domain allowlists, DKIM/SPF, bounced email handling.
+  - Rate limiting: protect forgot-password endpoint (per email/IP) to prevent abuse.
+- Email:
+  - SendGrid integration with templates:
+    - Reset Request: “Someone requested a password reset”
+    - Reset Confirmation: “Your password has been reset”
+  - Include safe non-flowing content and fallback messages if delivery fails.
+
+### Integration
+- Frontend to Backend:
+  - Unified auth page communicates with /auth endpoints; handles server responses with user-friendly messages.
+  - Password reset flow: Request form triggers forgot-password; UI polls or waits for email delivery signal; Reset page uses token from URL to submit new password to /auth/reset-password.
+- Security/SSO:
+  - Ensure Google OAuth tokens flow smoothly into /auth/login or /auth/signup paths.
+  - Enterprise SSO flows through page_auth, with explicit prompts for workspace + SSO enrollment.
+- Logging & Observability:
+  - Centralized audit events for password resets, password changes, and login anomalies.
+  - Error handling with structured responses for UI/UX consistency.
+
+---
+
+## User Experience Flow
+
+1) User Visits Unified Auth Page (page_auth)
+- Sees options: Sign up, Log in, Sign in with Google, Enterprise SSO (if configured), and a CTA to Forgot Password.
+- If new user selects Sign up, creates a new account and selects/creates a workspace.
+- If existing user selects Log in, enters email/password or uses Google OAuth.
+- If enterprise/SSO is required, user is guided through SSO enrollment or workspace association.
+
+2) Forgot Password
+- User clicks “Forgot Password” on page_auth.
+- Redirects to Password Reset Request within page_auth or page_password_reset flow.
+- User enters registered email (and optional workspace); client-side validates email format.
+- Backend creates a reset token, stores hashed token, and queues email to SendGrid.
+- UI shows a non-revealing success message: “If an account exists, you will receive a password reset email shortly.”
+- Email arrives with a secure link to the Password Reset Page (page_password_reset) containing a token.
+
+3) Password Reset Page (page_password_reset)
+- User clicks link with token, lands on the reset page.
+- Page validates token state (server-side) upon load or on submission.
+- User enters new password and confirmation.
+- Client-side validates password strength and matches confirmation; server-side re-validates.
+- On success, token is marked used; password is updated; audit log created; user is redirected to a confirmation screen or login with a success message.
+- On error (expired/invalid token), display clear error and guidance to request a new reset.
+
+4) Password Change (Authenticated)
+- User navigates to Settings > Password.
+- User enters current_password and new_password (and confirmation).
+- Client-side validates; server verifies current password, updates to new password, logs audit.
+- Show success message and provide a brief note about re-authentication if necessary.
+
+5) Post-Change Security & Notifications
+- Send optional email confirming password change.
+- If suspicious activity detected, trigger additional security prompts (2FA re-prompt, login from new device/IP).
+
+---
+
+## Technical Specifications
+
+Data Models
+- users:
+  - id (UUID)
+  - email (string, unique)
+  - password_hash (string)
+  - password_last_changed (timestamp)
+  - is_active (boolean)
+  - workspace_id (foreign key)
+  - created_at, updated_at
+  - failed_login_attempts (int)
+  - is_2fa_enabled (boolean, optional)
+- password_reset_tokens:
+  - id (UUID)
+  - user_id (foreign key -> users)
+  - token_hash (string)
+  - expires_at (timestamp)
+  - used_at (timestamp, nullable)
+  - created_at (timestamp)
+  - created_by_ip (string, optional)
+  - device_info (string, optional)
+  - user_agent (string, optional)
+- audit_logs:
+  - id (UUID)
+  - user_id (foreign key, nullable for unknown)
+  - action_type (enum: password_reset_requested, password_reset_used, password_changed, login_attempt, etc.)
+  - timestamp (timestamp)
+  - ip_address (string)
+  - user_agent (string)
+  - metadata (JSON)
+
+API Endpoints
+- POST /auth/forgot-password
+  - Body: { email, workspace_id? }
+  - Response: { message: "If an account exists, you will receive an email" } (generic)
+- POST /auth/reset-password
+  - Body: { token, new_password, confirm_password }
+  - Response: { message: "Password has been reset successfully" } or error details (generic for security)
+- POST /auth/change-password
+  - Protected route; Body: { current_password, new_password, confirm_password }
+  - Response: { message: "Password changed successfully" }
+- GET /auth/validate-reset-token?token=...
+  - Response: { valid: boolean, expires_at, used: boolean } (if implemented)
+- POST /auth/login
+  - Body: { email, password, remember_me? }
+  - Response: session token, user payload
+- POST /auth/signup
+  - Body: { email, password, workspace_id, ... }
+  - Response: user/session payload
+- OAuth flows endpoints as per provider strategy (Google)
+- Admin/SSO configuration endpoints (enterprise)
+
+Security
+- Password hashing: Argon2 recommended; fall back to bcrypt if necessary.
+- Token handling: store only token_hash (SHA-256) and expiration; enforce single-use via used_at.
+- Transport: TLS 1.2+; secure cookies (HttpOnly, Secure, SameSite=Lax/Strict).
+- Secrets: store in environment/config vault; rotate keys regularly.
+- Rate limiting: protect forgot-password and authentication endpoints.
+- Logging: redact sensitive fields; store audit logs with user_id, action, timestamp, IP, user agent.
+
+Validation
+- Client-side:
+  - Email format validation.
+  - Password strength: min length (12), must include upper/lowercase, number, and special character; disallow common passwords; optional breach-check integration.
+  - Password and confirm_password match.
+  - Workspace selection if required by enterprise flow.
+- Server-side:
+  - Re-validate all inputs; enforce security constraints; ensure token is valid and unused and not expired; ensure password meets policy.
+  - Ensure error responses do not reveal whether an email is registered (to prevent enumeration).
+
+Acceptance Criteria
+- [ ] End-to-end forgot password flow: token generation, email dispatch, token validation, password update, and audit logging succeed without exposing sensitive data.
+- [ ] Passwords are stored as hashed values with a strong algorithm; tokens are hashed in DB; tokens are single-use and time-limited.
+- [ ] Email delivery via SendGrid works with templates, including bounce handling and retries.
+- [ ] Frontend password strength meter provides live feedback; server enforces strength as well.
+- [ ] All password reset events are captured in audit_logs with appropriate metadata.
+- [ ] Unified login/signup page supports email/password and Google OAuth; enterprise SSO/workspace onboarding flows are accessible and robust.
+
+UI/UX Guidelines
+Apply the project's design system:
+- Visual language aligned with color palette, typography, and spacing described in the Visual Style section.
+- Cards with pure white background, soft shadows, rounded corners, and generous padding.
+- Top navigation and optional sidebars with accessible, large hit areas; active states use deep green (#195C4A).
+- Data visualization components (where present) use soft grids, muted axes, and non-intrusive color accents.
+- Interactive elements (buttons, inputs, tags) with smooth transitions and micro-interactions.
+- Mobile-first approach with responsive layouts and accessible controls.
+
+Visual Style Reference (reiterated)
+- Primary: #FFFFFF
+- Secondary: #F5F6FA, #F7F8FA
+- Accent: #195C4A (deep green), #7BE495 (bright green)
+- Status: #FFE8A3 (soft yellow), #FFDCA8 (orange), #FF6C6C (light red)
+- Text: #23272F (dark gray), #6B7280 (medium gray)
+- Shadows/borders: #E6E8F0, #D1D5DB
+- Typography: Inter/SF Pro/Manrope-like sans-serif; weights 400/500/600
+
+Connected Pages Context
+- page_password_reset exists to handle reset flows.
+- page_auth exists for unified authentication.
+- Ensure cohesive navigation between these pages with consistent styling and seamless transitions.
+
+Deliverables
+- Fully implemented frontend components and pages (page_auth, page_password_reset, password change UI).
+- Backend APIs with proper documentation (OpenAPI or similar) and clear error schemas.
+- Database migrations for password_reset_tokens and audit_logs.
+- Email templates and environment configuration for SendGrid.
+- Comprehensive tests (unit, integration, and end-to-end) validating flows and security.
+- Developer notes detailing deployment steps, environment variables, and rollback procedures.
+
+If you need this as a ready-to-run scaffold, I can provide code skeletons for the frontend (React/Vue), backend (Node/Express, or Python FastAPI), and database migrations aligned with your tech stack.
+
+=== SUCCESS CRITERIA ===
+# Success Criteria Checklist
+
+## Code Quality
+
+### TypeScript
+- [ ] No TypeScript errors (`tsc --noEmit` passes)
+- [ ] All functions and components have proper type definitions
+- [ ] No `any` types used (use `unknown` if type is truly unknown)
+- [ ] Props interfaces defined for all components
+- [ ] API responses have type definitions
+
+### Code Standards
+- [ ] All imports use path aliases (@/ prefix)
+- [ ] Components follow the established naming convention
+- [ ] Files are organized in correct directories
+- [ ] No unused imports or variables
+- [ ] Consistent code formatting
+
+## Component Implementation
+
+### UI Components
+- [ ] Use shadcn/ui components (Button, Card, Input, etc.) instead of building from scratch
+- [ ] All interactive elements have hover states
+- [ ] Components use the `cn()` utility for class merging
+- [ ] Proper TypeScript props interfaces defined
+- [ ] Components are responsive (mobile, tablet, desktop)
+
+### Animations
+- [ ] Motion library used for all animations (NOT framer-motion)
+- [ ] Page transitions implemented with fade/slide
+- [ ] Interactive elements have whileHover/whileTap animations
+- [ ] List items use stagger animations where appropriate
+- [ ] Animations respect `prefers-reduced-motion`
+
+### Icons
+- [ ] Lucide React icons used consistently
+- [ ] Icons have consistent sizing (h-4 w-4, h-5 w-5, h-6 w-6)
+- [ ] Icon colors match design system (text-primary, text-muted-foreground)
+
+## Data Management
+
+### React Query
+- [ ] All data fetching uses React Query hooks
+- [ ] Query keys follow the established pattern
+- [ ] Mutations invalidate related queries
+- [ ] Loading and error states handled
+- [ ] Optimistic updates implemented where appropriate
+
+### Forms
+- [ ] Forms use react-hook-form
+- [ ] Validation uses Zod schemas
+- [ ] Error messages display properly
+- [ ] Form submission shows loading state
+- [ ] Success/error feedback via toast notifications
+
+### API Layer
+- [ ] API functions in src/api/ directory
+- [ ] Axios used for HTTP requests
+- [ ] Proper error handling with try/catch
+- [ ] Auth tokens handled by interceptors
+- [ ] Type-safe API function signatures
+
+## User Experience
+
+### Notifications
+- [ ] Sonner toasts used for all notifications
+- [ ] Success actions show success toast
+- [ ] Errors show descriptive error messages
+- [ ] Loading states show toast.loading()
+
+### Loading States
+- [ ] Skeleton loaders shown during data fetch
+- [ ] Buttons show loading state during submission
+- [ ] Disabled state applied during async operations
+
+### Error Handling
+- [ ] Network errors caught and displayed
+- [ ] User-friendly error messages (no stack traces)
+- [ ] Fallback UI for error states
+- [ ] No unhandled promise rejections
+
+## Navigation
+
+### Route Accessibility
+- [ ] All pages have routes defined in router configuration
+- [ ] Every page is accessible through navigation (menu, sidebar, or direct URL)
+- [ ] Main pages (Dashboard, Home, Settings, etc.) accessible from primary navigation
+- [ ] Secondary pages accessible through contextual navigation or direct links
+- [ ] Deep-linked pages have breadcrumbs or back navigation
+- [ ] 404/Not Found page implemented for invalid routes
+- [ ] Protected routes have proper authentication checks
+- [ ] Navigation state persists across page refreshes where appropriate
+
+### Navigation UX
+- [ ] Active route highlighted in navigation menu
+- [ ] Clear visual hierarchy in navigation structure
+- [ ] Mobile navigation is accessible and usable
+- [ ] Navigation items have hover/focus states
+- [ ] Nested routes show parent-child relationships
+- [ ] User can always return to main areas (Dashboard/Home)
+
+## Styling
+
+### Tailwind CSS
+- [ ] Tailwind v3 classes used
+- [ ] HSL color variables from design system
+- [ ] Custom CSS properties used where defined
+- [ ] Responsive breakpoints: mobile-first approach
+- [ ] Dark mode support via CSS variables
+
+### Design System
+- [ ] Colors use theme variables (primary, secondary, accent)
+- [ ] Spacing uses Tailwind scale (p-4, gap-6, etc.)
+- [ ] Border radius uses theme values (rounded-lg)
+- [ ] Shadows use theme values (shadow-card)
+- [ ] Typography follows Inter font system
+
+## Accessibility
+
+- [ ] Semantic HTML elements used
+- [ ] Buttons have descriptive labels
+- [ ] Forms have proper labels
+- [ ] Focus states visible on interactive elements
+- [ ] Color contrast meets WCAG standards
+
+## Performance
+
+- [ ] No console.log statements in production code
+- [ ] No console errors in browser
+- [ ] Images optimized (WebP, lazy loading)
+- [ ] Large lists use virtualization if needed
+- [ ] React Query cache configured appropriately
+
+## Testing Readiness
+
+- [ ] Components structured for easy testing
+- [ ] Business logic separated from presentation
+- [ ] Mock-friendly API layer
+- [ ] No hardcoded values that should be configurable
+- [ ] Environment variables properly configured
+
+## Final Checks
+
+- [ ] Code builds without errors (`npm run build`)
+- [ ] Development server runs without errors (`npm run dev`)
+- [ ] No TypeScript errors in editor
+- [ ] Browser console is clean (no errors or warnings)
+- [ ] All functionality works as expected
+- [ ] Code follows existing project patterns
+- [ ] Changes are consistent with the rest of the codebase
+
+
+
+IMPORTANT: ALL styling and design decisions must follow the Design Reference section above EXACTLY. Do not make arbitrary design choices.
+
+Analyze the existing project structure and implement the task following the patterns already established. Ensure all success criteria are met.
