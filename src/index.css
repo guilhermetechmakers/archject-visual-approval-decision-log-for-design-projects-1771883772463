@@ -31,6 +31,9 @@
     --admin-warning: 255 232 163;
     --admin-muted: 255 220 168;
     --admin-destructive: 255 108 108;
+    /* Skeleton / loading states - align with muted, border palette */
+    --skeleton: 247 248 250;
+    --skeleton-shimmer: 230 232 240;
   }
 
   * {
