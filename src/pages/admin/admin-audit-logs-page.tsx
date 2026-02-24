@@ -1,10 +1,11 @@
 /**
  * Admin Audit Logs Explorer - immutable audit trail with filters and export.
  * Design: card-based, pill tabs, date-range picker, pagination.
+ * Follows design system: CSS variables, accessible heading hierarchy, empty/error states with CTA.
  */
 
 import * as React from 'react'
-import { History, Filter, Download, ChevronLeft, ChevronRight } from 'lucide-react'
+import { History, Filter, Download, ChevronLeft, ChevronRight, RotateCcw, AlertCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -65,7 +66,7 @@ export function AdminAuditLogsPage() {
     return f
   }, [page, dateFrom, dateTo, actionFilter, userFilter])
 
-  const { data, isLoading, error } = useGovernanceAuditLogs(filters)
+  const { data, isLoading, error, refetch } = useGovernanceAuditLogs(filters)
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
@@ -76,22 +77,62 @@ export function AdminAuditLogsPage() {
     window.open('#', '_self')
   }
 
+  const hasActiveFilters = Boolean(dateFrom || dateTo || actionFilter || userFilter.trim())
+  const handleClearFilters = () => {
+    setDateFrom('')
+    setDateTo('')
+    setActionFilter('')
+    setUserFilter('')
+    setPage(0)
+  }
+
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-muted-foreground">Failed to load audit logs</p>
+      <div className="space-y-8 animate-fade-in">
+        <header>
+          <h1 className="text-2xl font-semibold text-foreground">Audit Logs Explorer</h1>
+          <h2 className="mt-1 text-base font-medium text-muted-foreground">
+            Immutable audit trail for compliance and review
+          </h2>
+        </header>
+        <Card className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"
+              aria-hidden
+            >
+              <AlertCircle className="h-6 w-6 text-destructive" />
+            </div>
+            <h3 className="mt-4 text-base font-semibold text-foreground">
+              Failed to load audit logs
+            </h3>
+            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+              Something went wrong while fetching the audit trail. Please try again.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-6 rounded-full"
+              onClick={() => window.location.reload()}
+              aria-label="Retry loading audit logs"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" aria-hidden />
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Audit Logs Explorer</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-2xl font-semibold text-foreground">Audit Logs Explorer</h1>
+          <h2 className="mt-1 text-base font-medium text-muted-foreground">
             Immutable audit trail for compliance and review
-          </p>
+          </h2>
         </div>
         <Button
           variant="outline"
@@ -102,7 +143,7 @@ export function AdminAuditLogsPage() {
           <Download className="mr-2 h-4 w-4" />
           Export logs
         </Button>
-      </div>
+      </header>
 
       <Card className="overflow-hidden rounded-xl border border-border shadow-card transition-all duration-200 hover:shadow-card-hover">
         <CardHeader className="border-b border-border pb-4">
@@ -181,12 +222,34 @@ export function AdminAuditLogsPage() {
               ))}
             </div>
           ) : items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <History className="h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-sm font-medium text-foreground">No audit entries</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Adjust filters or date range to see results
+            <div
+              className="flex flex-col items-center justify-center py-16 px-4 text-center"
+              role="status"
+              aria-label="No audit entries"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <History className="h-6 w-6 text-muted-foreground" aria-hidden />
+              </div>
+              <h3 className="mt-4 text-base font-semibold text-foreground">No audit entries</h3>
+              <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                {hasActiveFilters
+                  ? 'No entries match your current filters. Try adjusting the date range or action type.'
+                  : 'Audit logs will appear here as governance actions occur.'}
               </p>
+              <Button
+                variant={hasActiveFilters ? 'default' : 'outline'}
+                size="sm"
+                className="mt-6 rounded-full"
+                onClick={hasActiveFilters ? handleClearFilters : () => refetch()}
+                aria-label={
+                  hasActiveFilters
+                    ? 'Clear filters to show all audit logs'
+                    : 'Refresh audit logs'
+                }
+              >
+                <RotateCcw className="mr-2 h-4 w-4" aria-hidden />
+                {hasActiveFilters ? 'Clear filters' : 'Refresh'}
+              </Button>
             </div>
           ) : (
             <>
