@@ -19,9 +19,11 @@ import { Button } from '@/components/ui/button'
 import { FileDown } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
-import type { AnalyticsFilters } from '@/types/analytics'
+import type { AnalyticsFilters, TemplatePerformance } from '@/types/analytics'
 import type { TemplateSortField, TemplateSortOrder } from './analytics-templates-table'
 import { cn } from '@/lib/utils'
+
+const EMPTY_TEMPLATE_PERFORMANCE: TemplatePerformance[] = []
 
 function getDefaultFilters(): AnalyticsFilters {
   const now = new Date()
@@ -46,9 +48,9 @@ export function CustomReportsPanel({ className }: CustomReportsPanelProps) {
 
   const { data, isLoading } = useCustomReport(filters)
 
+  const templatePerformance = data?.templatePerformance ?? EMPTY_TEMPLATE_PERFORMANCE
   const sortedTemplates = useMemo(() => {
-    if (!data?.templatePerformance) return []
-    const arr = [...data.templatePerformance]
+    const arr = [...templatePerformance]
     const { sortBy, sortOrder } = templateSort
     arr.sort((a, b) => {
       const aVal = a[sortBy]
@@ -60,7 +62,7 @@ export function CustomReportsPanel({ className }: CustomReportsPanelProps) {
       return sortOrder === 'asc' ? cmp : -cmp
     })
     return arr
-  }, [data?.templatePerformance, templateSort])
+  }, [templatePerformance, templateSort])
 
   const handleExportTemplatesCsv = () => {
     const csv = generateCsvFromTemplatePerformance(sortedTemplates, filters)

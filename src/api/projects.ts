@@ -141,6 +141,7 @@ export async function createProject(payload: CreateProjectPayload): Promise<Proj
 
 export async function fetchProject(projectId: string): Promise<Project | null> {
   if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- projects table schema compatibility
     const { data, error } = await (supabase as any)
       .from('projects')
       .select('*')
@@ -192,7 +193,7 @@ export async function createWorkspace(payload: CreateWorkspacePayload): Promise<
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('Not authenticated')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- workspaces table schema compatibility
     const { data, error } = await (supabase as any)
       .from('workspaces')
       .insert({
@@ -207,6 +208,7 @@ export async function createWorkspace(payload: CreateWorkspacePayload): Promise<
 
     if (error) throw new Error(error.message)
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- user_workspace_links table schema compatibility
     await (supabase as any).from('user_workspace_links').insert({
       user_id: user.id,
       workspace_id: data.id,
@@ -222,6 +224,7 @@ export async function createWorkspace(payload: CreateWorkspacePayload): Promise<
 
 export async function archiveProject(projectId: string): Promise<void> {
   if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- projects table schema compatibility
     const { error } = await (supabase as any)
       .from('projects')
       .update({ status: 'archived', archived_at: new Date().toISOString(), updated_at: new Date().toISOString() })
@@ -234,6 +237,7 @@ export async function archiveProject(projectId: string): Promise<void> {
 
 export async function restoreProject(projectId: string): Promise<void> {
   if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- projects table schema compatibility
     const { error } = await (supabase as any)
       .from('projects')
       .update({ status: 'active', archived_at: null, updated_at: new Date().toISOString() })

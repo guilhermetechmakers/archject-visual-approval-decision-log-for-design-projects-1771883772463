@@ -241,12 +241,14 @@ export async function fetchProjectTasks(
       .map((t) => ({ ...t, project_id: projectId }))
   }
   if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- decisions table for tasks lookup
     const { data: decisions } = await (supabase as any)
       .from('decisions')
       .select('id')
       .eq('project_id', projectId)
     const decisionIds = ((decisions ?? []) as { id: string }[]).map((d) => d.id)
     if (decisionIds.length === 0) return []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tasks table not in generated schema
     let query = (supabase as any)
       .from('tasks')
       .select('id, decision_id, assignee_id, due_date, status, priority, notes, created_at, updated_at')
@@ -269,6 +271,7 @@ export async function fetchProjectTasks(
     const userIds = [...new Set(tasks.map((t) => t.assignee_id).filter(Boolean))]
     const profileMap = new Map<string, string>()
     if (userIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- profiles table for assignee names
       const { data: profiles } = await (supabase as any)
         .from('profiles')
         .select('id, full_name')
@@ -328,6 +331,7 @@ export async function createTask(
     return task
   }
   if (isSupabaseConfigured && supabase && data.decision_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tasks table not in generated schema
     const { data: row, error } = await (supabase as any)
       .from('tasks')
       .insert({
@@ -384,6 +388,7 @@ export async function updateTask(
     if (data.assignee_id !== undefined) payload.assignee_id = data.assignee_id
     if (data.due_date !== undefined) payload.due_date = data.due_date
     if (data.priority !== undefined) payload.priority = data.priority
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tasks table not in generated schema
     const { data: row, error } = await (supabase as any)
       .from('tasks')
       .update(payload)
@@ -418,6 +423,7 @@ export async function deleteTask(
 ): Promise<void> {
   if (USE_MOCK) return
   if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tasks table not in generated schema
     const { error } = await (supabase as any).from('tasks').delete().eq('id', taskId)
     if (error) throw new Error(error.message)
     return
@@ -436,6 +442,7 @@ export async function fetchProjectWebhooks(
       .map((w) => ({ ...w, project_id: projectId }))
   }
   if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- webhook_endpoints table not in generated schema
     let query = (supabase as any)
       .from('webhook_endpoints')
       .select('id, project_id, url, events, enabled, last_triggered_at, last_test_at, last_test_status, created_at, updated_at')
@@ -477,6 +484,7 @@ export async function createWebhook(
     }
   }
   if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- webhook_endpoints table not in generated schema
     const { data: row, error } = await (supabase as any)
       .from('webhook_endpoints')
       .insert({
@@ -520,6 +528,7 @@ export async function updateWebhook(
     if (data.target_url !== undefined) payload.url = data.target_url
     if (data.events !== undefined) payload.events = data.events
     if (data.enabled !== undefined) payload.enabled = data.enabled
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- webhook_endpoints table not in generated schema
     const { data: row, error } = await (supabase as any)
       .from('webhook_endpoints')
       .update(payload)
@@ -548,6 +557,7 @@ export async function deleteWebhook(
 ): Promise<void> {
   if (USE_MOCK) return
   if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- webhook_endpoints table not in generated schema
     const { error } = await (supabase as any).from('webhook_endpoints').delete().eq('id', webhookId)
     if (error) throw new Error(error.message)
     return
@@ -563,6 +573,7 @@ export async function testWebhook(
     return { success: true, message: 'Test payload delivered (mock)' }
   }
   if (isSupabaseConfigured && supabase) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- webhook_endpoints table not in generated schema
     const { data: row } = await (supabase as any)
       .from('webhook_endpoints')
       .update({ last_test_at: new Date().toISOString(), last_test_status: 'success' })

@@ -73,6 +73,7 @@ export const integrationsApi = {
     if (!isSupabaseConfigured || !supabase) {
       return []
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- integrations table not in generated schema
     const { data, error } = await (supabase as any)
       .from('integrations')
       .select('id, provider, status, scopes, last_sync_at, last_error, created_at')
@@ -85,6 +86,7 @@ export const integrationsApi = {
     if (!isSupabaseConfigured || !supabase) {
       return []
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- integrations table not in generated schema
     const { data, error } = await (supabase as any)
       .from('integrations')
       .select('id, provider, status, scopes, last_sync_at, last_error, created_at')
@@ -136,6 +138,7 @@ export const integrationsApi = {
     if (!isSupabaseConfigured || !supabase) {
       return []
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- integration_mappings table not in generated schema
     const { data, error } = await (supabase as any)
       .from('integration_mappings')
       .select('*')
@@ -156,8 +159,10 @@ export const integrationsApi = {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase not configured')
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- integration_mappings table not in generated schema
     await (supabase as any).from('integration_mappings').delete().eq('integration_id', integrationId)
     if (mappings.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- integration_mappings table not in generated schema
       await (supabase as any).from('integration_mappings').insert(
         mappings.map((m) => ({
           integration_id: integrationId,
@@ -182,6 +187,7 @@ export const integrationsApi = {
     const decisionIds = ((decisions ?? []) as Array<{ id: string }>).map((d) => d.id)
     if (decisionIds.length === 0) return []
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- calendar_reminders table not in generated schema
     const { data: reminders } = await (supabase as any)
       .from('calendar_reminders')
       .select('id, decision_id, trigger_time, status, created_at')
@@ -189,6 +195,7 @@ export const integrationsApi = {
       .order('created_at', { ascending: false })
       .limit(limit)
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- forge_previews table not in generated schema
     const { data: previews } = await (supabase as any)
       .from('forge_previews')
       .select('id, decision_id, created_at')
