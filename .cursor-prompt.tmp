@@ -1,0 +1,1604 @@
+⚠️ CRITICAL EXECUTION RULES - READ FIRST ⚠️
+❌ NEVER run: npm run dev, npm start, yarn dev, pnpm dev, or ANY development server
+❌ NEVER run: long-running processes, servers, or commands that don't exit
+❌ NEVER test the application by starting it
+✅ ALLOWED: npm install, npm run build, npm run test (if needed)
+✅ YOUR TASK: Create/modify files only, then STOP and EXIT immediately
+⚠️ The MCP server handles all testing and validation separately
+
+You are an expert full-stack developer proficient in TypeScript, React, Next.js, and modern UI/UX frameworks (Tailwind CSS, Shadcn UI, Radix UI).
+
+=== DESIGN REFERENCE (MANDATORY) ===
+# Modern Design Best Practices
+
+## Philosophy
+
+Create unique, memorable experiences while maintaining consistency through modern design principles. Every project should feel distinct yet professional, innovative yet intuitive.
+
+---
+
+## Landing Pages & Marketing Sites
+
+### Hero Sections
+**Go beyond static backgrounds:**
+- Animated gradients with subtle movement
+- Particle systems or geometric shapes floating
+- Interactive canvas backgrounds (Three.js, WebGL)
+- Video backgrounds with proper fallbacks
+- Parallax scrolling effects
+- Gradient mesh animations
+- Morphing blob animations
+
+
+### Layout Patterns
+**Use modern grid systems:**
+- Bento grids (asymmetric card layouts)
+- Masonry layouts for varied content
+- Feature sections with diagonal cuts or curves
+- Overlapping elements with proper z-index
+- Split-screen designs with scroll-triggered reveals
+
+**Avoid:** Traditional 3-column equal grids
+
+### Scroll Animations
+**Engage users as they scroll:**
+- Fade-in and slide-up animations for sections
+- Scroll-triggered parallax effects
+- Progress indicators for long pages
+- Sticky elements that transform on scroll
+- Horizontal scroll sections for portfolios
+- Text reveal animations (word by word, letter by letter)
+- Number counters animating into view
+
+**Avoid:** Static pages with no scroll interaction
+
+### Call-to-Action Areas
+**Make CTAs impossible to miss:**
+- Gradient buttons with hover effects
+- Floating action buttons with micro-interactions
+- Animated borders or glowing effects
+- Scale/lift on hover
+- Interactive elements that respond to mouse position
+- Pulsing indicators for primary actions
+
+---
+
+## Dashboard Applications
+
+### Layout Structure
+**Always use collapsible side navigation:**
+- Sidebar that can collapse to icons only
+- Smooth transition animations between states
+- Persistent navigation state (remember user preference)
+- Mobile: drawer that slides in/out
+- Desktop: sidebar with expand/collapse toggle
+- Icons visible even when collapsed
+
+**Structure:**
+```
+/dashboard (layout wrapper with sidebar)
+  /dashboard/overview
+  /dashboard/analytics
+  /dashboard/settings
+  /dashboard/users
+  /dashboard/projects
+```
+
+All dashboard pages should be nested inside the dashboard layout, not separate routes.
+
+### Data Tables
+**Modern table design:**
+- Sticky headers on scroll
+- Row hover states with subtle elevation
+- Sortable columns with clear indicators
+- Pagination with items-per-page control
+- Search/filter with instant feedback
+- Selection checkboxes with bulk actions
+- Responsive: cards on mobile, table on desktop
+- Loading skeletons, not spinners
+- Empty states with illustrations or helpful text
+
+**Use modern table libraries:**
+- TanStack Table (React Table v8)
+- AG Grid for complex data
+- Data Grid from MUI (if using MUI)
+
+### Charts & Visualizations
+**Use the latest charting libraries:**
+- Recharts (for React, simple charts)
+- Chart.js v4 (versatile, well-maintained)
+- Apache ECharts (advanced, interactive)
+- D3.js (custom, complex visualizations)
+- Tremor (for dashboards, built on Recharts)
+
+**Chart best practices:**
+- Animated transitions when data changes
+- Interactive tooltips with detailed info
+- Responsive sizing
+- Color scheme matching design system
+- Legend placement that doesn't obstruct data
+- Loading states while fetching data
+
+### Dashboard Cards
+**Metric cards should stand out:**
+- Gradient backgrounds or colored accents
+- Trend indicators (↑ ↓ with color coding)
+- Sparkline charts for historical data
+- Hover effects revealing more detail
+- Icon representing the metric
+- Comparison to previous period
+
+---
+
+## Color & Visual Design
+
+### Color Palettes
+**Create depth with gradients:**
+- Primary gradient (not just solid primary color)
+- Subtle background gradients
+- Gradient text for headings
+- Gradient borders on cards
+- Elevated surfaces for depth
+
+**Color usage:**
+- 60-30-10 rule (dominant, secondary, accent)
+- Consistent semantic colors (success, warning, error)
+- Accessible contrast ratios (WCAG AA minimum)
+
+### Typography
+**Create hierarchy through contrast:**
+- Large, bold headings (48-72px for heroes)
+- Clear size differences between levels
+- Variable font weights (300, 400, 600, 700)
+- Letter spacing for small caps
+- Line height 1.5-1.7 for body text
+- Inter, Poppins, or DM Sans for modern feel
+
+### Shadows & Depth
+**Layer UI elements:**
+- Multi-layer shadows for realistic depth
+- Colored shadows matching element color
+- Elevated states on hover
+- Neumorphism for special elements (sparingly)
+
+---
+
+## Interactions & Micro-animations
+
+### Button Interactions
+**Every button should react:**
+- Scale slightly on hover (1.02-1.05)
+- Lift with shadow on hover
+- Ripple effect on click
+- Loading state with spinner or progress
+- Disabled state clearly visible
+- Success state with checkmark animation
+
+### Card Interactions
+**Make cards feel alive:**
+- Lift on hover with increased shadow
+- Subtle border glow on hover
+- Tilt effect following mouse (3D transform)
+- Smooth transitions (200-300ms)
+- Click feedback for interactive cards
+
+### Form Interactions
+**Guide users through forms:**
+- Input focus states with border color change
+- Floating labels that animate up
+- Real-time validation with inline messages
+- Success checkmarks for valid inputs
+- Error states with shake animation
+- Password strength indicators
+- Character count for text areas
+
+### Page Transitions
+**Smooth between views:**
+- Fade + slide for page changes
+- Skeleton loaders during data fetch
+- Optimistic UI updates
+- Stagger animations for lists
+- Route transition animations
+
+---
+
+## Mobile Responsiveness
+
+### Mobile-First Approach
+**Design for mobile, enhance for desktop:**
+- Touch targets minimum 44x44px
+- Generous padding and spacing
+- Sticky bottom navigation on mobile
+- Collapsible sections for long content
+- Swipeable cards and galleries
+- Pull-to-refresh where appropriate
+
+### Responsive Patterns
+**Adapt layouts intelligently:**
+- Hamburger menu → full nav bar
+- Card grid → stack on mobile
+- Sidebar → drawer
+- Multi-column → single column
+- Data tables → card list
+- Hide/show elements based on viewport
+
+---
+
+## Loading & Empty States
+
+### Loading States
+**Never leave users wondering:**
+- Skeleton screens matching content layout
+- Progress bars for known durations
+- Animated placeholders
+- Spinners only for short waits (<3s)
+- Stagger loading for multiple elements
+- Shimmer effects on skeletons
+
+### Empty States
+**Make empty states helpful:**
+- Illustrations or icons
+- Helpful copy explaining why it's empty
+- Clear CTA to add first item
+- Examples or suggestions
+- No "no data" text alone
+
+---
+
+## Unique Elements to Stand Out
+
+### Distinctive Features
+**Add personality:**
+- Custom cursor effects on landing pages
+- Animated page numbers or section indicators
+- Unusual hover effects (magnification, distortion)
+- Custom scrollbars
+- Glassmorphism for overlays
+- Animated SVG icons
+- Typewriter effects for hero text
+- Confetti or celebration animations for actions
+
+### Interactive Elements
+**Engage users:**
+- Drag-and-drop interfaces
+- Sliders and range controls
+- Toggle switches with animations
+- Progress steps with animations
+- Expandable/collapsible sections
+- Tabs with slide indicators
+- Image comparison sliders
+- Interactive demos or playgrounds
+
+---
+
+## Consistency Rules
+
+### Maintain Consistency
+**What should stay consistent:**
+- Spacing scale (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- Border radius values
+- Animation timing (200ms, 300ms, 500ms)
+- Color system (primary, secondary, accent, neutrals)
+- Typography scale
+- Icon style (outline vs filled)
+- Button styles across the app
+- Form element styles
+
+### What Can Vary
+**Project-specific customization:**
+- Color palette (different colors, same system)
+- Layout creativity (grids, asymmetry)
+- Illustration style
+- Animation personality
+- Feature-specific interactions
+- Hero section design
+- Card styling variations
+- Background patterns or textures
+
+---
+
+## Technical Excellence
+
+### Performance
+- Optimize images (WebP, lazy loading)
+- Code splitting for faster loads
+- Debounce search inputs
+- Virtualize long lists
+- Minimize re-renders
+- Use proper memoization
+
+### Accessibility
+- Keyboard navigation throughout
+- ARIA labels where needed
+- Focus indicators visible
+- Screen reader friendly
+- Sufficient color contrast
+- Respect reduced motion preferences
+
+---
+
+## Key Principles
+
+1. **Be Bold** - Don't be afraid to try unique layouts and interactions
+2. **Be Consistent** - Use the same patterns for similar functions
+3. **Be Responsive** - Design works beautifully on all devices
+4. **Be Fast** - Animations are smooth, loading is quick
+5. **Be Accessible** - Everyone can use what you build
+6. **Be Modern** - Use current design trends and technologies
+7. **Be Unique** - Each project should have its own personality
+8. **Be Intuitive** - Users shouldn't need instructions
+
+
+---
+
+# Project-Specific Customizations
+
+**IMPORTANT: This section contains the specific design requirements for THIS project. The guidelines above are universal best practices - these customizations below take precedence for project-specific decisions.**
+
+## User Design Requirements
+
+- Ensure all skeletons use the same color families and shimmer treatment as other components.
+- Maintain glassy, calm aesthetics with soft shadows, rounded corners, and ample white space.
+- Use the accent colors for progress/status cues only when appropriate within skeletons (e.g., a fake progress bar color might reflect the in-progress yellow/orange palette).
+- Keep interactions subtle; avoid distracting animations beyond the shimmer.
+
+---
+
+## Visual Style (Recap)
+
+Color Palette:
+- Primary: #FFFFFF
+- Secondary: #F5F6FA, #F7F8FA
+- Accent: #195C4A (deep green), #7BE495 (bright green), #FFE8A3 (soft yellow), #FFDCA8 (muted orange), #FF6C6C (light red)
+- Text: #23272F (dark gray), #6B7280 (medium gray)
+- Subtle shadows/borders: #E6E8F0, #D1D5DB
+
+Typography & Layout:
+- Font: Inter / SF Pro / Manrope family
+- Weights: 400, 500, 600
+- Layout: 24-32px container padding, 16-24px gaps, 8px increments
+- Card Design: White background, shadows, 12-16px radius, generous internal padding (≥24px)
+
+Key Design Elements:
+- Card, Navigation, Data Visualization, Interactive Elements, Micro-interactions
+- Focus on clarity, accessibility, mobile-first, and trust-building visuals
+
+---
+
+Generate the complete, detailed prompt now:
+- Provide structured sections as above.
+- Include explicit prop definitions, example usage snippets, and recommended test cases.
+- Include implementation notes that a developer can directly translate into code or a tool-driven build.
+
+## Implementation Notes
+
+When implementing this project:
+
+1. **Follow Universal Guidelines**: Use the design best practices documented above as your foundation
+2. **Apply Project Customizations**: Implement the specific design requirements stated in the "User Design Requirements" section
+3. **Priority Order**: Project-specific requirements override universal guidelines when there's a conflict
+4. **Color System**: Extract and implement color values as CSS custom properties in RGB format
+5. **Typography**: Define font families, sizes, and weights based on specifications
+6. **Spacing**: Establish consistent spacing scale following the design system
+7. **Components**: Style all Shadcn components to match the design aesthetic
+8. **Animations**: Use Motion library for transitions matching the design personality
+9. **Responsive Design**: Ensure mobile-first responsive implementation
+
+## Implementation Checklist
+
+- [ ] Review universal design guidelines above
+- [ ] Extract project-specific color palette and define CSS variables
+- [ ] Configure Tailwind theme with custom colors
+- [ ] Set up typography system (fonts, sizes, weights)
+- [ ] Define spacing and sizing scales
+- [ ] Create component variants matching design
+- [ ] Implement responsive breakpoints
+- [ ] Add animations and transitions
+- [ ] Ensure accessibility standards
+- [ ] Validate against user design requirements
+
+---
+
+**Remember: Always reference this file for design decisions. Do not use generic or placeholder designs.**
+
+
+*IMPORTANT*: For every page or component refer to # Modern Design Best Practices
+
+## Philosophy
+
+Create unique, memorable experiences while maintaining consistency through modern design principles. Every project should feel distinct yet professional, innovative yet intuitive.
+
+---
+
+## Landing Pages & Marketing Sites
+
+### Hero Sections
+**Go beyond static backgrounds:**
+- Animated gradients with subtle movement
+- Particle systems or geometric shapes floating
+- Interactive canvas backgrounds (Three.js, WebGL)
+- Video backgrounds with proper fallbacks
+- Parallax scrolling effects
+- Gradient mesh animations
+- Morphing blob animations
+
+
+### Layout Patterns
+**Use modern grid systems:**
+- Bento grids (asymmetric card layouts)
+- Masonry layouts for varied content
+- Feature sections with diagonal cuts or curves
+- Overlapping elements with proper z-index
+- Split-screen designs with scroll-triggered reveals
+
+**Avoid:** Traditional 3-column equal grids
+
+### Scroll Animations
+**Engage users as they scroll:**
+- Fade-in and slide-up animations for sections
+- Scroll-triggered parallax effects
+- Progress indicators for long pages
+- Sticky elements that transform on scroll
+- Horizontal scroll sections for portfolios
+- Text reveal animations (word by word, letter by letter)
+- Number counters animating into view
+
+**Avoid:** Static pages with no scroll interaction
+
+### Call-to-Action Areas
+**Make CTAs impossible to miss:**
+- Gradient buttons with hover effects
+- Floating action buttons with micro-interactions
+- Animated borders or glowing effects
+- Scale/lift on hover
+- Interactive elements that respond to mouse position
+- Pulsing indicators for primary actions
+
+---
+
+## Dashboard Applications
+
+### Layout Structure
+**Always use collapsible side navigation:**
+- Sidebar that can collapse to icons only
+- Smooth transition animations between states
+- Persistent navigation state (remember user preference)
+- Mobile: drawer that slides in/out
+- Desktop: sidebar with expand/collapse toggle
+- Icons visible even when collapsed
+
+**Structure:**
+```
+/dashboard (layout wrapper with sidebar)
+  /dashboard/overview
+  /dashboard/analytics
+  /dashboard/settings
+  /dashboard/users
+  /dashboard/projects
+```
+
+All dashboard pages should be nested inside the dashboard layout, not separate routes.
+
+### Data Tables
+**Modern table design:**
+- Sticky headers on scroll
+- Row hover states with subtle elevation
+- Sortable columns with clear indicators
+- Pagination with items-per-page control
+- Search/filter with instant feedback
+- Selection checkboxes with bulk actions
+- Responsive: cards on mobile, table on desktop
+- Loading skeletons, not spinners
+- Empty states with illustrations or helpful text
+
+**Use modern table libraries:**
+- TanStack Table (React Table v8)
+- AG Grid for complex data
+- Data Grid from MUI (if using MUI)
+
+### Charts & Visualizations
+**Use the latest charting libraries:**
+- Recharts (for React, simple charts)
+- Chart.js v4 (versatile, well-maintained)
+- Apache ECharts (advanced, interactive)
+- D3.js (custom, complex visualizations)
+- Tremor (for dashboards, built on Recharts)
+
+**Chart best practices:**
+- Animated transitions when data changes
+- Interactive tooltips with detailed info
+- Responsive sizing
+- Color scheme matching design system
+- Legend placement that doesn't obstruct data
+- Loading states while fetching data
+
+### Dashboard Cards
+**Metric cards should stand out:**
+- Gradient backgrounds or colored accents
+- Trend indicators (↑ ↓ with color coding)
+- Sparkline charts for historical data
+- Hover effects revealing more detail
+- Icon representing the metric
+- Comparison to previous period
+
+---
+
+## Color & Visual Design
+
+### Color Palettes
+**Create depth with gradients:**
+- Primary gradient (not just solid primary color)
+- Subtle background gradients
+- Gradient text for headings
+- Gradient borders on cards
+- Elevated surfaces for depth
+
+**Color usage:**
+- 60-30-10 rule (dominant, secondary, accent)
+- Consistent semantic colors (success, warning, error)
+- Accessible contrast ratios (WCAG AA minimum)
+
+### Typography
+**Create hierarchy through contrast:**
+- Large, bold headings (48-72px for heroes)
+- Clear size differences between levels
+- Variable font weights (300, 400, 600, 700)
+- Letter spacing for small caps
+- Line height 1.5-1.7 for body text
+- Inter, Poppins, or DM Sans for modern feel
+
+### Shadows & Depth
+**Layer UI elements:**
+- Multi-layer shadows for realistic depth
+- Colored shadows matching element color
+- Elevated states on hover
+- Neumorphism for special elements (sparingly)
+
+---
+
+## Interactions & Micro-animations
+
+### Button Interactions
+**Every button should react:**
+- Scale slightly on hover (1.02-1.05)
+- Lift with shadow on hover
+- Ripple effect on click
+- Loading state with spinner or progress
+- Disabled state clearly visible
+- Success state with checkmark animation
+
+### Card Interactions
+**Make cards feel alive:**
+- Lift on hover with increased shadow
+- Subtle border glow on hover
+- Tilt effect following mouse (3D transform)
+- Smooth transitions (200-300ms)
+- Click feedback for interactive cards
+
+### Form Interactions
+**Guide users through forms:**
+- Input focus states with border color change
+- Floating labels that animate up
+- Real-time validation with inline messages
+- Success checkmarks for valid inputs
+- Error states with shake animation
+- Password strength indicators
+- Character count for text areas
+
+### Page Transitions
+**Smooth between views:**
+- Fade + slide for page changes
+- Skeleton loaders during data fetch
+- Optimistic UI updates
+- Stagger animations for lists
+- Route transition animations
+
+---
+
+## Mobile Responsiveness
+
+### Mobile-First Approach
+**Design for mobile, enhance for desktop:**
+- Touch targets minimum 44x44px
+- Generous padding and spacing
+- Sticky bottom navigation on mobile
+- Collapsible sections for long content
+- Swipeable cards and galleries
+- Pull-to-refresh where appropriate
+
+### Responsive Patterns
+**Adapt layouts intelligently:**
+- Hamburger menu → full nav bar
+- Card grid → stack on mobile
+- Sidebar → drawer
+- Multi-column → single column
+- Data tables → card list
+- Hide/show elements based on viewport
+
+---
+
+## Loading & Empty States
+
+### Loading States
+**Never leave users wondering:**
+- Skeleton screens matching content layout
+- Progress bars for known durations
+- Animated placeholders
+- Spinners only for short waits (<3s)
+- Stagger loading for multiple elements
+- Shimmer effects on skeletons
+
+### Empty States
+**Make empty states helpful:**
+- Illustrations or icons
+- Helpful copy explaining why it's empty
+- Clear CTA to add first item
+- Examples or suggestions
+- No "no data" text alone
+
+---
+
+## Unique Elements to Stand Out
+
+### Distinctive Features
+**Add personality:**
+- Custom cursor effects on landing pages
+- Animated page numbers or section indicators
+- Unusual hover effects (magnification, distortion)
+- Custom scrollbars
+- Glassmorphism for overlays
+- Animated SVG icons
+- Typewriter effects for hero text
+- Confetti or celebration animations for actions
+
+### Interactive Elements
+**Engage users:**
+- Drag-and-drop interfaces
+- Sliders and range controls
+- Toggle switches with animations
+- Progress steps with animations
+- Expandable/collapsible sections
+- Tabs with slide indicators
+- Image comparison sliders
+- Interactive demos or playgrounds
+
+---
+
+## Consistency Rules
+
+### Maintain Consistency
+**What should stay consistent:**
+- Spacing scale (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- Border radius values
+- Animation timing (200ms, 300ms, 500ms)
+- Color system (primary, secondary, accent, neutrals)
+- Typography scale
+- Icon style (outline vs filled)
+- Button styles across the app
+- Form element styles
+
+### What Can Vary
+**Project-specific customization:**
+- Color palette (different colors, same system)
+- Layout creativity (grids, asymmetry)
+- Illustration style
+- Animation personality
+- Feature-specific interactions
+- Hero section design
+- Card styling variations
+- Background patterns or textures
+
+---
+
+## Technical Excellence
+
+### Performance
+- Optimize images (WebP, lazy loading)
+- Code splitting for faster loads
+- Debounce search inputs
+- Virtualize long lists
+- Minimize re-renders
+- Use proper memoization
+
+### Accessibility
+- Keyboard navigation throughout
+- ARIA labels where needed
+- Focus indicators visible
+- Screen reader friendly
+- Sufficient color contrast
+- Respect reduced motion preferences
+
+---
+
+## Key Principles
+
+1. **Be Bold** - Don't be afraid to try unique layouts and interactions
+2. **Be Consistent** - Use the same patterns for similar functions
+3. **Be Responsive** - Design works beautifully on all devices
+4. **Be Fast** - Animations are smooth, loading is quick
+5. **Be Accessible** - Everyone can use what you build
+6. **Be Modern** - Use current design trends and technologies
+7. **Be Unique** - Each project should have its own personality
+8. **Be Intuitive** - Users shouldn't need instructions
+
+
+---
+
+# Project-Specific Customizations
+
+**IMPORTANT: This section contains the specific design requirements for THIS project. The guidelines above are universal best practices - these customizations below take precedence for project-specific decisions.**
+
+## User Design Requirements
+
+- Ensure all skeletons use the same color families and shimmer treatment as other components.
+- Maintain glassy, calm aesthetics with soft shadows, rounded corners, and ample white space.
+- Use the accent colors for progress/status cues only when appropriate within skeletons (e.g., a fake progress bar color might reflect the in-progress yellow/orange palette).
+- Keep interactions subtle; avoid distracting animations beyond the shimmer.
+
+---
+
+## Visual Style (Recap)
+
+Color Palette:
+- Primary: #FFFFFF
+- Secondary: #F5F6FA, #F7F8FA
+- Accent: #195C4A (deep green), #7BE495 (bright green), #FFE8A3 (soft yellow), #FFDCA8 (muted orange), #FF6C6C (light red)
+- Text: #23272F (dark gray), #6B7280 (medium gray)
+- Subtle shadows/borders: #E6E8F0, #D1D5DB
+
+Typography & Layout:
+- Font: Inter / SF Pro / Manrope family
+- Weights: 400, 500, 600
+- Layout: 24-32px container padding, 16-24px gaps, 8px increments
+- Card Design: White background, shadows, 12-16px radius, generous internal padding (≥24px)
+
+Key Design Elements:
+- Card, Navigation, Data Visualization, Interactive Elements, Micro-interactions
+- Focus on clarity, accessibility, mobile-first, and trust-building visuals
+
+---
+
+Generate the complete, detailed prompt now:
+- Provide structured sections as above.
+- Include explicit prop definitions, example usage snippets, and recommended test cases.
+- Include implementation notes that a developer can directly translate into code or a tool-driven build.
+
+## Implementation Notes
+
+When implementing this project:
+
+1. **Follow Universal Guidelines**: Use the design best practices documented above as your foundation
+2. **Apply Project Customizations**: Implement the specific design requirements stated in the "User Design Requirements" section
+3. **Priority Order**: Project-specific requirements override universal guidelines when there's a conflict
+4. **Color System**: Extract and implement color values as CSS custom properties in RGB format
+5. **Typography**: Define font families, sizes, and weights based on specifications
+6. **Spacing**: Establish consistent spacing scale following the design system
+7. **Components**: Style all Shadcn components to match the design aesthetic
+8. **Animations**: Use Motion library for transitions matching the design personality
+9. **Responsive Design**: Ensure mobile-first responsive implementation
+
+## Implementation Checklist
+
+- [ ] Review universal design guidelines above
+- [ ] Extract project-specific color palette and define CSS variables
+- [ ] Configure Tailwind theme with custom colors
+- [ ] Set up typography system (fonts, sizes, weights)
+- [ ] Define spacing and sizing scales
+- [ ] Create component variants matching design
+- [ ] Implement responsive breakpoints
+- [ ] Add animations and transitions
+- [ ] Ensure accessibility standards
+- [ ] Validate against user design requirements
+
+---
+
+**Remember: Always reference this file for design decisions. Do not use generic or placeholder designs.**
+ for bestpractices and # Decision Objects CRUD
+
+## Overview
+Develop a complete, production-ready module for Decision Objects in Archject. This includes Create, Read, Update, and Delete (CRUD) capabilities for Decision Objects, along with associated entities such as options, metadata, approvals, comments, attachments, and lifecycle state transitions (draft, pending, approved, rejected). Build a cohesive set of pages for internal users and project teams: a detailed internal Decision view, a canonical Decisions List Content Browser, a multi-step Create/Edit Decision Page, and a Manage/Edit Decision Page with history and versioning. Ensure data integrity with a normalized PostgreSQL schema, a robust state machine with audit logs, optimistic concurrency control, autosave for drafts, server-side validation, and secure, scalable APIs. Align UI with the Archject design system and accessibility standards, delivering an end-to-end flow from creation to formal approval, storage, and export.
+
+## Components to Build
+- Decision Objects CRUD API
+  - Core entities: Decision, Option, Metadata, Approval, Comment, Attachment, History/Version, ShareLink, Assignee, Reminders.
+  - State machine for Decision lifecycle: Draft -> Pending -> Approved; Pending -> Rejected; with guards and audit trails.
+  - Optimistic locking/versioning to prevent edit conflicts.
+  - Autosave drafts with autosave indicators and server-side validation.
+  - Export capabilities (PDF/JSON/Decision Log) and share link generation with revocation.
+- Page: Decision Detail (Internal)
+  - Detailed view for internal users.
+  - Show decision summary, all options, side-by-side comparison, annotations, approval history, and admin actions (edit, revoke approval, export, reissue link).
+  - Inline editing controls for authorized roles; action log with timestamps.
+- Page: Decisions List / Content Browser
+  - Canonical list of all decisions across a project.
+  - Robust, faceted filters (status, assignee, last updated, project, date range, tags, metadata keys/values).
+  - Bulk actions: share links, export, change status, delete (soft delete with audit).
+  - Quick preview panel or in-row previews for rapid scanning.
+- Page: Create / Edit Decision Page
+  - Multi-step editor workflow:
+    - Step 1: Metadata (title, description, project, tags, due date, priority).
+    - Step 2: Options Upload (images, specs, layouts; support bulk uploads, drag-and-drop, versioned attachments).
+    - Step 3: Side-by-Side Comparison Setup (define visible comparison fields, layout presets, option weights).
+    - Step 4: Approval Rules (who can approve, required approvals, escalation, deadlines).
+    - Step 5: Assignee & Schedule Reminders (assign to team member, client liaison, reminder cadence, notifications).
+  - Autosave drafts, real-time validation, and auto-suggestion of metadata defaults from project templates.
+- Page: Edit / Manage Decision Page
+  - Detailed editing with:
+    - History & Version Compare (view diffs between versions, rollback).
+    - Reissue Share Link (grant new share URL with expiration, revoke old ones).
+    - Fine-grained permissions per decision (view/edit/approve).
+    - Attachments/versioned assets and re-upload workflow.
+  - Conflict detection and merge hints when concurrent edits occur.
+
+## Implementation Requirements
+
+### Frontend
+- UI Components
+  - Card system matching design tokens (spacing, typography, elevation).
+  - Data tables with server-side pagination, sorting, and filtering.
+  - Multi-step form wizard with progress indicator, save/continue, and autosave state.
+  - Side-by-side comparison panel with resizable columns and synchronized scrolling.
+  - Rich text/annotation area for comments and notes.
+  - Status chips and indicators (Draft, Pending, Approved, Rejected) with color coding.
+  - Bulk action toolbar with selection checkboxes, confirm dialogs, and undo/redo where appropriate.
+  - Admin action dock (edit, revoke approval, export, share link management).
+  - Export/download widgets for PDFs/JSON/Decision Logs.
+  - Attachment uploader supporting drag-and-drop, progress indicators, and version history.
+  - Notification toasts for success/failure, with actionable steps.
+  - Real-time cues for optimistic concurrency (lock indicators, warning on conflicts).
+- Accessibility
+  - Keyboard navigable, proper ARIA labels, and screen reader-friendly roles.
+  - Focus rings and high-contrast states for critical actions.
+- State Management
+  - Use a modern framework (React preferred) with either Redux Toolkit or equivalent context-based state management.
+  - Centralized API layer with retry logic, and optimistic updates for create/update/delete operations.
+
+### Backend
+- Data Models (PostgreSQL)
+  - Decision: id, project_id, title, description, status (enum: DRAFT, PENDING, APPROVED, REJECTED), version, created_at, updated_at, last_edited_by, deadline, metadata JSONB, assignee_id, reminder_schedule JSONB, shared (boolean), share_link_id (FK).
+  - Option: id, decision_id, title, description, image_url, specs_url, layout_url, position, metadata JSONB, created_at, updated_at.
+  - Metadata: key, value, decision_id (or embedded JSONB in decision for flexibility).
+  - Approval: id, decision_id, user_id, role, status (PENDING/APPROVED/REJECTED), timestamp, comments.
+  - Comment: id, decision_id, user_id, text, created_at, edited_at, attachment_id (optional).
+  - Attachment: id, decision_id, option_id (optional), filename, url, mime_type, size, version, uploaded_at.
+  - History/Version: id, decision_id, version_number, data_snapshot JSONB, changed_by, changed_at.
+  - ShareLink: id, decision_id, token, expires_at, created_by, revocation_flag, scope (read/edit), remaining_uses.
+  - Assignee: id, user_id, decision_id, role, assigned_at.
+  - Reminder: id, decision_id, remind_at, method (email/slack), status.
+- API Layer
+  - Endpoints for CRUD on Decision and related entities.
+  - State machine endpoints to advance transitions with guards (e.g., canApprove, canReject).
+  - Version control endpoints: fetch version diffs, compare, rollback.
+  - Autosave endpoint for draft persistence.
+  - Attachments upload/download endpoints with secure presigned upload URLs.
+  - Export endpoints: generate printable PDFs, JSON export, and a consolidated Decision Log.
+- Validation & Guards
+  - Server-side validation for required fields, metadata schemas, and attachment types.
+  - Concurrency control via optimistic locking (version field on Decision).
+  - Transition guards based on user roles, current state, and approvals.
+- Security & Authorization
+  - Role-based access control (RBC) with roles: Viewer, Editor, Approver, Admin.
+  - Per-decision permissions for sensitive actions (edit, approve, export, share).
+  - JWT-based authentication; refresh tokens; short-lived access tokens for file downloads.
+  - Input validation, CSRF protection for state-changing endpoints.
+- Performance & Reliability
+  - Efficient queries with proper indexing (decision_id, project_id, status, version, timestamps).
+  - Pagination and filtering on list endpoints.
+  - Caching strategy for read-heavy endpoints (e.g., decisions list per project).
+  - Audit logging for all create/update/delete actions.
+
+### Integration
+- Data Flows
+  - Create Decision with initial metadata and first set of options; generate initial version; create draft state with autosave hook.
+  - Update Decision: handle concurrent edits; create new History/Version entry on each save; reflect in UI with version diffs.
+  - Approval Flow: bind to approvals table; emit events to notify assignees and stakeholders; update decision status upon approvals.
+  - Comments/Annotations: allow threaded comments; attach to decisions or options; visible in detail view and history.
+  - Attachments: versioned uploads; link to specific decision/version where applicable.
+  - Share Links: generate time-bound tokens; allow revocation; reflect in decision detail and list by share status.
+- UI-API Mapping
+  - Decisions List: fetch with filters; bulk actions translate to multi-endpoint operations or batch API calls.
+  - Decision Detail: fetch full decision and related entities; manage inline edits; trigger approval actions.
+  - Create/Edit Wizard: orchestrate steps via frontend state and API calls; autosave on intervals.
+  - Edit/Manage Page: compare versions via diff API; reissue/export share links; show version history.
+
+## User Experience Flow
+1. User lands on Decisions List (Content Browser)
+   - Applies filters (project, status, assignee, date range, tags).
+   - Selects multiple decisions for bulk actions (share/export/change status).
+   - Clicks a decision to open Decision Detail.
+2. Decision Detail (Internal)
+   - View decision overview, options, side-by-side comparison, comments, approvals, and action history.
+   - Admin actions: Edit decision, Revoke approval, Export (PDF/JSON), Reissue share link.
+   - Add comments, attach files, or annotate options.
+3. Create / Edit Decision (Multi-step)
+   - Step 1: Enter metadata (title, project, due date, tags).
+   - Step 2: Upload options (images, specs, layouts); attach URLs or files; versioned.
+   - Step 3: Configure side-by-side comparison layout and fields to display.
+   - Step 4: Define approval rules (who approves, escalation timelines).
+   - Step 5: Assign to user(s) and set reminders (email/slack) with schedule.
+   - Autosave drafts every few minutes; on completion, transition to Pending or Approved with proper validation.
+4. Edit / Manage Decision
+   - Open existing decision; view full history with version compare.
+   - Make edits; preview diffs; publish new version; reissue or revoke share links as needed.
+   - Manage approvals and permissions; rollback to earlier version if required.
+5. Notifications and Exports
+   - Users receive notifications for status changes, reminders, or required approvals.
+   - Admins export decision logs or full decision records for contracts, permits, or internal archives.
+
+## Technical Specifications
+
+### Data Models: Schema Details (PostgreSQL)
+- Decision
+  - id: UUID PK
+  - project_id: UUID FK
+  - title: VARCHAR
+  - description: TEXT
+  - status: ENUM('DRAFT','PENDING','APPROVED','REJECTED')
+  - version: INTEGER
+  - metadata: JSONB
+  - assignee_id: UUID FK users
+  - reminder_schedule: JSONB
+  - shared: BOOLEAN
+  - share_link_id: UUID FK
+  - created_at, updated_at, last_edited_by: UUID
+- Option
+  - id: UUID PK
+  - decision_id: UUID FK
+  - title: VARCHAR
+  - description: TEXT
+  - image_url: VARCHAR
+  - specs_url: VARCHAR
+  - layout_url: VARCHAR
+  - position: INTEGER
+  - metadata: JSONB
+  - created_at, updated_at
+- Approval
+  - id: UUID PK
+  - decision_id: UUID FK
+  - user_id: UUID FK
+  - role: VARCHAR
+  - status: ENUM('PENDING','APPROVED','REJECTED')
+  - timestamp: TIMESTAMP
+  - comments: TEXT
+- Comment
+  - id: UUID PK
+  - decision_id: UUID FK
+  - user_id: UUID FK
+  - text: TEXT
+  - created_at, edited_at
+  - attachment_id: UUID FK (optional)
+- Attachment
+  - id: UUID PK
+  - decision_id: UUID FK
+  - option_id: UUID FK (optional)
+  - filename, url, mime_type, size
+  - version: INTEGER
+  - uploaded_at
+- History/Version
+  - id: UUID PK
+  - decision_id: UUID FK
+  - version_number: INTEGER
+  - data_snapshot: JSONB
+  - changed_by: UUID
+  - changed_at: TIMESTAMP
+- ShareLink
+  - id: UUID PK
+  - decision_id: UUID FK
+  - token: VARCHAR
+  - expires_at: TIMESTAMP
+  - created_by: UUID
+  - revocation_flag: BOOLEAN
+  - scope: ENUM('READ','EDIT')
+- Assignee
+  - id: UUID PK
+  - decision_id: UUID FK
+  - user_id: UUID FK
+  - role: VARCHAR
+  - assigned_at: TIMESTAMP
+- Reminder
+  - id: UUID PK
+  - decision_id: UUID FK
+  - remind_at: TIMESTAMP
+  - method: ENUM('EMAIL','SLACK')
+  - status: ENUM('PENDING','SENT','DISMISSED')
+
+### API Endpoints (Routes and Methods)
+- POST /api/decisions
+  - Create a new decision (draft/initial submission)
+- GET /api/decisions
+  - List decisions with filters (project_id, status, assignee, date range, search)
+  - Supports pagination and sorting
+- GET /api/decisions/{id}
+  - Retrieve full decision with options, approvals, comments, attachments, history
+- PUT /api/decisions/{id}
+  - Full update (with optimistic locking via version)
+- PATCH /api/decisions/{id}
+  - Partial update (e.g., status transition, metadata)
+- DELETE /api/decisions/{id}
+  - Soft delete or archive
+- POST /api/decisions/{id}/advance
+  - Trigger state transition (e.g., DRAFT -> PENDING, PENDING -> APPROVED, etc.)
+- POST /api/decisions/{id}/versions
+  - Create new version snapshot
+- GET /api/decisions/{id}/versions
+  - List versions
+- GET /api/decisions/{id}/versions/{version_number}
+  - Get a specific version snapshot
+- POST /api/decisions/{id}/rollback
+  - Rollback to a previous version
+- POST /api/decisions/{id}/share
+  - Create a share link
+- POST /api/share/{token}/revoke
+  - Revoke a share link
+- GET /api/decisions/{id}/export
+  - Generate PDF/JSON export
+- POST /api/decisions/{id}/attachments
+  - Upload attachment (multipart/form-data or presigned URL)
+- GET /api/decisions/{id}/attachments
+  - List attachments
+- GET /api/decisions/{id}/comments
+  - List comments
+- POST /api/decisions/{id}/comments
+  - Add a comment
+- POST /api/decisions/{id}/approvals
+  - Create/submit approval decision
+- GET /api/decisions/{id}/approvals
+  - Get approval history
+- POST /api/decisions/{id}/assignees
+  - Add/modify assignees
+- POST /api/decisions/{id}/reminders
+  - Create reminders
+
+Security: All endpoints require authentication. Enforce RBAC:
+- Viewers: read-only access to decisions they are allowed to see.
+- Editors: create/update decisions, add options, metadata, comments.
+- Approvers: approve/reject, manage approvals.
+- Admins: full access including share links, exports, history, and deletion.
+
+Validation:
+- Server-side validation for required fields, unique titles within a project (optional), valid statuses, valid version numbers.
+- Verify upload file types and sizes; reject disallowed formats.
+- Enforce transition guards (e.g., cannot approve a decision in DRAFT state).
+
+Optimistic Locking:
+- Each Decision has a version. Clients must supply current version to update; conflict results in a 409 CONFLICT with a diff hint.
+
+Autosave:
+- Endpoint supports draft autosave; client-side should save a draft version at intervals (e.g., every 60 seconds) and on field changes.
+
+Integration:
+- Event bus or webhook system to notify external services on approvals, status changes, or exports.
+- Real-time updates via WebSocket or long polling for collaborators viewing the same decision.
+
+## Acceptance Criteria
+- [ ] All CRUD endpoints implemented with proper validation, authentication, and authorization.
+- [ ] State machine enforces transitions with guards; transitions emit audit logs.
+- [ ] Optimistic locking prevents conflicting updates; 409 responses are returned on conflicts.
+- [ ] Autosave drafts functionally saves to a draft version and restores on reopen.
+- [ ] Side-by-side comparison UI accurately reflects option data and supports reordering and highlighting differences.
+- [ ] Decision List supports filters and bulk actions; bulk share/export/status changes execute correctly with appropriate confirmations.
+- [ ] Detailed Decision View shows options, comments, approvals, history, and admin actions with correct permission gating.
+- [ ] History/Version Compare works with visible diffs; rollback is possible and auditable.
+- [ ] Share links are time-bound, revocable, and scope-restricted; reissue link capability works.
+- [ ] Exports (PDF/JSON) render correctly and contain complete decision data, including options and approvals.
+- [ ] Data model migrations are versioned and revertible; seed/demo data included for testing.
+- [ ] UI aligns with the design system: typography, colors, spacing, components, and responsive behavior.
+
+## UI/UX Guidelines
+Apply the project's design system:
+- Ensure consistent typography: Inter/SF Pro/Manrope equivalents; weights: 400/500/600.
+- Use the provided color palette precisely for statuses, actions, and highlights.
+- Cards, grids, and modal dialogs use the specified shadows, radii, and spacing.
+- Navigation: top bar with pill-shaped active tab in Deep Green (#195C4A); secondary navigation in sidebars as needed.
+- Data visualization: status badges, lightweight charts if used in dashboards; emphasize clarity and quick comprehension.
+- Interactive elements: rounded inputs, soft backgrounds (#F5F6FA), accessible focus states, and responsive hover effects.
+
+---
+
+ Connected Pages
+- Page: Decision Detail (Internal)
+  - Detailed view for internal users showing the decision, all options, side-by-side comparison, comments/annotations, approval history, and admin actions (edit, revoke approval, export).
+- Page: Decisions List / Content Browser
+  - Canonical list of all decisions across a project with robust filters, bulk actions (share links, export, change status), and quick preview.
+- Page: Create / Edit Decision Page
+  - Multi-step editor to create or edit a Decision Object: metadata, options upload (images/specs/layouts), side-by-side comparison setup, approval rules, assignee, and schedule reminders.
+- Page: Edit / Manage Decision Page
+  - Page for detailed editing of an existing decision with history, version compare, and reissue share link capabilities.
+
+---
+
+This prompt is designed for an AI development tool to produce a complete, end-to-end implementation plan and code scaffolding for the Decision Objects CRUD feature set, aligned with Archject’s design language, project goals, and security requirements. for style.
+
+CRITICAL DESIGN REQUIREMENTS:
+- You MUST follow ALL design principles and patterns specified in the Design Reference above
+- Do NOT deviate from the design specifications without explicit user permission
+- Implement ALL visual design elements (colors, typography, spacing, shadows, animations) as specified
+- Follow the layout patterns and component designs exactly as documented
+- Ensure all interactions and micro-animations match the reference specifications
+
+CRITICAL TECHNICAL REQUIREMENTS:
+- React 18.3.1, React Router 6.30.1
+- Tailwind CSS v3 with tailwind.config.js and custom keyframes
+- @tailwindcss/typography plugin for rich text content
+- Tailwind CSS animations (NOT Motion library or framer-motion)
+- Sonner for toasts
+- Recharts for data visualization
+- Native fetch() with API utilities in src/lib/api.ts
+- Design system with CSS custom properties
+- Use RGB color values for theming
+- When Supabase is configured: use Edge Functions for LLM and server-only logic; never expose API keys in the client
+
+=== TASK ===
+# Decision Objects CRUD
+
+## Overview
+Develop a complete, production-ready module for Decision Objects in Archject. This includes Create, Read, Update, and Delete (CRUD) capabilities for Decision Objects, along with associated entities such as options, metadata, approvals, comments, attachments, and lifecycle state transitions (draft, pending, approved, rejected). Build a cohesive set of pages for internal users and project teams: a detailed internal Decision view, a canonical Decisions List Content Browser, a multi-step Create/Edit Decision Page, and a Manage/Edit Decision Page with history and versioning. Ensure data integrity with a normalized PostgreSQL schema, a robust state machine with audit logs, optimistic concurrency control, autosave for drafts, server-side validation, and secure, scalable APIs. Align UI with the Archject design system and accessibility standards, delivering an end-to-end flow from creation to formal approval, storage, and export.
+
+## Components to Build
+- Decision Objects CRUD API
+  - Core entities: Decision, Option, Metadata, Approval, Comment, Attachment, History/Version, ShareLink, Assignee, Reminders.
+  - State machine for Decision lifecycle: Draft -> Pending -> Approved; Pending -> Rejected; with guards and audit trails.
+  - Optimistic locking/versioning to prevent edit conflicts.
+  - Autosave drafts with autosave indicators and server-side validation.
+  - Export capabilities (PDF/JSON/Decision Log) and share link generation with revocation.
+- Page: Decision Detail (Internal)
+  - Detailed view for internal users.
+  - Show decision summary, all options, side-by-side comparison, annotations, approval history, and admin actions (edit, revoke approval, export, reissue link).
+  - Inline editing controls for authorized roles; action log with timestamps.
+- Page: Decisions List / Content Browser
+  - Canonical list of all decisions across a project.
+  - Robust, faceted filters (status, assignee, last updated, project, date range, tags, metadata keys/values).
+  - Bulk actions: share links, export, change status, delete (soft delete with audit).
+  - Quick preview panel or in-row previews for rapid scanning.
+- Page: Create / Edit Decision Page
+  - Multi-step editor workflow:
+    - Step 1: Metadata (title, description, project, tags, due date, priority).
+    - Step 2: Options Upload (images, specs, layouts; support bulk uploads, drag-and-drop, versioned attachments).
+    - Step 3: Side-by-Side Comparison Setup (define visible comparison fields, layout presets, option weights).
+    - Step 4: Approval Rules (who can approve, required approvals, escalation, deadlines).
+    - Step 5: Assignee & Schedule Reminders (assign to team member, client liaison, reminder cadence, notifications).
+  - Autosave drafts, real-time validation, and auto-suggestion of metadata defaults from project templates.
+- Page: Edit / Manage Decision Page
+  - Detailed editing with:
+    - History & Version Compare (view diffs between versions, rollback).
+    - Reissue Share Link (grant new share URL with expiration, revoke old ones).
+    - Fine-grained permissions per decision (view/edit/approve).
+    - Attachments/versioned assets and re-upload workflow.
+  - Conflict detection and merge hints when concurrent edits occur.
+
+## Implementation Requirements
+
+### Frontend
+- UI Components
+  - Card system matching design tokens (spacing, typography, elevation).
+  - Data tables with server-side pagination, sorting, and filtering.
+  - Multi-step form wizard with progress indicator, save/continue, and autosave state.
+  - Side-by-side comparison panel with resizable columns and synchronized scrolling.
+  - Rich text/annotation area for comments and notes.
+  - Status chips and indicators (Draft, Pending, Approved, Rejected) with color coding.
+  - Bulk action toolbar with selection checkboxes, confirm dialogs, and undo/redo where appropriate.
+  - Admin action dock (edit, revoke approval, export, share link management).
+  - Export/download widgets for PDFs/JSON/Decision Logs.
+  - Attachment uploader supporting drag-and-drop, progress indicators, and version history.
+  - Notification toasts for success/failure, with actionable steps.
+  - Real-time cues for optimistic concurrency (lock indicators, warning on conflicts).
+- Accessibility
+  - Keyboard navigable, proper ARIA labels, and screen reader-friendly roles.
+  - Focus rings and high-contrast states for critical actions.
+- State Management
+  - Use a modern framework (React preferred) with either Redux Toolkit or equivalent context-based state management.
+  - Centralized API layer with retry logic, and optimistic updates for create/update/delete operations.
+
+### Backend
+- Data Models (PostgreSQL)
+  - Decision: id, project_id, title, description, status (enum: DRAFT, PENDING, APPROVED, REJECTED), version, created_at, updated_at, last_edited_by, deadline, metadata JSONB, assignee_id, reminder_schedule JSONB, shared (boolean), share_link_id (FK).
+  - Option: id, decision_id, title, description, image_url, specs_url, layout_url, position, metadata JSONB, created_at, updated_at.
+  - Metadata: key, value, decision_id (or embedded JSONB in decision for flexibility).
+  - Approval: id, decision_id, user_id, role, status (PENDING/APPROVED/REJECTED), timestamp, comments.
+  - Comment: id, decision_id, user_id, text, created_at, edited_at, attachment_id (optional).
+  - Attachment: id, decision_id, option_id (optional), filename, url, mime_type, size, version, uploaded_at.
+  - History/Version: id, decision_id, version_number, data_snapshot JSONB, changed_by, changed_at.
+  - ShareLink: id, decision_id, token, expires_at, created_by, revocation_flag, scope (read/edit), remaining_uses.
+  - Assignee: id, user_id, decision_id, role, assigned_at.
+  - Reminder: id, decision_id, remind_at, method (email/slack), status.
+- API Layer
+  - Endpoints for CRUD on Decision and related entities.
+  - State machine endpoints to advance transitions with guards (e.g., canApprove, canReject).
+  - Version control endpoints: fetch version diffs, compare, rollback.
+  - Autosave endpoint for draft persistence.
+  - Attachments upload/download endpoints with secure presigned upload URLs.
+  - Export endpoints: generate printable PDFs, JSON export, and a consolidated Decision Log.
+- Validation & Guards
+  - Server-side validation for required fields, metadata schemas, and attachment types.
+  - Concurrency control via optimistic locking (version field on Decision).
+  - Transition guards based on user roles, current state, and approvals.
+- Security & Authorization
+  - Role-based access control (RBC) with roles: Viewer, Editor, Approver, Admin.
+  - Per-decision permissions for sensitive actions (edit, approve, export, share).
+  - JWT-based authentication; refresh tokens; short-lived access tokens for file downloads.
+  - Input validation, CSRF protection for state-changing endpoints.
+- Performance & Reliability
+  - Efficient queries with proper indexing (decision_id, project_id, status, version, timestamps).
+  - Pagination and filtering on list endpoints.
+  - Caching strategy for read-heavy endpoints (e.g., decisions list per project).
+  - Audit logging for all create/update/delete actions.
+
+### Integration
+- Data Flows
+  - Create Decision with initial metadata and first set of options; generate initial version; create draft state with autosave hook.
+  - Update Decision: handle concurrent edits; create new History/Version entry on each save; reflect in UI with version diffs.
+  - Approval Flow: bind to approvals table; emit events to notify assignees and stakeholders; update decision status upon approvals.
+  - Comments/Annotations: allow threaded comments; attach to decisions or options; visible in detail view and history.
+  - Attachments: versioned uploads; link to specific decision/version where applicable.
+  - Share Links: generate time-bound tokens; allow revocation; reflect in decision detail and list by share status.
+- UI-API Mapping
+  - Decisions List: fetch with filters; bulk actions translate to multi-endpoint operations or batch API calls.
+  - Decision Detail: fetch full decision and related entities; manage inline edits; trigger approval actions.
+  - Create/Edit Wizard: orchestrate steps via frontend state and API calls; autosave on intervals.
+  - Edit/Manage Page: compare versions via diff API; reissue/export share links; show version history.
+
+## User Experience Flow
+1. User lands on Decisions List (Content Browser)
+   - Applies filters (project, status, assignee, date range, tags).
+   - Selects multiple decisions for bulk actions (share/export/change status).
+   - Clicks a decision to open Decision Detail.
+2. Decision Detail (Internal)
+   - View decision overview, options, side-by-side comparison, comments, approvals, and action history.
+   - Admin actions: Edit decision, Revoke approval, Export (PDF/JSON), Reissue share link.
+   - Add comments, attach files, or annotate options.
+3. Create / Edit Decision (Multi-step)
+   - Step 1: Enter metadata (title, project, due date, tags).
+   - Step 2: Upload options (images, specs, layouts); attach URLs or files; versioned.
+   - Step 3: Configure side-by-side comparison layout and fields to display.
+   - Step 4: Define approval rules (who approves, escalation timelines).
+   - Step 5: Assign to user(s) and set reminders (email/slack) with schedule.
+   - Autosave drafts every few minutes; on completion, transition to Pending or Approved with proper validation.
+4. Edit / Manage Decision
+   - Open existing decision; view full history with version compare.
+   - Make edits; preview diffs; publish new version; reissue or revoke share links as needed.
+   - Manage approvals and permissions; rollback to earlier version if required.
+5. Notifications and Exports
+   - Users receive notifications for status changes, reminders, or required approvals.
+   - Admins export decision logs or full decision records for contracts, permits, or internal archives.
+
+## Technical Specifications
+
+### Data Models: Schema Details (PostgreSQL)
+- Decision
+  - id: UUID PK
+  - project_id: UUID FK
+  - title: VARCHAR
+  - description: TEXT
+  - status: ENUM('DRAFT','PENDING','APPROVED','REJECTED')
+  - version: INTEGER
+  - metadata: JSONB
+  - assignee_id: UUID FK users
+  - reminder_schedule: JSONB
+  - shared: BOOLEAN
+  - share_link_id: UUID FK
+  - created_at, updated_at, last_edited_by: UUID
+- Option
+  - id: UUID PK
+  - decision_id: UUID FK
+  - title: VARCHAR
+  - description: TEXT
+  - image_url: VARCHAR
+  - specs_url: VARCHAR
+  - layout_url: VARCHAR
+  - position: INTEGER
+  - metadata: JSONB
+  - created_at, updated_at
+- Approval
+  - id: UUID PK
+  - decision_id: UUID FK
+  - user_id: UUID FK
+  - role: VARCHAR
+  - status: ENUM('PENDING','APPROVED','REJECTED')
+  - timestamp: TIMESTAMP
+  - comments: TEXT
+- Comment
+  - id: UUID PK
+  - decision_id: UUID FK
+  - user_id: UUID FK
+  - text: TEXT
+  - created_at, edited_at
+  - attachment_id: UUID FK (optional)
+- Attachment
+  - id: UUID PK
+  - decision_id: UUID FK
+  - option_id: UUID FK (optional)
+  - filename, url, mime_type, size
+  - version: INTEGER
+  - uploaded_at
+- History/Version
+  - id: UUID PK
+  - decision_id: UUID FK
+  - version_number: INTEGER
+  - data_snapshot: JSONB
+  - changed_by: UUID
+  - changed_at: TIMESTAMP
+- ShareLink
+  - id: UUID PK
+  - decision_id: UUID FK
+  - token: VARCHAR
+  - expires_at: TIMESTAMP
+  - created_by: UUID
+  - revocation_flag: BOOLEAN
+  - scope: ENUM('READ','EDIT')
+- Assignee
+  - id: UUID PK
+  - decision_id: UUID FK
+  - user_id: UUID FK
+  - role: VARCHAR
+  - assigned_at: TIMESTAMP
+- Reminder
+  - id: UUID PK
+  - decision_id: UUID FK
+  - remind_at: TIMESTAMP
+  - method: ENUM('EMAIL','SLACK')
+  - status: ENUM('PENDING','SENT','DISMISSED')
+
+### API Endpoints (Routes and Methods)
+- POST /api/decisions
+  - Create a new decision (draft/initial submission)
+- GET /api/decisions
+  - List decisions with filters (project_id, status, assignee, date range, search)
+  - Supports pagination and sorting
+- GET /api/decisions/{id}
+  - Retrieve full decision with options, approvals, comments, attachments, history
+- PUT /api/decisions/{id}
+  - Full update (with optimistic locking via version)
+- PATCH /api/decisions/{id}
+  - Partial update (e.g., status transition, metadata)
+- DELETE /api/decisions/{id}
+  - Soft delete or archive
+- POST /api/decisions/{id}/advance
+  - Trigger state transition (e.g., DRAFT -> PENDING, PENDING -> APPROVED, etc.)
+- POST /api/decisions/{id}/versions
+  - Create new version snapshot
+- GET /api/decisions/{id}/versions
+  - List versions
+- GET /api/decisions/{id}/versions/{version_number}
+  - Get a specific version snapshot
+- POST /api/decisions/{id}/rollback
+  - Rollback to a previous version
+- POST /api/decisions/{id}/share
+  - Create a share link
+- POST /api/share/{token}/revoke
+  - Revoke a share link
+- GET /api/decisions/{id}/export
+  - Generate PDF/JSON export
+- POST /api/decisions/{id}/attachments
+  - Upload attachment (multipart/form-data or presigned URL)
+- GET /api/decisions/{id}/attachments
+  - List attachments
+- GET /api/decisions/{id}/comments
+  - List comments
+- POST /api/decisions/{id}/comments
+  - Add a comment
+- POST /api/decisions/{id}/approvals
+  - Create/submit approval decision
+- GET /api/decisions/{id}/approvals
+  - Get approval history
+- POST /api/decisions/{id}/assignees
+  - Add/modify assignees
+- POST /api/decisions/{id}/reminders
+  - Create reminders
+
+Security: All endpoints require authentication. Enforce RBAC:
+- Viewers: read-only access to decisions they are allowed to see.
+- Editors: create/update decisions, add options, metadata, comments.
+- Approvers: approve/reject, manage approvals.
+- Admins: full access including share links, exports, history, and deletion.
+
+Validation:
+- Server-side validation for required fields, unique titles within a project (optional), valid statuses, valid version numbers.
+- Verify upload file types and sizes; reject disallowed formats.
+- Enforce transition guards (e.g., cannot approve a decision in DRAFT state).
+
+Optimistic Locking:
+- Each Decision has a version. Clients must supply current version to update; conflict results in a 409 CONFLICT with a diff hint.
+
+Autosave:
+- Endpoint supports draft autosave; client-side should save a draft version at intervals (e.g., every 60 seconds) and on field changes.
+
+Integration:
+- Event bus or webhook system to notify external services on approvals, status changes, or exports.
+- Real-time updates via WebSocket or long polling for collaborators viewing the same decision.
+
+## Acceptance Criteria
+- [ ] All CRUD endpoints implemented with proper validation, authentication, and authorization.
+- [ ] State machine enforces transitions with guards; transitions emit audit logs.
+- [ ] Optimistic locking prevents conflicting updates; 409 responses are returned on conflicts.
+- [ ] Autosave drafts functionally saves to a draft version and restores on reopen.
+- [ ] Side-by-side comparison UI accurately reflects option data and supports reordering and highlighting differences.
+- [ ] Decision List supports filters and bulk actions; bulk share/export/status changes execute correctly with appropriate confirmations.
+- [ ] Detailed Decision View shows options, comments, approvals, history, and admin actions with correct permission gating.
+- [ ] History/Version Compare works with visible diffs; rollback is possible and auditable.
+- [ ] Share links are time-bound, revocable, and scope-restricted; reissue link capability works.
+- [ ] Exports (PDF/JSON) render correctly and contain complete decision data, including options and approvals.
+- [ ] Data model migrations are versioned and revertible; seed/demo data included for testing.
+- [ ] UI aligns with the design system: typography, colors, spacing, components, and responsive behavior.
+
+## UI/UX Guidelines
+Apply the project's design system:
+- Ensure consistent typography: Inter/SF Pro/Manrope equivalents; weights: 400/500/600.
+- Use the provided color palette precisely for statuses, actions, and highlights.
+- Cards, grids, and modal dialogs use the specified shadows, radii, and spacing.
+- Navigation: top bar with pill-shaped active tab in Deep Green (#195C4A); secondary navigation in sidebars as needed.
+- Data visualization: status badges, lightweight charts if used in dashboards; emphasize clarity and quick comprehension.
+- Interactive elements: rounded inputs, soft backgrounds (#F5F6FA), accessible focus states, and responsive hover effects.
+
+---
+
+ Connected Pages
+- Page: Decision Detail (Internal)
+  - Detailed view for internal users showing the decision, all options, side-by-side comparison, comments/annotations, approval history, and admin actions (edit, revoke approval, export).
+- Page: Decisions List / Content Browser
+  - Canonical list of all decisions across a project with robust filters, bulk actions (share links, export, change status), and quick preview.
+- Page: Create / Edit Decision Page
+  - Multi-step editor to create or edit a Decision Object: metadata, options upload (images/specs/layouts), side-by-side comparison setup, approval rules, assignee, and schedule reminders.
+- Page: Edit / Manage Decision Page
+  - Page for detailed editing of an existing decision with history, version compare, and reissue share link capabilities.
+
+---
+
+This prompt is designed for an AI development tool to produce a complete, end-to-end implementation plan and code scaffolding for the Decision Objects CRUD feature set, aligned with Archject’s design language, project goals, and security requirements.
+
+=== SUCCESS CRITERIA ===
+# Success Criteria Checklist
+
+## Code Quality
+
+### TypeScript
+- [ ] No TypeScript errors (`tsc --noEmit` passes)
+- [ ] All functions and components have proper type definitions
+- [ ] No `any` types used (use `unknown` if type is truly unknown)
+- [ ] Props interfaces defined for all components
+- [ ] API responses have type definitions
+
+### Code Standards
+- [ ] All imports use path aliases (@/ prefix)
+- [ ] Components follow the established naming convention
+- [ ] Files are organized in correct directories
+- [ ] No unused imports or variables
+- [ ] Consistent code formatting
+
+## Component Implementation
+
+### UI Components
+- [ ] Use shadcn/ui components (Button, Card, Input, etc.) instead of building from scratch
+- [ ] All interactive elements have hover states
+- [ ] Components use the `cn()` utility for class merging
+- [ ] Proper TypeScript props interfaces defined
+- [ ] Components are responsive (mobile, tablet, desktop)
+
+### Animations
+- [ ] Motion library used for all animations (NOT framer-motion)
+- [ ] Page transitions implemented with fade/slide
+- [ ] Interactive elements have whileHover/whileTap animations
+- [ ] List items use stagger animations where appropriate
+- [ ] Animations respect `prefers-reduced-motion`
+
+### Icons
+- [ ] Lucide React icons used consistently
+- [ ] Icons have consistent sizing (h-4 w-4, h-5 w-5, h-6 w-6)
+- [ ] Icon colors match design system (text-primary, text-muted-foreground)
+
+## Data Management
+
+### React Query
+- [ ] All data fetching uses React Query hooks
+- [ ] Query keys follow the established pattern
+- [ ] Mutations invalidate related queries
+- [ ] Loading and error states handled
+- [ ] Optimistic updates implemented where appropriate
+
+### Forms
+- [ ] Forms use react-hook-form
+- [ ] Validation uses Zod schemas
+- [ ] Error messages display properly
+- [ ] Form submission shows loading state
+- [ ] Success/error feedback via toast notifications
+
+### API Layer
+- [ ] API functions in src/api/ directory
+- [ ] Axios used for HTTP requests
+- [ ] Proper error handling with try/catch
+- [ ] Auth tokens handled by interceptors
+- [ ] Type-safe API function signatures
+
+## User Experience
+
+### Notifications
+- [ ] Sonner toasts used for all notifications
+- [ ] Success actions show success toast
+- [ ] Errors show descriptive error messages
+- [ ] Loading states show toast.loading()
+
+### Loading States
+- [ ] Skeleton loaders shown during data fetch
+- [ ] Buttons show loading state during submission
+- [ ] Disabled state applied during async operations
+
+### Error Handling
+- [ ] Network errors caught and displayed
+- [ ] User-friendly error messages (no stack traces)
+- [ ] Fallback UI for error states
+- [ ] No unhandled promise rejections
+
+## Navigation
+
+### Route Accessibility
+- [ ] All pages have routes defined in router configuration
+- [ ] Every page is accessible through navigation (menu, sidebar, or direct URL)
+- [ ] Main pages (Dashboard, Home, Settings, etc.) accessible from primary navigation
+- [ ] Secondary pages accessible through contextual navigation or direct links
+- [ ] Deep-linked pages have breadcrumbs or back navigation
+- [ ] 404/Not Found page implemented for invalid routes
+- [ ] Protected routes have proper authentication checks
+- [ ] Navigation state persists across page refreshes where appropriate
+
+### Navigation UX
+- [ ] Active route highlighted in navigation menu
+- [ ] Clear visual hierarchy in navigation structure
+- [ ] Mobile navigation is accessible and usable
+- [ ] Navigation items have hover/focus states
+- [ ] Nested routes show parent-child relationships
+- [ ] User can always return to main areas (Dashboard/Home)
+
+## Styling
+
+### Tailwind CSS
+- [ ] Tailwind v3 classes used
+- [ ] HSL color variables from design system
+- [ ] Custom CSS properties used where defined
+- [ ] Responsive breakpoints: mobile-first approach
+- [ ] Dark mode support via CSS variables
+
+### Design System
+- [ ] Colors use theme variables (primary, secondary, accent)
+- [ ] Spacing uses Tailwind scale (p-4, gap-6, etc.)
+- [ ] Border radius uses theme values (rounded-lg)
+- [ ] Shadows use theme values (shadow-card)
+- [ ] Typography follows Inter font system
+
+## Accessibility
+
+- [ ] Semantic HTML elements used
+- [ ] Buttons have descriptive labels
+- [ ] Forms have proper labels
+- [ ] Focus states visible on interactive elements
+- [ ] Color contrast meets WCAG standards
+
+## Performance
+
+- [ ] No console.log statements in production code
+- [ ] No console errors in browser
+- [ ] Images optimized (WebP, lazy loading)
+- [ ] Large lists use virtualization if needed
+- [ ] React Query cache configured appropriately
+
+## Testing Readiness
+
+- [ ] Components structured for easy testing
+- [ ] Business logic separated from presentation
+- [ ] Mock-friendly API layer
+- [ ] No hardcoded values that should be configurable
+- [ ] Environment variables properly configured
+
+## Final Checks
+
+- [ ] Code builds without errors (`npm run build`)
+- [ ] Development server runs without errors (`npm run dev`)
+- [ ] No TypeScript errors in editor
+- [ ] Browser console is clean (no errors or warnings)
+- [ ] All functionality works as expected
+- [ ] Code follows existing project patterns
+- [ ] Changes are consistent with the rest of the codebase
+
+
+
+IMPORTANT: ALL styling and design decisions must follow the Design Reference section above EXACTLY. Do not make arbitrary design choices.
+
+Analyze the existing project structure and implement the task following the patterns already established. Ensure all success criteria are met.
