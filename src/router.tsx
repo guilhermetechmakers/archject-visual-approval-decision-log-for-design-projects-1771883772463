@@ -92,6 +92,8 @@ export const router = createBrowserRouter([
       { path: '/terms', element: <TermsPage /> },
       { path: '/legal/terms', element: <TermsPage /> },
       { path: '/cookies', element: <CookiesPage /> },
+      { path: '/legal/cookies', element: <CookiesPage /> },
+      { path: '/cookie-policy', element: <CookiesPage /> },
       { path: '/portal/:token', element: <ClientPortalPage /> },
       {
         path: '/admin',

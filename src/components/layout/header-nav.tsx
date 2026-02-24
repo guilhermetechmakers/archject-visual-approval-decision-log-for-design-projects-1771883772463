@@ -8,6 +8,7 @@ const navLinks = [
   { to: '/about', label: 'About' },
   { to: '/privacy', label: 'Privacy' },
   { to: '/terms', label: 'Terms' },
+  { to: '/cookies', label: 'Cookies' },
 ]
 
 export function HeaderNav() {
